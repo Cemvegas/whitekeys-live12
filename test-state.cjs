@@ -4,11 +4,11 @@ function eq(a,b){assert.deepStrictEqual(JSON.parse(JSON.stringify(a)),b);asserti
 // The approved message seam: real Scale Keyboard -> state -> MIDI scripts.
 // Host facilities (drawing, patcher UI and MIDI outlets) are boundary adapters.
 function integration() {
-    const midiBytes=[],labels={},views=[],scheduled=[],paintColors=[];
+    const midiBytes=[],labels={},menus={},views=[],scheduled=[],paintColors=[];
     let keyboard;
     const midi={Task:function(callback){this.schedule=()=>scheduled.push(callback);this.cancel=()=>{}},arrayfromargs:a=>Array.from(a),outlet:(port,...a)=>{if(port===0)midiBytes.push(...a);else{if(Array.isArray(a[0]))a=Array.from(a[0]);keyboard[a[0]](...a.slice(1));}}};
     vm.createContext(midi);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-midi.js','utf8'),midi);
-    const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{if(a[0]==='set')labels[n]=a[1]}})},outlet:(port,...a)=>{
+    const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{if(a[0]==='set')labels[n]=a[1];if(a[0]==='clear')menus[n]=[];if(a[0]==='append')(menus[n]||(menus[n]=[])).push(a[1])}})},outlet:(port,...a)=>{
         if(Array.isArray(a[0]))a=Array.from(a[0]);
         if(port===0)midi[a[0]](...a.slice(1));
         else {views.push(a);keyboard[a[0]](...a.slice(1));}
@@ -17,7 +17,7 @@ function integration() {
     keyboard={box:{rect:[0,0,350,70]},mgraphics:{init:()=>{},redraw:()=>{},set_source_rgba:(...a)=>paintColors.push(a),rectangle_rounded:()=>{},fill:()=>{},set_line_width:()=>{},stroke:()=>{},rectangle:()=>{},select_font_face:()=>{},set_font_size:()=>{},text_measure:()=>[4],move_to:()=>{},show_text:()=>{}},outlet:(port,command,pc)=>state[command](pc)};
     vm.createContext(keyboard);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-keyboard.js','utf8'),keyboard);
     state.livescale(0,'Major',1,0,2,4,5,7,9,11);
-    return {state,labels,views,scheduled,midiBytes,paint:()=>{paintColors.length=0;keyboard.paint();return paintColors.filter(c=>c[0]===0.97&&c[1]===0.76&&c[2]===0.41).length},send:(s,n,v)=>midi.note(s,n,v),click:(x,y=69)=>keyboard.onclick(x,y,1,0,0,0,0,0),note:(n)=>{midiBytes.length=0;midi.note(144,n,91);midi.note(128,n,27);return midiBytes.slice()}};
+    return {state,labels,menus,views,scheduled,midiBytes,paint:()=>{paintColors.length=0;keyboard.paint();return paintColors.filter(c=>c[0]===0.97&&c[1]===0.76&&c[2]===0.41).length},send:(s,n,v)=>midi.note(s,n,v),click:(x,y=69)=>keyboard.onclick(x,y,1,0,0,0,0,0),note:(n)=>{midiBytes.length=0;midi.note(144,n,91);midi.note(128,n,27);return midiBytes.slice()}};
 }
 // Local editing is immediate; source-controlled editing is read-only.
 let flow=integration();flow.state.followselect(0);flow.click(125);flow.click(100,10);
@@ -66,3 +66,30 @@ flow=integration();flow.state.followselect(0);for(const pc of [1,3,6,8,10])flow.
 // A persisted but currently unsupported WhiteKeys source cannot be edited locally.
 flow=integration();const unavailable=Array.from(flow.state.getvalueof());unavailable[3]='WhiteKeys';unavailable[5]='another-set';unavailable[6]='host-id';unavailable[7]='Piano';flow.state.setvalueof(...unavailable);flow.state.rootselect(7);flow.state.toggle(4);eq(flow.state.getvalueof(),unavailable);eq(flow.note(64),[144,64,91,128,64,27]);assert.match(flow.labels.status_label,/Source unavailable/);assertions++;
 console.log(assertions+' final editor/state assertions passed');
+
+// Adding the removed E recognizes C Major again, without moving Root.
+flow=integration();flow.state.followselect(0);flow.state.toggle(4);eq(flow.state.getvalueof().slice(8,11),[0,2725,'Custom']);flow.state.toggle(4);eq(flow.state.getvalueof().slice(8,11),[0,2741,'Major']);
+
+// Choosing A Minor from Also matches preserves C Major's absolute notes.
+flow=integration();flow.state.followselect(0);
+eq(flow.menus.scale_menu.slice(13),['Also matches','D Dorian','E Phrygian','F Lydian','G Mixolydian','A Minor','B Locrian']);
+const alternative=flow.menus.scale_menu.indexOf('A Minor');flow.midiBytes.length=0;flow.send(146,60,98);flow.state.scaleselect(alternative);flow.send(130,60,35);
+eq(flow.state.getvalueof().slice(8,11),[9,1453,'Minor']);eq(flow.views.at(-1),['view',9,1453]);eq(flow.midiBytes,[146,60,98,130,60,35]);eq(flow.note(60),[144,69,91,128,69,27]);
+// Unknown Live names survive source updates, but Local adopts catalog recognition.
+flow=integration();flow.state.livescale(2,'Live Special',1,0,2,3,5,7,9,10);eq(flow.labels.scale_title,'Scale: D Live Special (7 notes)');flow.state.followselect(0);eq(flow.state.getvalueof().slice(8,11),[2,1709,'Dorian']);
+// Legacy Local labels are reidentified from the saved sounding membership, not draft.
+flow=integration();flow.state.setvalueof(3,0,9,'Minor',1453,0,'Old Label',2741,0,1);eq(flow.state.getvalueof().slice(8,11),[0,2741,'Major']);
+// Worked catalog fixtures through source->Local recognition at every Root.
+const catalogFixtures=[['Major',[0,2,4,5,7,9,11]],['Minor',[0,2,3,5,7,8,10]],['Dorian',[0,2,3,5,7,9,10]],['Mixolydian',[0,2,4,5,7,9,10]],['Lydian',[0,2,4,6,7,9,11]],['Phrygian',[0,1,3,5,7,8,10]],['Locrian',[0,1,3,5,6,8,10]],['Harmonic Minor',[0,2,3,5,7,8,11]],['Melodic Minor',[0,2,3,5,7,9,11]],['Major Pentatonic',[0,2,4,7,9]],['Minor Pentatonic',[0,3,5,7,10]],['Whole Tone',[0,2,4,6,8,10]]];
+for(const [catalogName,intervals] of catalogFixtures)for(let root=0;root<12;root++){
+ const device=integration();device.state.livescale(root,'Unknown source label',1,...intervals);device.state.followselect(0);
+ eq(device.state.getvalueof()[10],catalogName);eq(device.labels.root_menu,root);eq(device.note(60),[144,60+root,91,128,60+root,27]);
+}
+// A genuinely unmatched twelve-note scale remains Custom, without guessing a Root.
+flow=integration();flow.state.livescale(7,'Chromatic from source',1,0,1,2,3,4,5,6,7,8,9,10,11);flow.state.followselect(0);eq(flow.state.getvalueof().slice(8,11),[7,4095,'Custom']);eq(flow.menus.scale_menu.length,13);
+// Section headings cannot mutate the scale. Following rejects even alternate selection.
+flow=integration();flow.state.followselect(0);const beforeHeading=Array.from(flow.state.getvalueof());flow.state.scaleselect(flow.menus.scale_menu.indexOf('Also matches'));eq(flow.state.getvalueof(),beforeHeading);
+flow.state.followselect(1);const beforeFollowingAlternative=Array.from(flow.state.getvalueof());flow.state.scaleselect(flow.menus.scale_menu.indexOf('A Minor'));eq(flow.state.getvalueof(),beforeFollowingAlternative);
+// Normal Root selection transposes rather than preserving absolute pitch classes.
+flow=integration();flow.state.followselect(0);flow.state.rootselect(2);eq(flow.views.at(-1),['view',2,2741]);eq(flow.state.getvalueof()[10],'Major');
+console.log(assertions+' scale recognition/editor/state/MIDI assertions passed');
