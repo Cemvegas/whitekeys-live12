@@ -111,7 +111,8 @@ menuEntries=scaleMenu();var menuIndex=0,labels=[];
     var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(i=0;i<labels.length;i++)sm.message('append',labels[i]);}
     setui('root_menu',root);setui('scale_menu',menuIndex);setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));setui('host_toggle',0);setui('black_menu',black);
     setui('scale_title','WhiteKeys');
-    var text='Playing: '+pitchNames[activeRoot]+' '+activeName+' ('+active.length+(active.length===1?' note)':' notes)');
+    var visibleName=activeName.length>28?activeName.slice(0,25)+'...':activeName;
+    var text='Playing: '+pitchNames[activeRoot]+' '+visibleName+' ('+active.length+(active.length===1?' note)':' notes)');
     var sourceText=sourceKind==='Local'?'Local':(sourceKind==='WhiteKeys'?'Source unavailable':(apiReady?'Following Live':'Live unavailable'));
     if(follow&&apiReady&&!liveMode)sourceText+=' - Scale Mode off';
     setui('source_status',sharingNotice||sourceText);
