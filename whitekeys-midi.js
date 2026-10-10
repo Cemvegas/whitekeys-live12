@@ -7,7 +7,7 @@ var root = 0, intervals = [], ready = false, black = 0;
 var pending = {}, counts = {}, status = 0, data = [], sysex = false;
 var white = {0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6};
 function configure() {
-    var a = arrayfromargs(arguments), r = Number(a.shift()), ok = a.length === 7;
+    var a = arrayfromargs(arguments), r = Number(a.shift()), ok = a.length >= 1 && a.length <= 12;
     for (var i = 0; i < a.length; i++) {
         a[i] = Number(a[i]);
         if (a[i] !== Math.floor(a[i]) || a[i] < 0 || a[i] > 11 || (i && a[i] <= a[i-1])) ok = false;
@@ -26,7 +26,10 @@ function mapped(n) {
     var degree = white[n % 12];
     if (degree === undefined) return black ? -1 : n;
     if (!ready) return -1;
-    var out = Math.floor(n / 12) * 12 + root + intervals[degree];
+    var step = (Math.floor(n / 12) - 5) * 7 + degree;
+    var octave = Math.floor(step / intervals.length);
+    var index = step - octave * intervals.length;
+    var out = 60 + root + octave * 12 + intervals[index];
     return out > 127 || out < 0 ? -1 : out;
 }
 function note(s, n, v) {

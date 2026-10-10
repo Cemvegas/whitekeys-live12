@@ -15,7 +15,7 @@ c.feed([144,61,80]);c.blackkeys(1);c.feed([128,61,40]);eq(c.take(),[144,61,80,12
 c=make();c.configure(0,...minor);c.feed([144,64,80,63,100,128,64,40]);eq(c.take(),[144,63,80,144,63,100]);c.feed([128,63,60]);eq(c.take(),[128,63,60]);
 c=make();c.configure(0,...minor);c.feed([144,64,40,64,60,128,64,10,64,20]);eq(c.take(),[144,63,40,144,63,60,128,63,20]);
 c=make();c.configure(0,...minor);c.feed([144,64,80,145,64,81,128,64,40,129,64,41]);eq(c.take(),[144,63,80,145,63,81,128,63,40,129,63,41]);
-c=make();c.configure(0,0,2,4,7,9);c.feed([144,60,80,128,60,40]);eq(c.take(),[]);
+c=make();c.configure(0,0,2,4,7,9);c.feed([144,60,80,128,60,40]);eq(c.take(),[144,60,80,128,60,40]);
 c=make();c.configure(0,...minor);c.feed([176,64,127,224,0,64,192,5,208,80,242,1,2,240,1,248,2,247]);eq(c.take(),[176,64,127,224,0,64,192,5,208,80,242,1,2,240,1,248,2,247]);
 c=make();c.configure(0,...minor);c.feed([144,64,80,160,64,90,128,64,12]);eq(c.take(),[144,63,80,160,63,90,128,63,12]);
 c=make();c.configure(0,...minor);c.feed([144,64,80]);c.take();c.panic();assert(c.take().slice(0,3).join()==='128,63,0');eq(Object.keys(c.pending),[]);eq(Object.keys(c.counts),[]);
@@ -83,9 +83,9 @@ live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_in
 live.midi.feed([128,64,39,144,64,77,128,64,23]);eq(live.midi.take(),[128,63,39,144,65,77,128,65,23]);
 live.state.scaleselect(1);live.values.root_note=[7];live.change();live.flush(0);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,62,80,128,62,30]);
 live.state.followselect(1);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,67,80,128,67,30]);
-live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'7/7 notes - Scale Mode off');
+live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Continuous Degrees - 7 notes - Scale Mode off');
 live.midi.feed([144,64,90]);eq(live.midi.take(),[144,70,90]);
-live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'5/7 notes - choose 7 notes');
+live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Continuous Degrees - 5 notes - Scale Mode off');
 live.setOnline(false);live.change();live.flush(0);eq(live.labels.status_label,'Live unavailable');
 // Disconnect immediately detaches the old host observers, before retrying.
 eq(live.subscriptions.filter(s=>s.property).length,0);
@@ -108,7 +108,7 @@ eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);
 live.setOnline(true);live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.flush(1000);
 live.midi.feed([144,60,82,128,60,33]);eq(live.midi.take(),[144,62,82,128,62,33]);
 // A queued callback belonging to the detached observer must not disrupt recovery.
-oldObserver.callback(['id',0]);eq(live.labels.status_label,'7/7 notes');eq(live.tasks.filter(t=>t.scheduled).length,0);
+oldObserver.callback(['id',0]);eq(live.labels.status_label,'Continuous Degrees - 7 notes');eq(live.tasks.filter(t=>t.scheduled).length,0);
 live.state.scaleselect(1);live.subscriptions.find(s=>s.property).id=0;
 live.midi.feed([144,64,83,128,64,34]);eq(live.midi.take(),[144,65,83,128,65,34]);
 live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
@@ -117,3 +117,14 @@ live=liveChain();live.state.init();live.api.init();live.subscriptions[0].id=0;li
 eq(live.labels.status_label,'Live unavailable');live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[]);
 eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log(`${checks} total MIDI/API message assertions passed`);
+// Spec #9: literal Continuous Degrees examples at the public raw MIDI seam.
+for (const [ints,notes,pitches] of [
+ [[0,2,3,5,6,7,9,10],[59,60,62,64,65,67,69,71,72,74],[58,60,62,63,65,66,67,69,70,72]],
+ [[0,2,4,7,9],[59,60,62,64,65,67,69],[57,60,62,64,67,69,72]],
+ [[0],[59,60,62,64],[48,60,72,84]],
+ [[0,1,2,3,4,5,6,7,8,9,10,11],[60,62,64,65,67,69,71,72,74,76,77,79,81],[60,61,62,63,64,65,66,67,68,69,70,71,72]]
+]) {
+ c=make();c.configure(0,...ints);
+ notes.forEach((n,i)=>{c.feed([144,n,91,128,n,27]);eq(c.take(),[144,pitches[i],91,128,pitches[i],27]);});
+}
+console.log(checks+' total MIDI/API and variable-scale assertions passed');
