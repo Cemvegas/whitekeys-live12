@@ -52,9 +52,9 @@ Bu formda hiçbir gerçek sonuç önceden doldurulmaz. #8 açık; DEVELOPMENT pa
 
 | Koşum | Beklenen | Gerçek | Kanıt / kaydet-kapat-aç | Sonuç |
 |---|---|---|---|---|
-| AC23 geçerli D Custom+ignore | D/Dorian,60→62,64→65 | | | |
-| AC24 altı/E taslak | E/6, aktif D/Dorian; G ekleyince E/7 | | | |
-| AC24 sekiz/G taslak | G/8, aktif C/Major; Ab çıkarınca G/7 | | | |
+| AC23 geçerli D Custom+ignore | D/Custom (Dorian aralıkları),60→62,64→65 | | | |
+| AC24 altı/E taslak | E/6, aktif D/Custom (Dorian aralıkları); G ekleyince E/7 | | | |
+| AC24 sekiz/G taslak | G/8, aktif C/Custom (Major aralıkları); Ab çıkarınca G/7 | | | |
 | AC25 Follow/geç API | Güncel D/Dorian eski C/Major'ı geçer | | | |
 | AC26 iki cihaz | Bağımsız durum; geçici sesler başlamaz | | | |
 
