@@ -208,7 +208,7 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 13,
+          "fontsize": 11,
           "fontface": 1,
           "varname": "scale_title",
           "textcolor": [
@@ -217,7 +217,7 @@
             0.21,
             1
           ],
-          "text": "C Major",
+          "text": "Draft: C Major (7 notes)",
           "presentation": 1,
           "presentation_rect": [
             14,
@@ -660,7 +660,7 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 9,
+          "fontsize": 10,
           "varname": "status_label",
           "textcolor": [
             0.25,
@@ -672,7 +672,7 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            148,
+            144,
             332,
             16
           ]
@@ -728,8 +728,8 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            164,
-            172,
+            177,
+            220,
             20
           ]
         }
@@ -757,10 +757,10 @@
           "text": "Continuous Degrees",
           "presentation": 1,
           "presentation_rect": [
-            192,
-            164,
-            154,
-            32
+            52,
+            160,
+            294,
+            14
           ]
         }
       },
@@ -777,6 +777,87 @@
           "numinlets": 1,
           "numoutlets": 1,
           "text": "prepend modeselect"
+        }
+      },
+      {
+        "box": {
+          "id": "apply",
+          "maxclass": "textbutton",
+          "patching_rect": [
+            370,
+            145,
+            76,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 3,
+          "mode": 0,
+          "fontsize": 11,
+          "bgcolor": [
+            0.88,
+            0.89,
+            0.82,
+            1
+          ],
+          "textcolor": [
+            0.25,
+            0.32,
+            0.21,
+            1
+          ],
+          "text": "Apply",
+          "presentation": 1,
+          "presentation_rect": [
+            270,
+            176,
+            76,
+            22
+          ],
+          "varname": "apply_button"
+        }
+      },
+      {
+        "box": {
+          "id": "applymsg",
+          "maxclass": "message",
+          "text": "apply",
+          "patching_rect": [
+            370,
+            180,
+            45,
+            22
+          ],
+          "numinlets": 2,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "modelabel",
+          "maxclass": "comment",
+          "text": "Mode",
+          "fontsize": 10,
+          "textcolor": [
+            0.25,
+            0.32,
+            0.21,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            14,
+            160,
+            35,
+            14
+          ],
+          "patching_rect": [
+            14,
+            390,
+            35,
+            14
+          ],
+          "numinlets": 1,
+          "numoutlets": 0
         }
       }
     ],
@@ -1049,6 +1130,30 @@
         "patchline": {
           "source": [
             "modeprep",
+            0
+          ],
+          "destination": [
+            "model",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "apply",
+            0
+          ],
+          "destination": [
+            "applymsg",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "applymsg",
             0
           ],
           "destination": [
