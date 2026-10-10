@@ -128,3 +128,58 @@ for (const [ints,notes,pitches] of [
  notes.forEach((n,i)=>{c.feed([144,n,91,128,n,27]);eq(c.take(),[144,pitches[i],91,128,pitches[i],27]);});
 }
 console.log(checks+' total MIDI/API and variable-scale assertions passed');
+// #12 / VS18: Eight-degree white/black collisions retain all sixteen independent owners.
+const octatonic=[0,2,3,5,6,7,9,10];
+c=make();c.configure(0,...octatonic);
+for(let ch=0;ch<16;ch++) {
+ c.feed([144+ch,64,70,63,100,64,93]);
+ eq(c.take(),[144+ch,63,70,144+ch,63,100,144+ch,63,93]);
+}
+for(let ch=0;ch<16;ch++) {
+ c.feed([128+ch,64,10,63,20]);eq(c.take(),[]);
+ c.feed([128+ch,64,44]);eq(c.take(),[128+ch,63,44]);
+}
+// FIFO retriggers and poly pressure follow each held target across a scale change.
+c=make();c.configure(0,...octatonic);c.feed([147,64,81]);eq(c.take(),[147,63,81]);
+c.configure(0,0);c.feed([147,64,97,163,64,92]);eq(c.take(),[147,84,97,163,63,92,163,84,92]);
+c.feed([131,64,21,163,64,78,147,64,0]);eq(c.take(),[131,63,21,163,84,78,147,84,0]);
+// VS21: Suppressed retriggers occupy their FIFO slot without emitting ghost releases.
+c=make();c.configure(0,0);c.feed([144,72,88]);eq(c.take(),[]);
+c.configure(0,...octatonic);c.feed([144,72,99,128,72,13]);eq(c.take(),[144,70,99]);
+c.feed([128,72,47]);eq(c.take(),[128,70,47]);
+c=make();c.configure(0,0);c.feed([144,50,80,128,50,22,144,52,89,128,52,31]);eq(c.take(),[144,0,89,128,0,31]);
+c.configure(7,0);c.feed([144,69,91,128,69,32,144,71,92,128,71,33]);eq(c.take(),[144,127,91,128,127,32]);
+c.configure(0,0,1,2,3,4,5,6,7,8,9,10,11);c.feed([144,0,90,128,0,34,144,127,93,128,127,35]);eq(c.take(),[144,25,90,128,25,34,144,99,93,128,99,35]);
+// VS22: Running status, release velocities, real-time interleaving and unrelated MIDI survive.
+c=make();c.configure(0,...octatonic);
+c.feed([146,64,248,79,64,0,178,64,127,226,0,64,194,5,210,80,242,1,2,240,1,248,2,247]);
+eq(c.take(),[248,146,63,79,146,63,0,178,64,127,226,0,64,194,5,210,80,242,1,2,240,1,248,2,247]);
+// VS19/20: Real screen audition remains independent of variable scale and physical ignore.
+for(const [x,y,pitch] of [[25,70,60],[100,10,63],[50,10,61]]) {
+ device=instrument();device.state.livescale(0,'Octatonic',1,...octatonic);device.state.modeselect(0);device.state.blackselect(1);
+ before=device.saved();device.click(x,y,1);eq(device.saved(),before);eq(device.midi.take(),[144,pitch,96]);eq(device.lights(),1);
+ device.midi.tasks[0].run();eq(device.midi.take(),[128,pitch,0]);eq(device.lights(),0);
+}
+// Variable mapped octaves and channels keep the shared pitch-class light until last release.
+device=instrument();device.state.livescale(0,'Octatonic',1,...octatonic);
+device.midi.feed([144,60,81,145,74,82]);eq(device.midi.take(),[144,60,81,145,72,82]);eq(device.lights(),1);
+device.midi.feed([128,60,33]);eq(device.midi.take(),[128,60,33]);eq(device.lights(),1);
+device.midi.feed([129,74,34]);eq(device.midi.take(),[129,72,34]);eq(device.lights(),0);
+// Panic/system reset invalidate an already queued audition even if the new target collides.
+for(const reset of [m=>m.panic(),m=>m.feed([255])]) {
+ device=instrument();device.state.livescale(0,'Octatonic',1,...octatonic);device.click(100,10,1);
+ const stale=device.midi.tasks[0];device.midi.feed([145,74,83,176,64,127]);device.midi.take();reset(device.midi);
+ const out=device.midi.take();
+ if(out[0]===255)eq(out,[255]);
+ else eq(out,[128,63,0,129,72,0,...Array.from({length:16},(_,ch)=>[176+ch,64,0,176+ch,123,0]).flat()]);
+ eq(device.lights(),0);device.midi.feed([144,64,85]);eq(device.midi.take(),[144,63,85]);
+ stale.runQueued();eq(device.midi.take(),[]);eq(device.lights(),1);
+ device.midi.feed([128,64,49]);eq(device.midi.take(),[128,63,49]);eq(device.lights(),0);
+}
+// Live and mode transitions never retarget held notes, including pending poly pressure.
+live=liveChain();live.state.init();live.api.init();live.values.scale_intervals=octatonic.slice();live.change();live.flush(0);
+live.state.modeselect(0);live.midi.feed([144,72,95]);eq(live.midi.take(),[144,70,95]);
+live.values.root_note=[7];live.values.scale_intervals=[0];live.change();live.flush(0);live.state.modeselect(1);
+live.midi.feed([160,72,77,128,72,41,144,69,94,128,69,42]);eq(live.midi.take(),[160,70,77,128,70,41,144,127,94,128,127,42]);
+live.api.notifydeleted();
+console.log(checks+' final MIDI/API/variable performance assertions passed');
