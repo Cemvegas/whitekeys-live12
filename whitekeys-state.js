@@ -18,7 +18,9 @@ function setvalueof() {
     var a=arrayfromargs(arguments); if(a.length===1&&a[0] instanceof Array)a=a[0];
     var old=Number(a[0])===2&&a.length===9;
     if(!old&&(Number(a[0])!==3||a.length!==10||(Number(a[9])!==0&&Number(a[9])!==1))) return;
-    var r=Number(a[2]),ar=Number(a[5]),d=unmask(Number(a[4])),v=unmask(Number(a[7]));
+    var dm=Number(a[4]),am=Number(a[7]);
+    if(dm<1||dm>4095||dm!==Math.floor(dm)||am<1||am>4095||am!==Math.floor(am))return;
+    var r=Number(a[2]),ar=Number(a[5]),d=unmask(dm),v=unmask(am);
     if(r<0||r>11||r!==Math.floor(r)||ar<0||ar>11||ar!==Math.floor(ar)||!valid(d)||!valid(v)||(old&&v.length!==7))return;
     preferredMode=old?0:Number(a[9]);
     follow=Number(a[1])?1:0;root=r;name=String(a[3]);draft=d;activeRoot=ar;activeName=String(a[6]);active=v;black=Number(a[8])===1?1:0;
