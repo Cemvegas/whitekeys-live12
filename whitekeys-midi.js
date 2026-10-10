@@ -90,6 +90,8 @@ function msg_int(b) {
     if (data.length === len) { message(status, data); data = []; if (status >= 240) status = 0; }
 }
 function stopAuditions() {
+    // Invalidate even callbacks already queued by Max before cancellation.
+    channelEpoch[0] = (channelEpoch[0] || 0) + 1;
     for (var i = 0; i < auditionTasks.length; i++) auditionTasks[i].cancel();
     auditionTasks = [];
 }
