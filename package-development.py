@@ -89,7 +89,7 @@ def package(output):
     if output.resolve().is_relative_to(ROOT):
         raise ValueError('ZIP must be outside the source checkout (use chat outputs)')
     data = {name: (ROOT / name).read_bytes() for name in files}
-    manifest = {'status': 'DEVELOPMENT — host acceptance pending issue #15',
+    manifest = {'status': 'PARTIAL DEVELOPMENT — Live acceptance pending issue #22; WhiteKeys sharing unavailable pending validation gate #19',
                 'source_commit': commit, 'package_version': 'development-' + commit[:12],
                 'files': {name: {'bytes': len(content), 'sha256': hashlib.sha256(content).hexdigest()} for name, content in data.items()}}
     data['MANIFEST.json'] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode()
