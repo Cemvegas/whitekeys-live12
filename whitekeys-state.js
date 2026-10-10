@@ -9,7 +9,7 @@ var follow = 1, root = 0, name = 'Major', draft = scaleNotes[0].slice(0);
 var activeRoot = 0, activeName = 'Major', active = draft.slice(0), black = 0;
 var liveRoot = 0, liveName = 'Major', liveNotes = draft.slice(0), liveMode = 1;
 var menuSignature = '';
-var apiReady = false, apiError = '', initialized = false;
+var apiReady = false, apiError = '';
 function mask(a) { var n=0; for(var i=0;i<a.length;i++) n |= 1<<a[i]; return n; }
 function unmask(m) { var a=[]; for(var i=0;i<12;i++) if(m & (1<<i)) a.push(i); return a; }
 function valid(a) { if(!a.length||a[0]!==0) return false; for(var i=0;i<a.length;i++) if(a[i]!==Math.floor(a[i])||a[i]<0||a[i]>11||(i&&a[i]<=a[i-1]))return false; return true; }
@@ -20,11 +20,11 @@ function setvalueof() {
     var r=Number(a[2]),ar=Number(a[5]),d=unmask(Number(a[4])),v=unmask(Number(a[7]));
     if(r<0||r>11||r!==Math.floor(r)||ar<0||ar>11||ar!==Math.floor(ar)||!valid(d)||!valid(v)||v.length!==7)return;
     follow=Number(a[1])?1:0;root=r;name=String(a[3]);draft=d;activeRoot=ar;activeName=String(a[6]);active=v;black=Number(a[8])===1?1:0;
-    // Live's blob may arrive after API init. Follow mode must always use fresh Live values.
-    if(initialized&&follow&&apiReady) useLive();
+    // A ready API wins over a stale Follow blob, even before the init message.
+    if(follow&&apiReady) useLive();
     render();
 }
-function init() { initialized=true; if(follow&&apiReady)useLive();render(); }
+function init() { if(follow&&apiReady)useLive();render(); }
 function ui(id) { return this.patcher.getnamed(id); }
 function setui(id,value) { var b=ui(id); if(b) b.message('set',value); }
 function save() { notifyclients(); }
