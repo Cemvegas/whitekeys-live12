@@ -4,20 +4,20 @@ function eq(a,b){assert.deepStrictEqual(JSON.parse(JSON.stringify(a)),b);asserti
 // The approved message seam: real Scale Keyboard -> state -> MIDI scripts.
 // Host facilities (drawing, patcher UI and MIDI outlets) are boundary adapters.
 function integration() {
-    const midiBytes=[],labels={},views=[],scheduled=[];
-    const midi={Task:function(callback){this.schedule=()=>scheduled.push(callback);this.cancel=()=>{}},arrayfromargs:a=>Array.from(a),outlet:(port,...a)=>{if(port===0)midiBytes.push(...a)}};
-    vm.createContext(midi);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-midi.js','utf8'),midi);
+    const midiBytes=[],labels={},views=[],scheduled=[],paintColors=[];
     let keyboard;
+    const midi={Task:function(callback){this.schedule=()=>scheduled.push(callback);this.cancel=()=>{}},arrayfromargs:a=>Array.from(a),outlet:(port,...a)=>{if(port===0)midiBytes.push(...a);else{if(Array.isArray(a[0]))a=Array.from(a[0]);keyboard[a[0]](...a.slice(1));}}};
+    vm.createContext(midi);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-midi.js','utf8'),midi);
     const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{if(a[0]==='set')labels[n]=a[1]}})},outlet:(port,...a)=>{
         if(Array.isArray(a[0]))a=Array.from(a[0]);
         if(port===0)midi[a[0]](...a.slice(1));
         else {views.push(a);keyboard[a[0]](...a.slice(1));}
     }};
     vm.createContext(state);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-state.js','utf8'),state);
-    keyboard={box:{rect:[0,0,350,70]},mgraphics:{init:()=>{},redraw:()=>{}},outlet:(port,command,pc)=>state[command](pc)};
+    keyboard={box:{rect:[0,0,350,70]},mgraphics:{init:()=>{},redraw:()=>{},set_source_rgba:(...a)=>paintColors.push(a),rectangle_rounded:()=>{},fill:()=>{},set_line_width:()=>{},stroke:()=>{},rectangle:()=>{},select_font_face:()=>{},set_font_size:()=>{},text_measure:()=>[4],move_to:()=>{},show_text:()=>{}},outlet:(port,command,pc)=>state[command](pc)};
     vm.createContext(keyboard);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-keyboard.js','utf8'),keyboard);
     state.livescale(0,'Major',1,0,2,4,5,7,9,11);
-    return {state,labels,views,scheduled,midiBytes,send:(s,n,v)=>midi.note(s,n,v),click:(x,y=69)=>keyboard.onclick(x,y,1,0,0,0,0,0),note:(n)=>{midiBytes.length=0;midi.note(144,n,91);midi.note(128,n,27);return midiBytes.slice()}};
+    return {state,labels,views,scheduled,midiBytes,paint:()=>{paintColors.length=0;keyboard.paint();return paintColors.filter(c=>c[0]===0.97&&c[1]===0.76&&c[2]===0.41).length},send:(s,n,v)=>midi.note(s,n,v),click:(x,y=69)=>keyboard.onclick(x,y,1,0,0,0,0,0),note:(n)=>{midiBytes.length=0;midi.note(144,n,91);midi.note(128,n,27);return midiBytes.slice()}};
 }
 let staged=integration();staged.click(125);staged.click(100,10);
 eq(staged.note(64),[144,64,91,128,64,27]);
@@ -196,3 +196,81 @@ eq(flow.labels.scale_title,'Draft: C Custom (12 notes)');
 eq(flow.note(72),[144,72,91,128,72,27]);flow.state.apply();
 eq(flow.note(72),[144,67,91,128,67,27]);
 console.log(assertions+' total state/integration/Apply assertions passed');
+// A malformed saved membership must not silently become a different scale on reopen.
+for(const badMask of [2741.5,6837,-1355,NaN,Infinity]){
+ const device=integration(),before=Array.from(device.state.getvalueof());
+ device.state.setvalueof(3,0,2,'Custom',badMask,0,'Major',2741,1,0);
+ eq(device.state.getvalueof(),before);
+ device.state.setvalueof(3,0,2,'Custom',1453,0,'Major',badMask,1,0);
+ eq(device.state.getvalueof(),before);
+}
+// v2 migration visibly retains its pending draft until Apply, including all legacy lengths.
+const legacy=[
+ {blob:[2,0,2,'Custom',1453,0,'Major',2741,1],draft:'Draft: D Custom (7 notes)',before:72,after:74},
+ {blob:[2,0,4,'Custom',1365,2,'Dorian',1709,0],draft:'Draft: E Custom (6 notes)',before:74,after:78},
+ {blob:[2,0,7,'Custom',1773,0,'Major',2741,1],draft:'Draft: G Custom (8 notes)',before:72,after:77}
+];
+for(const fixture of legacy){
+ const device=integration();device.state.setvalueof(...fixture.blob);device.state.init();
+ eq(device.labels.scale_title,fixture.draft);eq(device.labels.mode_menu,0);
+ eq(device.note(72),[144,fixture.before,91,128,fixture.before,27]);
+ device.state.apply();eq(device.note(72),[144,fixture.after,91,128,fixture.after,27]);
+}
+// Literal new-version pending states retain both roots, mode preference and Black Keys.
+const pendingStates=[
+ {blob:[3,0,2,'Custom',661,7,'Minor',1453,1,1],title:'Draft: D Custom (5 notes)',after72:78,mode:'Continuous Degrees'},
+ {blob:[3,0,4,'Custom',1773,2,'Dorian',1709,0,0],title:'Draft: E Custom (8 notes)',after72:74,mode:'Continuous Degrees: 8 notes; Anchored needs 7'},
+ {blob:[3,0,7,'Custom',4095,0,'Major',2741,1,0],title:'Draft: G Custom (12 notes)',after72:74,mode:'Continuous Degrees: 12 notes; Anchored needs 7'}
+];
+for(const fixture of pendingStates){
+ const source=integration();source.state.setvalueof(...fixture.blob);
+ const saved=Array.from(source.state.getvalueof());eq(saved,fixture.blob);
+ const device=integration();device.state.setvalueof(...saved);device.state.init();
+ eq(device.state.getvalueof(),fixture.blob);eq(device.labels.scale_title,fixture.title);
+ eq(device.labels.mode_menu,fixture.blob[9]);eq(device.labels.black_menu,fixture.blob[8]);
+ eq(device.views.at(-1),['view',fixture.blob[2],fixture.blob[4]]);
+ eq(device.note(60),[144,60+fixture.blob[5],91,128,60+fixture.blob[5],27]);
+ device.state.apply();eq(device.labels.mode_status,fixture.mode);
+ eq(device.note(72),[144,fixture.after72,91,128,fixture.after72,27]);
+ const applied=integration();applied.state.setvalueof(...device.state.getvalueof());
+ eq(applied.labels.mode_status,fixture.mode);eq(applied.note(72),[144,fixture.after72,91,128,fixture.after72,27]);
+ if(fixture.blob[9]===0){
+  applied.state.followselect(1);eq(applied.labels.mode_status,'Octave Anchored');eq(applied.labels.mode_menu,0);
+ }
+}
+// Every startup ordering retains non-scale preferences while fresh Live replaces stale Follow.
+for(const order of ['ABI','AIB','BAI','BIA','IAB','IBA']){
+ for(const preferred of [0,1])for(const blackMode of [0,1]){
+  const device=integration(),blob=[3,1,4,'Custom',1773,0,'Major',2741,blackMode,preferred];
+  for(const step of order){
+   if(step==='A')device.state.livescale(2,'Octatonic',1,0,2,3,5,6,7,9,10);
+   if(step==='B')device.state.setvalueof(...blob);
+   if(step==='I')device.state.init();
+  }
+  eq(device.state.getvalueof(),[3,1,2,'Octatonic',1773,2,'Octatonic',1773,blackMode,preferred]);
+  eq(device.labels.scale_title,'Draft: D Octatonic (8 notes)');
+  eq(device.labels.status_label,'Playing: D Octatonic (8 notes)');
+  eq(device.labels.mode_menu,preferred);eq(device.labels.black_menu,blackMode);
+  eq(device.note(72),[144,72,91,128,72,27]);
+  device.state.livescale(2,'Dorian',1,0,2,3,5,7,9,10);
+  eq(device.labels.mode_status,preferred===0?'Octave Anchored':'Continuous Degrees');
+ }
+}
+// A separate instance cannot receive the other's Apply, stored preferences or MIDI releases.
+const independentA=integration(),independentB=integration();
+independentA.state.setvalueof(...pendingStates[0].blob);independentB.state.setvalueof(...pendingStates[1].blob);
+independentA.state.apply();independentA.state.modeselect(0);independentA.send(144,60,88);
+eq(independentB.state.getvalueof(),pendingStates[1].blob);
+independentB.midiBytes.length=0;independentB.send(128,60,43);eq(independentB.midiBytes,[]);
+eq(independentB.labels.scale_title,'Draft: E Custom (8 notes)');
+console.log(assertions+' total state/integration/migration assertions passed');
+// Rendered note highlights and audition timers are session-only, even with a pending blob.
+const litSource=integration();litSource.state.setvalueof(...pendingStates[0].blob);
+litSource.send(144,60,90);litSource.state.audition(3);
+eq(litSource.paint(),2);eq(litSource.scheduled.length,1);
+const litReopen=integration();litReopen.midiBytes.length=0;
+litReopen.state.setvalueof(...litSource.state.getvalueof());litReopen.state.init();
+eq(litReopen.paint(),0);eq(litReopen.scheduled.length,0);eq(litReopen.midiBytes,[]);
+litReopen.send(128,60,32);eq(litReopen.paint(),0);eq(litReopen.midiBytes,[]);
+litSource.scheduled[0]();eq(litReopen.paint(),0);eq(litReopen.midiBytes,[]);
+console.log(assertions+' final state/integration/migration assertions passed');
