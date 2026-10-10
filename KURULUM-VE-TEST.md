@@ -4,15 +4,31 @@ C D E F G A B beyaz tuşlarını Live'ın seçili yedi notalı gamının 1–7. 
 
 ## Kurulum
 
-1. ZIP'i aç. `WhiteKeysLive12` klasörünü kalıcı bir konuma koy. **.amxd ve iki .js dosyası aynı klasörde kalmalı.** Bu sürüm bağımlılıkları yanında bulunan, dondurulmamış bir cihazdır; yalnız .amxd dosyasını başka yere taşımak yeterli değildir.
+1. ZIP'i aç. `WhiteKeysLive12` klasörünü kalıcı bir konuma koy. **.amxd ve dört .js dosyası aynı klasörde kalmalı.** Bu sürüm bağımlılıkları yanında bulunan, dondurulmamış bir cihazdır; yalnız .amxd dosyasını başka yere taşımak yeterli değildir.
 2. Ableton Live 12 Suite veya Max for Live lisansı olan Live 12 Standard kullan. Apple Silicon'da Live'ın yerleşik Max'i yeterlidir; üçüncü taraf external, Node, Rosetta veya ek paket gerekmez.
 3. `WhiteKeys Live 12.amxd` dosyasını MIDI kanalına, enstrümandan **önce** sürükle. Arka arkaya iki kopya ekleme. Öncesindeki Pitch/Scale cihazları giriş tuşlarını değiştirebilir; doğrudan eşleme için cihazı zincirin başına koy.
 4. Kanalı arm et veya Monitor = In seç. Sonrasına bir synth/piyano ekle.
-5. Live'ın üst çubuğundaki Current Scale Root ve Current Scale Name alanlarından örneğin C / Minor seç. Cihazda aynı kök/gam ve `hazir` yazısını görmelisin.
-6. Siyah tuşlar menüsü: `passthrough` = orijinal notayı geçir; `ignore` = siyah tuşların note-on/off'unu üretme. Mod değişiminden önce basılan notaların bırakılması eski eşlemeyi kapatır. Bu menü Live Set ile saklanan bir Live parametresidir.
-7. Takılı ses varsa PANIC'e bas; aktif eşlenmiş notaları kapatır, tüm MIDI kanallarına sustain off ve all notes off yollar. YENILE mevcut API değerlerini tekrar okur.
+5. Live'ın üst çubuğundaki Current Scale Root ve Current Scale Name alanlarından örneğin C / Minor seç. Cihazda aynı kök/gam ve `7/7 notes` yazısını görmelisin.
+6. Black Keys menüsü: `passthrough` = orijinal notayı geçir; `ignore` = siyah tuşların note-on/off'unu üretme. Mod değişiminden önce basılan notaların bırakılması eski eşlemeyi kapatır. Bu seçim cihazın özel gam durumu ile birlikte saklanır.
+7. Takılı ses varsa PANIC'e bas; aktif eşlenmiş notaları kapatır, tüm MIDI kanallarına sustain off ve all notes off yollar. Follow Live, Live takibine geri döner.
 
-Tek .amxd olarak dağıtmak istersen: Edit in Max → alt araç çubuğunda Freeze Device → Save. Max bu iki JavaScript bağımlılığını toplamalıdır. Bu teslimin dondurulmuş sürümü üretilmedi; ZIP içindeki klasör düzeniyle kullan.
+Tek .amxd olarak dağıtmak istersen: Edit in Max → alt araç çubuğunda Freeze Device → Save. Max bu dört JavaScript bağımlılığını toplamalıdır. Bu teslimin dondurulmuş sürümü üretilmedi; ZIP içindeki klasör düzeniyle kullan.
+
+## B arayüzü ve özel gam
+
+360 × 169 boyutunda İngilizce panel: klavye önce, altında Root / Scale / Black Keys ve küçük Panic. Büyük başlık, Refresh ve sabit alt açıklama kaldırıldı. Durum satırı yalnız nota sayısını ve gerekli uyarıyı gösterir.
+
+- Yeşil tuşlar gamın notalarıdır; kökte turuncu çizgi bulunur. Çıkan MIDI notaları geçici turuncu vurgu alır.
+- Tuşa tıklamak notayı ekler/çıkarır, Custom moduna geçer. Kök çıkarılamaz.
+- Option+tıklamak kısa bir MIDI audition notası yollar; gamı değiştirmez. Ses için sonrasında enstrüman bulunmalı.
+- Custom gam tam 7 nota olduğunda çalınır. Düzenleme sırasında 6/8 nota varsa son geçerli 7 notalı gam çalmaya devam eder; durum satırı çalan gamı belirtir.
+- Root, gamı transpoze eder. Geçersiz taslakta çalan eski kök, taslak yeniden 7 nota olana kadar korunur.
+- Scale menüsü yaygın gamları içerir. Live'dan gelen diğer gam adları otomatik menüye eklenir.
+- Root / Scale değişikliği cihazda yereldir. Live'ın veya klibin gamını değiştirmez.
+- Follow Live açıkken Live'ın Current Scale değişiklikleri takip edilir. İlk düzenleme takibi kapatır; tekrar Follow Live açılınca güncel Live gamı alınır.
+- Taslak, son geçerli gam/kök, takip modu ve Black Keys seçimi gizli blob pattr parametresi ile Set'e saklanacak şekilde bağlandı. Host'ta Set'i kapatıp açma testi henüz yapılmadı.
+
+Live API'nin `scale_intervals` alanı salt okunurdur; özel aralık listesi Live'a yazılamaz. Bu yüzden Custom cihaz içinde tutulur. [Resmî Song API belgesi](https://docs.cycling74.com/apiref/lom/song/).
 
 ## Eşleme örnekleri
 
@@ -76,6 +92,12 @@ Gerçek host kontrolü: 10 Ekim 2026, macOS'ta kurulu Live 12.4.6 / yerleşik Ma
 
 Donanım testi, yeniden açma/preset saklama testi ve gerçek çıkış note-off ölçümü bu oturumda tamamlanmadı; yukarıdaki maddeler bunları doğrulamak içindir.
 
+## B sürümü doğrulama durumu
+
+10 Ekim 2026: gerçek Live içinde yeni panel, klavye ve Root / Scale / Black Keys menüleri görüntülendi. Özel gam durum mantığı için 34 otomatik kontrol ve MIDI/audition çakışmaları dahil 4.627 kontrol geçti. Bu kontroller Max mesajlarını taklit eder. Yeni panelin fare etkileşimleri, Option audition ses çıkışı ve Set yeniden açma davranışı host'ta tam doğrulanmadı; bu sürüm kabul testi bekleyen geliştirme sürümüdür.
+
+Ek kabul testi: C Major'da E'yi çıkar → 6/7, eski Major çalar. Eb'yi ekle → 7/7 Custom, E girişi Eb çalar. Live kökünü değiştir → Custom değişmez. Follow Live aç → güncel Live gamı gelir. Custom'da Root değiştir → tüm gam transpoze olur. 6 notalı taslak ve ignore seçimini kaydet, Set'i yeniden aç → taslak ve son geçerli gam korunmalı.
+
 ## Kaynak ve otomatik test
 
 - `WhiteKeys Live 12.maxpat`: düzenlenebilir kaynak patch.
@@ -83,6 +105,9 @@ Donanım testi, yeniden açma/preset saklama testi ve gerçek çıkış note-off
 - `whitekeys-api.js`: Live API gözlemcileri ve durum metni.
 - `test-midi.cjs`: üretimdeki MIDI JavaScript'ini Node VM'de Max mesaj giriş/çıkışları taklit edilerek sınar. Live/Max host entegrasyon testi değildir.
 
-Node varsa klasörde `node test-midi.cjs` çalıştır. 4.622 assertion geçti: 128 giriş notası × 12 kök × Major/Minor/Dorian; velocity, note-off, siyah mod geçişleri, nota çakışması, kanallar, MIDI mesajları, PANIC ve gam değişimi. Bu kontroller native host testinin yerine geçmez.
+Node varsa klasörde `node test-midi.cjs` çalıştır. 4.627 assertion geçti: 128 giriş notası × 12 kök × Major/Minor/Dorian; velocity, note-off, siyah mod geçişleri, nota çakışması, kanallar, MIDI mesajları, PANIC ve gam değişimi. Bu kontroller native host testinin yerine geçmez.
 
 Cihaz yalnız standart Max nesneleri ve ES5 `js` kullanır; architecture alanı patch'in kaydedildiği Max sürümünün metadata'sıdır, derlenmiş Intel external içermez. Apple Silicon hedeflidir; kurulu host'un arm64 çalışması ayrıca ölçülmedi.
+
+- `whitekeys-state.js`: özel gam ve kaydedilen durum. `test-state.cjs`: 34 durum kontrolü.
+- `whitekeys-keyboard.js`: native klavye çizimi ve fare etkileşimleri.

@@ -14,7 +14,7 @@ function init() {
     retryTask = new Task(init, this);
     try {
         song = new LiveAPI(null, 'live_set');
-        if (!Number(song.id)) throw new Error('live_set yok');
+        if (!Number(song.id)) throw new Error('live_set not available');
         var props = ['root_note','scale_intervals','scale_name','scale_mode'];
         for (var i = 0; i < props.length; i++) {
             var obs = new LiveAPI(changed, 'live_set');
@@ -22,8 +22,8 @@ function init() {
         }
         refresh();
     } catch (e) {
-        outlet(0, 'unavailable');
-        outlet(1, 'set', 'Live API bekleniyor: ' + e.message);
+        outlet(0, 'apistatus', 'Live API unavailable');
+        outlet(1, 'set', 'Waiting for Live API: ' + e.message);
         retryTask.schedule(1000);
     }
 }
@@ -33,15 +33,10 @@ function refresh() {
         var iv = song.get('scale_intervals');
         var name = song.get('scale_name').join(' ');
         var mode = Number(song.get('scale_mode')[0]);
-        outlet(0, ['configure', r].concat(iv));
-        var text = names[r] + ' / ' + name + ' / ' + iv.length + ' nota';
-        if (iv.length !== 7) text += ' — 1:1 icin 7 notali gam sec';
-        else text += ' — hazir';
-        if (!mode) text += ' (Scale Mode kapali; esleme aktif)';
-        outlet(1, 'set', text);
+        outlet(0, ['livescale', r, name, mode].concat(iv));
         post('WhiteKeys API: root=' + r + ' intervals=' + iv.join(',') + ' scale=' + name + '\n');
     } catch (e) {
-        outlet(0, 'unavailable'); outlet(1, 'set', 'API hatasi: ' + e.message);
+        outlet(0, 'apistatus', 'Live API unavailable'); outlet(1, 'set', 'Live API error: ' + e.message);
         if (retryTask) retryTask.schedule(1000);
     }
 }

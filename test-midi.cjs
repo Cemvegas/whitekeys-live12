@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const src=fs.readFileSync(__dirname+'/whitekeys-midi.js','utf8');
 let checks=0;
-function make(){let output=[];let c={outlet:(_,v)=>output.push(v),arrayfromargs:a=>Array.from(a)};vm.createContext(c);vm.runInContext(src,c);c.output=output;c.feed=a=>a.forEach(b=>c.msg_int(b));c.take=()=>output.splice(0);return c;}
+function make(){let output=[],tasks=[];let c={Task:function(fn){this.cancelled=false;this.cancel=()=>this.cancelled=true;this.schedule=()=>tasks.push(this);this.run=()=>{if(!this.cancelled)fn()};},outlet:(i,v)=>{if(i===0)output.push(v)},arrayfromargs:a=>Array.from(a)};vm.createContext(c);vm.runInContext(src,c);c.tasks=tasks;c.output=output;c.feed=a=>a.forEach(b=>c.msg_int(b));c.take=()=>output.splice(0);return c;}
 function eq(a,b){assert.deepStrictEqual(a,b);checks++;}
 const major=[0,2,4,5,7,9,11],minor=[0,2,3,5,7,8,10],white=[0,2,4,5,7,9,11];
 for(let r=0;r<12;r++)for(let ints of [major,minor,[0,2,3,5,7,9,10]])for(let n=0;n<128;n++){
@@ -20,4 +20,7 @@ c=make();c.configure(0,...minor);c.feed([176,64,127,224,0,64,192,5,208,80,242,1,
 c=make();c.configure(0,...minor);c.feed([144,64,80,160,64,90,128,64,12]);eq(c.take(),[144,63,80,160,63,90,128,63,12]);
 c=make();c.configure(0,...minor);c.feed([144,64,80]);c.take();c.panic();assert(c.take().slice(0,3).join()==='128,63,0');eq(Object.keys(c.pending),[]);eq(Object.keys(c.counts),[]);
 c=make();c.configure(0,...minor);c.feed([144,64,80,176,123,0,128,64,40]);eq(c.take(),[144,63,80,176,123,0]);
+c=make();c.configure(0,...minor);c.feed([144,64,80]);c.audition(63);c.feed([128,64,0]);eq(c.take(),[144,63,80,144,63,96]);c.tasks[0].run();eq(c.take(),[128,63,0]);
+c=make();c.configure(0,...minor);c.audition(63);c.feed([176,120,0,144,64,81]);c.take();c.tasks[0].run();eq(c.take(),[]);c.feed([128,64,45]);eq(c.take(),[128,63,45]);
+c=make();c.audition(60);c.panic();c.take();c.tasks[0].run();eq(c.take(),[]);
 console.log(`${checks} assertions passed (all 128 notes x 12 roots x 3 scales plus MIDI edge cases)`);

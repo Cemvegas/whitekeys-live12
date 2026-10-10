@@ -1,7 +1,8 @@
 // Max js (ECMAScript 5). Raw MIDI stream in/out; no LiveAPI on MIDI path.
 autowatch = 0;
 inlets = 1;
-outlets = 1;
+outlets = 2;
+var auditionTasks = [], channelEpoch = {};
 var root = 0, intervals = [], ready = false, black = 0;
 var pending = {}, counts = {}, status = 0, data = [], sysex = false;
 var white = {0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6};
@@ -16,7 +17,11 @@ function configure() {
 }
 function unavailable() { ready = false; }
 function blackkeys(v) { black = Number(v) === 1 ? 1 : 0; }
-function send(a) { for (var i = 0; i < a.length; i++) outlet(0, a[i]); }
+function send(a) {
+    for (var i = 0; i < a.length; i++) outlet(0, a[i]);
+    var type = a[0] & 240;
+    if (a.length === 3 && (type === 128 || type === 144)) outlet(1, ['playing'].concat(a));
+}
 function mapped(n) {
     var degree = white[n % 12];
     if (degree === undefined) return black ? -1 : n;
@@ -46,6 +51,8 @@ function note(s, n, v) {
     }
 }
 function clearChannel(ch) {
+    channelEpoch[ch] = (channelEpoch[ch] || 0) + 1;
+    outlet(1, "clearvoice", ch);
     var k;
     for (k in pending) if (k.split(':')[0] === String(ch)) delete pending[k];
     for (k in counts) if (k.split(':')[0] === String(ch)) delete counts[k];
@@ -66,7 +73,7 @@ function message(s, d) {
 function msg_int(b) {
     b = Number(b);
     if (b < 0 || b > 255 || b !== Math.floor(b)) return;
-    if (b >= 248) { send([b]); if (b === 255) { pending = {}; counts = {}; status = 0; data = []; sysex = false; } return; }
+    if (b >= 248) { send([b]); if (b === 255) { stopAuditions(); outlet(1, "clear"); pending = {}; counts = {}; status = 0; data = []; sysex = false; } return; }
     if (sysex) {
         if (b < 128 || b === 247) { send([b]); if (b === 247) sysex = false; return; }
         sysex = false;
@@ -82,7 +89,27 @@ function msg_int(b) {
     var len = status < 240 ? (((status & 240) === 192 || (status & 240) === 208) ? 1 : 2) : (status === 242 ? 2 : 1);
     if (data.length === len) { message(status, data); data = []; if (status >= 240) status = 0; }
 }
+function stopAuditions() {
+    for (var i = 0; i < auditionTasks.length; i++) auditionTasks[i].cancel();
+    auditionTasks = [];
+}
+function audition(n) {
+    n = Number(n); if (n < 0 || n > 127 || n !== Math.floor(n)) return;
+    var target = '0:' + n, epoch = channelEpoch[0] || 0;
+    counts[target] = (counts[target] || 0) + 1;
+    send([144, n, 96]);
+    var task = new Task(function () {
+        if (epoch === (channelEpoch[0] || 0) && counts[target]) {
+            counts[target]--;
+            if (counts[target] === 0) { delete counts[target]; send([128, n, 0]); }
+        }
+        var idx = auditionTasks.indexOf(task); if (idx >= 0) auditionTasks.splice(idx, 1);
+    }, this);
+    auditionTasks.push(task); task.schedule(240);
+}
+function notifydeleted() { stopAuditions(); }
 function panic() {
+    stopAuditions(); outlet(1, "clear");
     var k, a;
     for (k in counts) { a = k.split(':'); send([128 + Number(a[0]), Number(a[1]), 0]); }
     for (var ch = 0; ch < 16; ch++) { send([176 + ch, 64, 0]); send([176 + ch, 123, 0]); }
