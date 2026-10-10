@@ -46,7 +46,7 @@ function scaleselect(v) {
     v=Number(v);if(v<0||v>=scaleNames.length||v!==Math.floor(v))return;
     follow=0;name=scaleNames[v];
     if(v<scaleNotes.length)draft=scaleNotes[v].slice(0);
-    else if(name===liveName)draft=liveNotes.slice(0);
+    else if(name!=='Custom'&&name===liveName)draft=liveNotes.slice(0);
     adopt();render();save();
 }
 function followselect(v) { follow=Number(v)?1:0; if(follow&&apiReady)useLive();render();save(); }
