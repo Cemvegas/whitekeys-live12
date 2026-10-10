@@ -1,6 +1,6 @@
 # WhiteKeys Live 12 — değişken gam geliştirme paketi
 
-**DEVELOPMENT.** Spec #9 ve uygulama #10–#14; yeni gerçek Live kabulü [#15](https://github.com/Cemvegas/whitekeys-live12/issues/15) kullanıcıya aittir. Önceki #8 kullanıcı kabulü eski sürüme aittir ve bu özelliğin kanıtı değildir. Agent Computer Use kullanmaz; aşağıdaki native sonuçlar henüz ölçülmüş değildir.
+**DEVELOPMENT.** Spec #9 ve uygulama #10–#14; yeni gerçek Live kabulü [#15](https://github.com/Cemvegas/whitekeys-live12/issues/15) kullanıcıya aittir. Önceki #8 kullanıcı kabulü eski sürüme aittir ve bu özelliğin kanıtı değildir. İlk spec uygulamasında Computer Use kullanılmadı. Sonraki UI düzeltmesinde, kullanıcı izniyle Live’da Mode/Apply yerleşimi görsel doğrulandı; tam MIDI/ses/Set kabulü hâlâ #15’tedir.
 
 ## Kurulum ve kanıt
 
@@ -8,7 +8,9 @@
 2. Live 12 Suite veya Max for Live lisanslı Live 12 Standard ile ayrı test Set'i açın. Eski Set'leri kopyalayın; mevcut müzik projesinin üzerine test kaydetmeyin. Cihazı enstrümandan önce koyun, Monitor In veya arm açın. Audition için arkada enstrüman gerekir.
 3. Giriş ve Post FX çıkışını kaydedin. İkinci MIDI kanalında MIDI From = cihaz kanalı / Post FX, Monitor Off ve arm açık kullanın. Release velocity, CC/system/SysEx için ham MIDI log da alın. Ekran tek başına MIDI kanıtı değildir.
 4. `MANIFEST.json` içindeki tam commit, package_version ve dosya SHA256 değerleri ile ZIP SHA256 değerini boş sonuç formuna yazın. Eski kabul görüntülerini yeni koşum diye kullanmayın.
-5. VS28'de yaklaşık360×205 İngilizce panelin kesilmediğini, 332×62 klavyenin küçülmediğini, Draft/Playing/Mode/Apply durumlarının okunabilir olduğunu gözleyin. ZIP'i önceki kaynak konumundan farklı konuma açıp oradaki cihazı yükleyin; Max konsolunda dört JS için eksik bağımlılık olmadığını belgeleyin. Apple Silicon'da hem Live hem kullanılan Max'in native arm64 çalışmasını Activity Monitor/System bilgisiyle kaydedin. Üçüncü taraf external, Node veya Python cihaz çalıştırma bağımlılığı değildir; Node/Python geliştirici kontrolleri içindir.
+5. VS28'de yaklaşık360×169 İngilizce panelin kesilmediğini, 332×62 klavyenin küçülmediğini, Draft/Playing/Mode/Apply durumlarının okunabilir olduğunu gözleyin. ZIP'i önceki kaynak konumundan farklı konuma açıp oradaki cihazı yükleyin; Max konsolunda dört JS için eksik bağımlılık olmadığını belgeleyin. Apple Silicon'da hem Live hem kullanılan Max'in native arm64 çalışmasını Activity Monitor/System bilgisiyle kaydedin. Üçüncü taraf external, Node veya Python cihaz çalıştırma bağımlılığı değildir; Node/Python geliştirici kontrolleri içindir.
+
+Live cihaz yüksekliği sabit169 px olduğundan panel360×169 içindedir; önceki205 px tasarımındaki alt satır kesilmesi düzeltildi. Kaynak: [Cycling ’74 UI belgesi](https://docs.cycling74.com/userguide/m4l/live_userinterfaces/).
 
 ## Kullanım
 
@@ -69,7 +71,7 @@ Her satıra yeni paketle gözlenen ham MIDI/ekran/Set kanıtı ekleyin. API kesi
 | VS25 | Yeni kayıt pending farklı Root ve5/8/12 taslak, ayrı sounding gam | Kaydet/kapat/aç aynı ayrımı ve Preferred Mapping Mode'u korur; etkili mode doğru türetilir, Apply doğru taslağı alır. |
 | VS26 | Follow kaydı/API/blob/init farklı sıralar | Güncel API kayıtlı eski Follow gamını geçer; preferred mode ve Black Keys korunur, fallback güncel gamdan hesaplanır. |
 | VS27 | İki cihazı farklı tercih/taslak/çalan gamla kaydet/aç | Cihazlar bağımsız; held/audition yeniden başlamaz. |
-| VS28 | Yeni panel ve yeni konumdan paket yükle | Yaklaşık360×205 İngilizce panel kesilmeden, klavye küçülmeden, Mode/Apply/Playing okunabilir görünür; dört JS bulunur. Native arm64 ve ses/MIDI kullanıcı kanıtıdır. |
+| VS28 | Yeni panel ve yeni konumdan paket yükle | Yaklaşık360×169 İngilizce panel kesilmeden, klavye küçülmeden, Mode/Apply/Playing okunabilir görünür; dört JS bulunur. Native arm64 ve ses/MIDI kullanıcı kanıtıdır. |
 
 ## Set / migration matrisi
 

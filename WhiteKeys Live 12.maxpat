@@ -19,7 +19,7 @@
       0,
       0,
       360,
-      205
+      169
     ],
     "bglocked": 0,
     "openinpresentation": 1,
@@ -221,9 +221,9 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            8,
+            4,
             228,
-            20
+            18
           ]
         }
       },
@@ -271,7 +271,7 @@
           "presentation": 1,
           "presentation_rect": [
             252,
-            9,
+            4,
             94,
             19
           ]
@@ -294,7 +294,7 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            33,
+            25,
             332,
             62
           ]
@@ -323,9 +323,9 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            102,
+            89,
             53,
-            16
+            12
           ]
         }
       },
@@ -384,9 +384,9 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            120,
+            101,
             53,
-            20
+            18
           ]
         }
       },
@@ -428,9 +428,9 @@
           "presentation": 1,
           "presentation_rect": [
             75,
-            102,
+            89,
             129,
-            16
+            12
           ]
         }
       },
@@ -491,9 +491,9 @@
           "presentation": 1,
           "presentation_rect": [
             75,
-            120,
+            101,
             129,
-            20
+            18
           ]
         }
       },
@@ -535,9 +535,9 @@
           "presentation": 1,
           "presentation_rect": [
             212,
-            102,
+            89,
             83,
-            16
+            12
           ]
         }
       },
@@ -576,9 +576,9 @@
           "presentation": 1,
           "presentation_rect": [
             212,
-            120,
+            101,
             83,
-            20
+            18
           ]
         }
       },
@@ -627,9 +627,9 @@
           "presentation": 1,
           "presentation_rect": [
             302,
-            120,
+            101,
             44,
-            20
+            18
           ]
         }
       },
@@ -672,9 +672,9 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            144,
+            120,
             332,
-            16
+            14
           ]
         }
       },
@@ -727,10 +727,10 @@
           ],
           "presentation": 1,
           "presentation_rect": [
-            14,
-            177,
-            220,
-            20
+            52,
+            135,
+            200,
+            18
           ]
         }
       },
@@ -757,9 +757,9 @@
           "text": "Continuous Degrees",
           "presentation": 1,
           "presentation_rect": [
-            52,
-            160,
-            294,
+            14,
+            154,
+            332,
             14
           ]
         }
@@ -809,9 +809,9 @@
           "presentation": 1,
           "presentation_rect": [
             270,
-            176,
+            135,
             76,
-            22
+            18
           ],
           "varname": "apply_button"
         }
@@ -846,7 +846,7 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            160,
+            137,
             35,
             14
           ],

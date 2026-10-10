@@ -58,12 +58,12 @@ def integrity():
         raise ValueError('Missing MIDI/API/editor/mode/Apply/panic route')
     if boxes['applymsg']['text'] != 'apply' or boxes['apply'].get('varname') != 'apply_button':
         raise ValueError('Invalid Apply control')
-    if p.get('openrect') != [0, 0, 360, 205]:
-        raise ValueError('Expected 360 by 205 device panel')
+    if p.get('openrect') != [0, 0, 360, 169]:
+        raise ValueError('Expected 360 by 169 Live device panel')
     for box in boxes.values():
         if box.get('presentation'):
             x, y, width, height = box['presentation_rect']
-            if min(x, y) < 0 or min(width, height) <= 0 or x + width > 360 or y + height > 205:
+            if min(x, y) < 0 or min(width, height) <= 0 or x + width > 360 or y + height > 169:
                 raise ValueError('Presentation control outside panel: ' + box['id'])
     if boxes['keyboard']['presentation_rect'][2:] != [332, 62]:
         raise ValueError('Scale Keyboard must retain 332 by 62 size')
