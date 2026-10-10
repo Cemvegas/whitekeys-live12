@@ -1,0 +1,7 @@
+# Apply local scale drafts explicitly
+
+When scales of different lengths are playable, reaching exactly seven notes no longer marks the end of editing. The accepted direction keeps local Draft Scale edits separate from the Sounding Scale until Apply, preventing intermediate membership clicks from changing a performance. Follow Live continues to adopt the current Live scale automatically; Local Root, named Scale and membership changes all belong to the draft and wait for Apply. Turning Follow Live on abandons the unapplied local draft and adopts the current Live scale. Existing Set drafts remain separate from the sounding scale after migration and now wait for Apply rather than automatic seven-note promotion. A manual Mapping Mode change affects the current Sounding Scale immediately for new notes without applying the draft. Notes already held retain their original note-on targets until release across Apply, mode and Live changes.
+
+2026-10-10: Mod seçimiyle ilgili hükümler ADR [0004](0004-continuous-degrees-only.md) tarafından tasarım düzeyinde güncellenmiştir. Diğer hükümler korunur; kod geçişi sonraki uygulama adımındadır.
+
+2026-10-11: Kullanıcının anlık düzenleme kararıyla Draft/Apply hükümleri [ADR 0005](0005-immediate-scale-editing-and-sharing.md) tarafından güncellenmiştir. Son kapsam, incelemeye sunulan anlık gam/paylaşım spec’inde tanımlanır. Üretim kodu henüz değiştirilmemiştir.
