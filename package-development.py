@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
-                 'test-midi.cjs', 'test-state.cjs', 'build-amxd.py',
+                 'test-midi.cjs', 'test-state.cjs', 'test-ui.cjs', 'build-amxd.py',
                  'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md'}
 
 
@@ -50,11 +50,16 @@ def integrity():
               (('api', 0), ('model', 0)), (('model', 0), ('midi', 0)),
               (('keyboard', 0), ('model', 0)), (('model', 1), ('keyboard', 0)),
               (('midi', 1), ('keyboard', 0)), (('panic', 0), ('panicmsg', 0)),
-              (('panicmsg', 0), ('midi', 0))}
-    for control in ('root', 'scale', 'black', 'follow'):
+              (('panicmsg', 0), ('midi', 0)), (('host', 0), ('hostprep', 0)),
+              (('hostprep', 0), ('model', 0))}
+    for control in ('root', 'scale', 'black', 'source'):
         needed |= {((control, 0), (control + 'prep', 0)), ((control + 'prep', 0), ('model', 0))}
     if not needed <= routes:
         raise ValueError('Missing MIDI/API/editor/panic route')
+    if boxes.get('source',{}).get('varname') != 'source_menu' or boxes.get('host',{}).get('varname') != 'host_toggle':
+        raise ValueError('Scale Source and gated Host controls required')
+    if boxes['host'].get('active') != 0:
+        raise ValueError('Sharing identity gate pending: Host must remain disabled')
     if any(name in boxes for name in ('apply', 'applymsg', 'mode', 'modeprep', 'modestatus', 'modelabel')):
         raise ValueError('Removed Mode or Apply controls remain')
     if p.get('openrect') != [0, 0, 360, 169]:

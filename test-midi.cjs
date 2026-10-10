@@ -83,17 +83,17 @@ live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_in
 live.midi.feed([128,64,39,144,64,77,128,64,23]);eq(live.midi.take(),[128,63,39,144,65,77,128,65,23]);
 live.state.followselect(0);live.state.scaleselect(1);live.values.root_note=[7];live.change();live.flush(0);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,62,80,128,62,30]);
 live.state.followselect(1);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,67,80,128,67,30]);
-live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Playing: G Dorian (7 notes) - Scale Mode off');
+live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Playing: G Dorian (7 notes)');eq(live.labels.source_status,'Following Live - Scale Mode off');
 live.midi.feed([144,64,90]);eq(live.midi.take(),[144,70,90]);
-live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Playing: G Dorian (5 notes) - Scale Mode off');
-live.setOnline(false);live.change();live.flush(0);assert.match(live.labels.status_label,/Live unavailable/);checks++;
+live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Playing: G Dorian (5 notes)');eq(live.labels.source_status,'Following Live - Scale Mode off');
+live.setOnline(false);live.change();live.flush(0);assert.match(live.labels.source_status,/Live unavailable/);checks++;
 // Disconnect immediately detaches the old host observers, before retrying.
 eq(live.subscriptions.filter(s=>s.property).length,0);
 live.setOnline(true);live.values.scale_intervals=major.slice();live.values.root_note=[0];live.flush(1000);live.midi.feed([144,64,82,128,64,42]);eq(live.midi.take(),[144,64,82,128,64,42]);
 live.api.notifydeleted();eq(live.subscriptions.filter(s=>s.property).length,0);eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log('Live observer → state → MIDI message scenarios passed');
 // API may become available only after device initialization.
-live=liveChain();live.state.init();live.setOnline(false);live.api.init();assert.match(live.labels.status_label,/Live unavailable/);checks++;live.midi.feed([144,60,80,128,60,40]);eq(live.midi.take(),[144,60,80,128,60,40]);live.setOnline(true);live.flush(1000);live.midi.feed([144,64,88,128,64,32]);eq(live.midi.take(),[144,63,88,128,63,32]);live.api.notifydeleted();
+live=liveChain();live.state.init();live.setOnline(false);live.api.init();assert.match(live.labels.source_status,/Live unavailable/);checks++;live.midi.feed([144,60,80,128,60,40]);eq(live.midi.take(),[144,60,80,128,60,40]);live.setOnline(true);live.flush(1000);live.midi.feed([144,64,88,128,64,32]);eq(live.midi.take(),[144,63,88,128,63,32]);live.api.notifydeleted();
 // Channel independence and collision/retrigger release velocity at all 16 channels.
 for(let ch=0;ch<16;ch++){
  c=make();c.configure(0,...minor);c.feed([144+ch,64,70,63,100,64,93,128+ch,64,10,63,20,64,44]);eq(c.take(),[144+ch,63,70,144+ch,63,100,144+ch,63,93,128+ch,63,44]);
@@ -102,7 +102,7 @@ for(let ch=0;ch<16;ch++){
 live=liveChain();live.state.init();live.api.init();live.midi.feed([144,64,90]);eq(live.midi.take(),[144,63,90]);
 const oldObserver=live.subscriptions.find(s=>s.property);
 live.setOnline(false);oldObserver.id=0;
-assert.match(live.labels.status_label,/Live unavailable/);checks++;
+assert.match(live.labels.source_status,/Live unavailable/);checks++;
 live.midi.feed([144,60,80,128,60,15,128,64,37,144,61,70,128,61,29]);eq(live.midi.take(),[144,60,80,128,60,15,128,63,37,144,61,70,128,61,29]);
 eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);
 live.setOnline(true);live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.flush(1000);
@@ -114,7 +114,7 @@ live.midi.feed([144,64,83,128,64,34]);eq(live.midi.take(),[144,65,83,128,65,34])
 live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 // Invalid song IDs must be rejected even when the host getters retain old data.
 live=liveChain();live.state.init();live.api.init();live.subscriptions[0].id=0;live.change();live.flush(0);
-assert.match(live.labels.status_label,/Live unavailable/);checks++;live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[144,60,84,128,60,35]);
+assert.match(live.labels.source_status,/Live unavailable/);checks++;live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[144,60,84,128,60,35]);
 eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log(`${checks} total MIDI/API message assertions passed`);
 // Spec #9: literal Continuous Degrees examples at the public raw MIDI seam.

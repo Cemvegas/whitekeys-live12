@@ -1,69 +1,24 @@
-# Yeni Live host kabul sonuç formu — #15
+# Anlık gam düzenleme — gerçek Live kabul sonuç formu
 
-Kullanıcı doldurur. Spec #9 için DEVELOPMENT paketidir; gerçek sonuç/kanıt alanları boştur. Eski #8 kabulü bu koşumun kanıtı değildir. Beklenenler KURULUM-VE-TEST.md içindedir.
+Kullanıcı doldurur. Kısmi DEVELOPMENT sürümüdür; Host paylaşımı ve kalıcı kimlik doğrulaması ayrı bekleyen iştir. Otomatik testler veya eski sürümün kabulü bu formun Passed kanıtı değildir.
 
 | Koşum bilgisi | Gerçek değer |
 |---|---|
 | Tarih / test eden | |
-| macOS sürümü | |
-| Live sürümü / lisans | |
-| Max sürümü | |
-| Live native arm64 kanıtı | |
-| Max native arm64 kanıtı | |
-| Manifest package_version | |
-| Manifest tam source_commit | |
-| ZIP SHA256 | |
-| Yeni açılan klasör | |
-| MIDI giriş / çıkış monitor | |
-| Test Set dosyaları / yeniden açma saati | |
+| macOS / Live / Max sürümü | |
+| Manifest source_commit / package_version | |
+| ZIP SHA256 / açılan klasör | |
+| MIDI giriş / Post FX ham kayıt | |
+| Test Set / yeniden açma saati | |
 
-| Kriter | Beklenen | Gerçek | Kanıt (ham MIDI/ekran/Set) | Sonuç (geçti/kaldı/uygulanmadı) |
+| Kriter | Beklenen | Gerçek | Kanıt | Passed / Failed / Not run |
 |---|---|---|---|---|
-| VS01 | Yönerge VS01 | | | |
-| VS02 | Yönerge VS02 | | | |
-| VS03 | Yönerge VS03 | | | |
-| VS04 | Yönerge VS04 | | | |
-| VS05 | Yönerge VS05 | | | |
-| VS06 | Yönerge VS06 | | | |
-| VS07 | Yönerge VS07 | | | |
-| VS08 | Yönerge VS08 | | | |
-| VS09 | Yönerge VS09 | | | |
-| VS10 | Yönerge VS10 | | | |
-| VS11 | Yönerge VS11 | | | |
-| VS12 | Yönerge VS12 | | | |
-| VS13 | Yönerge VS13 | | | |
-| VS14 | Yönerge VS14 | | | |
-| VS15 | Yönerge VS15 | | | |
-| VS16 | Yönerge VS16 | | | |
-| VS17 | Yönerge VS17 | | | |
-| VS18 | Yönerge VS18 | | | |
-| VS19 | Yönerge VS19 | | | |
-| VS20 | Yönerge VS20 | | | |
-| VS21 | Yönerge VS21 | | | |
-| VS22 | Yönerge VS22 | | | |
-| VS23 | Yönerge VS23 | | | |
-| VS24 | Yönerge VS24 | | | |
-| VS25 | Yönerge VS25 | | | |
-| VS26 | Yönerge VS26 | | | |
-| VS27 | Yönerge VS27 | | | |
-| VS28 | Yönerge VS28 | | | |
+| UI01 | A renkleri, kırpılmayan 360×169 panel, 332×62 klavye; Host gated | | | |
+| UI02 | Local anlık nota/Root değişimi; Root korunur | | | |
+| UI03 | Root sabit gam tanıma; alternatif aynı notaları korur | | | |
+| UI04 | Follow Live güncellemesi; read-only editör; kayıpta son gam | | | |
+| UI05 | Eski hedefte note-off, velocity/kanal, audition/Panic | | | |
+| UI06 | 1–12 derece, siyah tuşlar ve MIDI sınırları | | | |
+| UI07 | v2/v3 Sounding geçişi ve v4 yeniden açılışı | | | |
 
-## Saklama alt koşumları
-
-| Koşum | Gerçek | Kanıt / kaydet-kapat-aç | Sonuç |
-|---|---|---|---|
-| v2 geçerli Custom +ignore | | | |
-| v2 E/6 taslak, D/7 çalan | | | |
-| v2 G/8 taslak, C/7 çalan | | | |
-| v3 pending5 | | | |
-| v3 pending8 | | | |
-| v3 pending12 | | | |
-| v3 Anchored / sekiz çalan / yediye dönüş | | | |
-| Follow / güncel API ve geç restore | | | |
-| İki cihaz / transient sesler | | | |
-
-## Üretilemeyen koşullar / tekrar
-
-| Kriter / koşul | Gerçek gözlem | Gerekli tekrar / kanıt |
-|---|---|---|
-| | | |
+Host keşfi/paylaşımı, kalıcı kaynak eşleşmesi, çoğaltma ve Set izolasyonu henüz bu kısmi sürümde mevcut değildir; sonuçları ayrı teknik prototip formuna yazın. UI kriterlerinin geçmesi paylaşım ticket'ını kapatmaz.

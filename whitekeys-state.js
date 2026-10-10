@@ -9,7 +9,10 @@ var follow = 1, root = 0, name = 'Major', notes = scaleNotes[0].slice(0);
 var activeRoot = 0, activeName = 'Major', active = notes.slice(0), black = 0;
 var liveRoot = 0, liveName = 'Major', liveNotes = notes.slice(0), liveMode = 1;
 var menuSignature = '', menuEntries = [];
-var apiReady = false, apiError = '';
+var apiReady = false, apiError = '', sharingNotice = '';
+// Transport remains gated by real Live identity evidence. No Host registration occurs.
+function sourceselect(v) { v=Number(v);if(v===0||v===1){sharingNotice='';followselect(v);}else if(v===2){sharingNotice='Sharing unavailable';render();} }
+function hostselect(v) { sharingNotice='Sharing unavailable';render(); }
 function mask(a) { var n=0; for(var i=0;i<a.length;i++) n |= 1<<a[i]; return n; }
 function unmask(m) { var a=[]; for(var i=0;i<12;i++) if(m & (1<<i)) a.push(i); return a; }
 function valid(a) { if(!a.length||a[0]!==0) return false; for(var i=0;i<a.length;i++) if(a[i]!==Math.floor(a[i])||a[i]<0||a[i]>11||(i&&a[i]<=a[i-1]))return false; return true; }
@@ -102,17 +105,17 @@ function toggle(pc) {
 }
 function audition(pc) { pc=Number(pc);if(pc>=0&&pc<12)outlet(0,'audition',60+pc); }
 function render() {
-    menuEntries=scaleMenu();var menuIndex=0,labels=[];
+menuEntries=scaleMenu();var menuIndex=0,labels=[];
     for(var i=0;i<menuEntries.length;i++){labels.push(menuEntries[i].label);if(menuEntries[i].label===name)menuIndex=i;}
     var signature=labels.join('|');
     var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(i=0;i<labels.length;i++)sm.message('append',labels[i]);}
-    setui('root_menu',root);setui('scale_menu',menuIndex);setui('follow_toggle',follow);setui('black_menu',black);
-    setui('scale_title','Scale: '+pitchNames[root]+' '+name+' ('+notes.length+(notes.length===1?' note)':' notes)'));
+    setui('root_menu',root);setui('scale_menu',menuIndex);setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));setui('host_toggle',0);setui('black_menu',black);
+    setui('scale_title','WhiteKeys');
     var text='Playing: '+pitchNames[activeRoot]+' '+activeName+' ('+active.length+(active.length===1?' note)':' notes)');
-    if(follow&&!apiReady)text+=' - Live unavailable';
-    if(sourceKind==='WhiteKeys')text+=' - Source unavailable';
-    if(follow&&apiReady&&!liveMode)text+=' - Scale Mode off';
-    var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',0.36,0.44,0.27,1);}
+    var sourceText=sourceKind==='Local'?'Local':(sourceKind==='WhiteKeys'?'Source unavailable':(apiReady?'Following Live':'Live unavailable'));
+    if(follow&&apiReady&&!liveMode)sourceText+=' - Scale Mode off';
+    setui('source_status',sharingNotice||sourceText);
+    var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',184/255,197/255,186/255,1);}
     var editable=sourceKind==='Local'?0:1;
     var controls=['root_menu','scale_menu'];
     for(var j=0;j<controls.length;j++){var control=ui(controls[j]);if(control)control.message('ignoreclick',editable);}
