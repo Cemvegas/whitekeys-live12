@@ -3,7 +3,6 @@ autowatch = 0;
 inlets = 1;
 outlets = 2;
 var song = null, observers = [], refreshTask = null, retryTask = null;
-var names = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 function changed(args) {
     if (!args || args[0] === 'id') return;
     if (refreshTask) { refreshTask.cancel(); refreshTask.schedule(0); }
@@ -22,6 +21,7 @@ function init() {
         }
         refresh();
     } catch (e) {
+        disconnect();
         outlet(0, 'apistatus', 'Live API unavailable');
         outlet(1, 'set', 'Waiting for Live API: ' + e.message);
         retryTask.schedule(1000);
@@ -36,14 +36,18 @@ function refresh() {
         outlet(0, ['livescale', r, name, mode].concat(iv));
         post('WhiteKeys API: root=' + r + ' intervals=' + iv.join(',') + ' scale=' + name + '\n');
     } catch (e) {
+        disconnect();
         outlet(0, 'apistatus', 'Live API unavailable'); outlet(1, 'set', 'Live API error: ' + e.message);
         if (retryTask) retryTask.schedule(1000);
     }
 }
-function dispose() {
+function disconnect() {
     if (refreshTask) refreshTask.cancel();
-    if (retryTask) retryTask.cancel();
     for (var i = 0; i < observers.length; i++) { try { observers[i].property = ''; observers[i].id = 0; } catch (e) {} }
     observers = []; song = null;
+}
+function dispose() {
+    disconnect();
+    if (retryTask) retryTask.cancel();
 }
 function notifydeleted() { dispose(); }
