@@ -208,29 +208,29 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 11,
+          "fontsize": 10,
           "fontface": 1,
           "varname": "scale_title",
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
-          "text": "Scale: C Major (7 notes)",
+          "text": "WhiteKeys",
           "presentation": 1,
           "presentation_rect": [
             14,
             4,
-            228,
+            88,
             18
           ]
         }
       },
       {
         "box": {
-          "id": "follow",
-          "maxclass": "live.text",
+          "id": "source",
+          "maxclass": "umenu",
           "patching_rect": [
             245,
             20,
@@ -238,42 +238,41 @@
             20
           ],
           "numinlets": 1,
-          "numoutlets": 2,
-          "varname": "follow_toggle",
-          "texton": "Follow Live",
-          "mode": 1,
+          "numoutlets": 3,
+          "varname": "source_menu",
           "parameter_enable": 0,
           "bgcolor": [
-            0.87,
-            0.9,
-            0.8,
-            1
-          ],
-          "bgoncolor": [
-            0.68,
-            0.77,
-            0.49,
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
             1
           ],
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
             1
           ],
-          "textoncolor": [
-            0.25,
-            0.32,
-            0.21,
-            1
-          ],
-          "text": "Follow Live",
           "presentation": 1,
           "presentation_rect": [
-            252,
+            104,
             4,
-            94,
+            144,
             19
+          ],
+          "fontsize": 10,
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
+          ],
+          "items": [
+            "Local",
+            ",",
+            "Follow Live",
+            ",",
+            "Follow WhiteKeys (unavailable)"
           ]
         }
       },
@@ -294,10 +293,17 @@
           "presentation": 1,
           "presentation_rect": [
             14,
-            25,
+            28,
             332,
             62
-          ]
+          ],
+          "textcolor": [
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
+            1
+          ],
+          "fontsize": 10
         }
       },
       {
@@ -312,18 +318,18 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 9,
+          "fontsize": 10,
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
           "text": "Root",
           "presentation": 1,
           "presentation_rect": [
             14,
-            89,
+            94,
             53,
             12
           ]
@@ -370,23 +376,29 @@
           ],
           "fontsize": 10,
           "bgcolor": [
-            0.89,
-            0.91,
-            0.83,
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
             1
           ],
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
             1
           ],
           "presentation": 1,
           "presentation_rect": [
             14,
-            101,
+            106,
             53,
             18
+          ],
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
           ]
         }
       },
@@ -417,18 +429,18 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 9,
+          "fontsize": 10,
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
           "text": "Scale",
           "presentation": 1,
           "presentation_rect": [
             75,
-            89,
+            94,
             129,
             12
           ]
@@ -477,23 +489,29 @@
           ],
           "fontsize": 10,
           "bgcolor": [
-            0.89,
-            0.91,
-            0.83,
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
             1
           ],
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
             1
           ],
           "presentation": 1,
           "presentation_rect": [
             75,
-            101,
+            106,
             129,
             18
+          ],
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
           ]
         }
       },
@@ -524,19 +542,19 @@
           ],
           "numinlets": 1,
           "numoutlets": 0,
-          "fontsize": 9,
+          "fontsize": 10,
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
           "text": "Black Keys",
           "presentation": 1,
           "presentation_rect": [
             212,
-            89,
-            83,
+            94,
+            134,
             12
           ]
         }
@@ -562,23 +580,29 @@
           ],
           "fontsize": 10,
           "bgcolor": [
-            0.89,
-            0.91,
-            0.83,
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
             1
           ],
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
             1
           ],
           "presentation": 1,
           "presentation_rect": [
             212,
-            101,
-            83,
+            106,
+            134,
             18
+          ],
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
           ]
         }
       },
@@ -612,24 +636,30 @@
           "mode": 0,
           "fontsize": 10,
           "bgcolor": [
-            0.88,
-            0.89,
-            0.82,
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
             1
           ],
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
             1
           ],
           "text": "Panic",
           "presentation": 1,
           "presentation_rect": [
             302,
-            101,
+            4,
             44,
-            18
+            19
+          ],
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
           ]
         }
       },
@@ -663,24 +693,24 @@
           "fontsize": 10,
           "varname": "status_label",
           "textcolor": [
-            0.25,
-            0.32,
-            0.21,
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
           "text": "Live unavailable",
           "presentation": 1,
           "presentation_rect": [
             14,
-            120,
+            148,
             332,
-            14
+            16
           ]
         }
       },
       {
         "box": {
-          "id": "followprep",
+          "id": "sourceprep",
           "maxclass": "newobj",
           "patching_rect": [
             245,
@@ -690,7 +720,111 @@
           ],
           "numinlets": 1,
           "numoutlets": 1,
-          "text": "prepend followselect"
+          "text": "prepend sourceselect"
+        }
+      },
+      {
+        "box": {
+          "id": "host",
+          "maxclass": "live.text",
+          "patching_rect": [
+            302,
+            145,
+            44,
+            20
+          ],
+          "numinlets": 1,
+          "numoutlets": 2,
+          "mode": 1,
+          "fontsize": 10,
+          "bgcolor": [
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
+            1
+          ],
+          "textcolor": [
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
+            1
+          ],
+          "text": "Host",
+          "presentation": 1,
+          "presentation_rect": [
+            254,
+            4,
+            42,
+            19
+          ],
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
+          ],
+          "varname": "host_toggle",
+          "parameter_enable": 0,
+          "texton": "Host",
+          "bgoncolor": [
+            0.7176470588235294,
+            0.8235294117647058,
+            0.6549019607843137,
+            1
+          ],
+          "textoncolor": [
+            0.12549019607843137,
+            0.18823529411764706,
+            0.12941176470588237,
+            1
+          ],
+          "active": 0,
+          "hint": "Sharing unavailable \u2014 real Live identity validation pending"
+        }
+      },
+      {
+        "box": {
+          "id": "hostprep",
+          "maxclass": "newobj",
+          "text": "prepend hostselect",
+          "patching_rect": [
+            350,
+            240,
+            110,
+            20
+          ],
+          "numinlets": 1,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "sourceinfo",
+          "maxclass": "comment",
+          "patching_rect": [
+            20,
+            520,
+            332,
+            18
+          ],
+          "numinlets": 1,
+          "numoutlets": 0,
+          "fontsize": 10,
+          "varname": "source_status",
+          "textcolor": [
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
+            1
+          ],
+          "text": "Live unavailable",
+          "presentation": 1,
+          "presentation_rect": [
+            14,
+            128,
+            332,
+            16
+          ]
         }
       }
     ],
@@ -878,11 +1012,11 @@
       {
         "patchline": {
           "source": [
-            "follow",
+            "source",
             0
           ],
           "destination": [
-            "followprep",
+            "sourceprep",
             0
           ]
         }
@@ -890,7 +1024,7 @@
       {
         "patchline": {
           "source": [
-            "followprep",
+            "sourceprep",
             0
           ],
           "destination": [
@@ -943,6 +1077,30 @@
           ],
           "destination": [
             "keyboard",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "host",
+            0
+          ],
+          "destination": [
+            "hostprep",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "hostprep",
+            0
+          ],
+          "destination": [
+            "model",
             0
           ]
         }
@@ -1026,9 +1184,9 @@
     },
     "autosave": 0,
     "bgcolor": [
-      0.95,
-      0.95,
-      0.9,
+      0.1607843137254902,
+      0.1803921568627451,
+      0.17254901960784313,
       1
     ],
     "parameters": {

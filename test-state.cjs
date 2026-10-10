@@ -30,7 +30,7 @@ const reopen=integration();reopen.state.setvalueof(...saved);eq(reopen.state.get
 // Following sources reject all local edits and keep the current MIDI configuration.
 flow=integration();const following=Array.from(flow.state.getvalueof());flow.state.rootselect(7);flow.state.scaleselect(1);flow.state.toggle(4);
 eq(flow.state.getvalueof(),following);eq(flow.note(64),[144,64,91,128,64,27]);
-flow.state.apistatus('Offline');eq(flow.note(64),[144,64,91,128,64,27]);assert.match(flow.labels.status_label,/Playing: C Major.*Live unavailable/);assertions++;
+flow.state.apistatus('Offline');eq(flow.note(64),[144,64,91,128,64,27]);assert.match(flow.labels.status_label,/Playing: C Major/);eq(flow.labels.source_status,'Live unavailable');assertions++;
 flow.state.followselect(0);flow.state.rootselect(2);flow.state.scaleselect(1);
 eq(flow.note(60),[144,62,91,128,62,27]);eq(flow.note(64),[144,65,91,128,65,27]);
 const rootBefore=Array.from(flow.state.getvalueof());flow.state.toggle(2);eq(flow.state.getvalueof(),rootBefore);
@@ -64,5 +64,5 @@ console.log(assertions+' immediate editor/state/MIDI/migration assertions passed
 flow=integration();flow.state.followselect(0);for(const pc of [2,4,5,7,9,11])flow.state.toggle(pc);eq(flow.note(62),[144,72,91,128,72,27]);eq(flow.state.getvalueof()[9],1);
 flow=integration();flow.state.followselect(0);for(const pc of [1,3,6,8,10])flow.state.toggle(pc);eq(flow.note(72),[144,67,91,128,67,27]);eq(flow.state.getvalueof()[9],4095);
 // A persisted but currently unsupported WhiteKeys source cannot be edited locally.
-flow=integration();const unavailable=Array.from(flow.state.getvalueof());unavailable[3]='WhiteKeys';unavailable[5]='another-set';unavailable[6]='host-id';unavailable[7]='Piano';flow.state.setvalueof(...unavailable);flow.state.rootselect(7);flow.state.toggle(4);eq(flow.state.getvalueof(),unavailable);eq(flow.note(64),[144,64,91,128,64,27]);assert.match(flow.labels.status_label,/Source unavailable/);assertions++;
+flow=integration();const unavailable=Array.from(flow.state.getvalueof());unavailable[3]='WhiteKeys';unavailable[5]='another-set';unavailable[6]='host-id';unavailable[7]='Piano';flow.state.setvalueof(...unavailable);flow.state.rootselect(7);flow.state.toggle(4);eq(flow.state.getvalueof(),unavailable);eq(flow.note(64),[144,64,91,128,64,27]);assert.match(flow.labels.source_status,/Source unavailable/);assertions++;
 console.log(assertions+' final editor/state assertions passed');
