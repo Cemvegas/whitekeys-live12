@@ -19,7 +19,7 @@
       0,
       0,
       360,
-      169
+      205
     ],
     "bglocked": 0,
     "openinpresentation": 1,
@@ -692,6 +692,92 @@
           "numoutlets": 1,
           "text": "prepend followselect"
         }
+      },
+      {
+        "box": {
+          "id": "mode",
+          "maxclass": "umenu",
+          "patching_rect": [
+            14,
+            350,
+            172,
+            20
+          ],
+          "numinlets": 1,
+          "numoutlets": 3,
+          "varname": "mode_menu",
+          "parameter_enable": 0,
+          "items": [
+            "Octave Anchored",
+            ",",
+            "Continuous Degrees"
+          ],
+          "fontsize": 10,
+          "bgcolor": [
+            0.89,
+            0.91,
+            0.83,
+            1
+          ],
+          "textcolor": [
+            0.25,
+            0.32,
+            0.21,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            14,
+            164,
+            172,
+            20
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "modestatus",
+          "maxclass": "comment",
+          "patching_rect": [
+            192,
+            350,
+            154,
+            32
+          ],
+          "numinlets": 1,
+          "numoutlets": 0,
+          "fontsize": 10,
+          "varname": "mode_status",
+          "textcolor": [
+            0.25,
+            0.32,
+            0.21,
+            1
+          ],
+          "text": "Continuous Degrees",
+          "presentation": 1,
+          "presentation_rect": [
+            192,
+            164,
+            154,
+            32
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "modeprep",
+          "maxclass": "newobj",
+          "patching_rect": [
+            14,
+            390,
+            130,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 1,
+          "text": "prepend modeselect"
+        }
       }
     ],
     "lines": [
@@ -943,6 +1029,30 @@
           ],
           "destination": [
             "keyboard",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "mode",
+            0
+          ],
+          "destination": [
+            "modeprep",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "modeprep",
+            0
+          ],
+          "destination": [
+            "model",
             0
           ]
         }

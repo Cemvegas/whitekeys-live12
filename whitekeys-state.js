@@ -8,17 +8,19 @@ var scaleNotes = [[0,2,4,5,7,9,11],[0,2,3,5,7,8,10],[0,2,3,5,7,9,10],[0,2,4,5,7,
 var follow = 1, root = 0, name = 'Major', draft = scaleNotes[0].slice(0);
 var activeRoot = 0, activeName = 'Major', active = draft.slice(0), black = 0;
 var liveRoot = 0, liveName = 'Major', liveNotes = draft.slice(0), liveMode = 1;
-var menuSignature = '';
+var menuSignature = '', preferredMode = 1;
 var apiReady = false, apiError = '';
 function mask(a) { var n=0; for(var i=0;i<a.length;i++) n |= 1<<a[i]; return n; }
 function unmask(m) { var a=[]; for(var i=0;i<12;i++) if(m & (1<<i)) a.push(i); return a; }
 function valid(a) { if(!a.length||a[0]!==0) return false; for(var i=0;i<a.length;i++) if(a[i]!==Math.floor(a[i])||a[i]<0||a[i]>11||(i&&a[i]<=a[i-1]))return false; return true; }
-function getvalueof() { return [2,follow,root,name,mask(draft),activeRoot,activeName,mask(active),black]; }
+function getvalueof() { return [3,follow,root,name,mask(draft),activeRoot,activeName,mask(active),black,preferredMode]; }
 function setvalueof() {
     var a=arrayfromargs(arguments); if(a.length===1&&a[0] instanceof Array)a=a[0];
-    if(a.length!==9||Number(a[0])!==2) return;
+    var old=Number(a[0])===2&&a.length===9;
+    if(!old&&(Number(a[0])!==3||a.length!==10||(Number(a[9])!==0&&Number(a[9])!==1))) return;
     var r=Number(a[2]),ar=Number(a[5]),d=unmask(Number(a[4])),v=unmask(Number(a[7]));
-    if(r<0||r>11||r!==Math.floor(r)||ar<0||ar>11||ar!==Math.floor(ar)||!valid(d)||!valid(v)||v.length!==7)return;
+    if(r<0||r>11||r!==Math.floor(r)||ar<0||ar>11||ar!==Math.floor(ar)||!valid(d)||!valid(v)||(old&&v.length!==7))return;
+    preferredMode=old?0:Number(a[9]);
     follow=Number(a[1])?1:0;root=r;name=String(a[3]);draft=d;activeRoot=ar;activeName=String(a[6]);active=v;black=Number(a[8])===1?1:0;
     // A ready API wins over a stale Follow blob, even before the init message.
     if(follow&&apiReady) useLive();
@@ -29,7 +31,7 @@ function ui(id) { return this.patcher.getnamed(id); }
 function setui(id,value) { var b=ui(id); if(b) b.message('set',value); }
 function save() { notifyclients(); }
 function adopt() { if(draft.length===7){active=draft.slice(0);activeRoot=root;activeName=name;} }
-function useLive() { root=liveRoot;name=liveName;draft=liveNotes.slice(0);adopt(); }
+function useLive() { root=liveRoot;name=liveName;draft=liveNotes.slice(0);active=draft.slice(0);activeRoot=root;activeName=name; }
 function livescale() {
     var a=arrayfromargs(arguments),r=Number(a.shift()),nm=String(a.shift()),mode=Number(a.shift());
     for(var i=0;i<a.length;i++)a[i]=Number(a[i]);
@@ -50,6 +52,7 @@ function scaleselect(v) {
     adopt();render();save();
 }
 function followselect(v) { follow=Number(v)?1:0; if(follow&&apiReady)useLive();render();save(); }
+function modeselect(v) { v=Number(v);if(v!==0&&v!==1)return;preferredMode=v;render();save(); }
 function blackselect(v) { black=Number(v)===1?1:0;render();save(); }
 function toggle(pc) {
     pc=Number(pc);if(pc<0||pc>11||pc!==Math.floor(pc))return;
@@ -67,13 +70,17 @@ function render() {
     var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(var i=0;i<scaleNames.length;i++)sm.message('append',scaleNames[i]);}
     setui('root_menu',root);setui('scale_menu',menuIndex);setui('follow_toggle',follow);setui('black_menu',black);
     setui('scale_title',pitchNames[root]+' '+name);
-    var text=draft.length+'/7 notes';
+    setui('mode_menu',preferredMode);
+    var effective = preferredMode===0 && active.length===7 ? 'Octave Anchored' : 'Continuous Degrees';
+    setui('mode_status',effective+(preferredMode===0&&active.length!==7?' (automatic)':''));
+    var text=draft.length+' notes';
     if(follow&&!apiReady)text='Live unavailable';
-    else if(draft.length!==7)text+=follow?' - choose 7 notes':' - playing '+pitchNames[activeRoot]+' '+activeName;
-    else if(follow&&!liveMode)text+=' - Scale Mode off';
+    else if(follow)text=effective+' - '+active.length+' notes'+(preferredMode===0&&active.length!==7?' (automatic fallback)':'');
+    else if(draft.length!==7)text+=' - playing '+pitchNames[activeRoot]+' '+activeName;
+    if(follow&&apiReady&&!liveMode)text+=' - Scale Mode off';
     var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',draft.length===7?0.36:0.65,draft.length===7?0.44:0.36,draft.length===7?0.27:0.13,1);}
     outlet(1,['view',root,mask(draft)]);
     outlet(0,'blackkeys',black);
-    if(follow&&(!apiReady||draft.length!==7))outlet(0,'unavailable');
+    if(follow&&!apiReady)outlet(0,'unavailable');
     else outlet(0,['configure',activeRoot].concat(active));
 }
