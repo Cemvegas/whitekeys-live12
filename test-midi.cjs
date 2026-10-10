@@ -72,7 +72,7 @@ function liveChain() {
  let online=true;
  const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{if(a[0]==='set')labels[n]=a[1]}})},outlet:(i,...args)=>{if(i!==0)return;const a=Array.isArray(args[0])?Array.from(args[0]):args;midi[a[0]](...a.slice(1));}};
  vm.createContext(state);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-state.js','utf8'),state);
- const api={post:()=>{},outlet:(i,...args)=>{if(i!==0)return;const a=Array.isArray(args[0])?Array.from(args[0]):args;state[a[0]](...a.slice(1));},Task:function(fn){this.cancel=()=>this.scheduled=false;this.schedule=delay=>{this.delay=delay;this.scheduled=true};this.run=()=>{if(this.scheduled){this.scheduled=false;fn()}};tasks.push(this);},LiveAPI:function(callback,path){assert.strictEqual(path,'live_set');this.id=online?1:0;this.get=p=>{if(!online)throw Error('connection lost');return values[p].slice()};Object.defineProperty(this,'property',{get:()=>this.prop,set:p=>{this.prop=p;}});this.callback=callback;subscriptions.push(this);}};
+ const api={post:()=>{},outlet:(i,...args)=>{if(i!==0)return;const a=Array.isArray(args[0])?Array.from(args[0]):args;state[a[0]](...a.slice(1));},Task:function(fn){this.cancel=()=>this.scheduled=false;this.schedule=delay=>{this.delay=delay;this.scheduled=true};this.run=()=>{if(this.scheduled){this.scheduled=false;fn()}};tasks.push(this);},LiveAPI:function(callback,path){assert.strictEqual(path,'live_set');let id=online?1:0;Object.defineProperty(this,'id',{get:()=>id,set:v=>{id=v;if(callback)callback(['id',v]);}});this.get=p=>{if(!online)throw Error('connection lost');return values[p].slice()};Object.defineProperty(this,'property',{get:()=>this.prop,set:p=>{this.prop=p;}});this.callback=callback;subscriptions.push(this);}};
  vm.createContext(api);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-api.js','utf8'),api);
  return {api,state,midi,labels,values,tasks,subscriptions,setOnline:v=>online=v,flush:delay=>tasks.filter(t=>t.scheduled&&t.delay===delay).slice().forEach(t=>t.run()),change:()=>subscriptions.filter(s=>s.property).forEach(s=>s.callback(['root_note',values.root_note[0]]))};
 }
@@ -98,4 +98,22 @@ live=liveChain();live.state.init();live.setOnline(false);live.api.init();eq(live
 for(let ch=0;ch<16;ch++){
  c=make();c.configure(0,...minor);c.feed([144+ch,64,70,63,100,64,93,128+ch,64,10,63,20,64,44]);eq(c.take(),[144+ch,63,70,144+ch,63,100,144+ch,63,93,128+ch,63,44]);
 }
+// Object-loss callbacks can be the only host notification: no property event follows.
+live=liveChain();live.state.init();live.api.init();live.midi.feed([144,64,90]);eq(live.midi.take(),[144,63,90]);
+const oldObserver=live.subscriptions.find(s=>s.property);
+live.setOnline(false);oldObserver.id=0;
+eq(live.labels.status_label,'Live unavailable');
+live.midi.feed([144,60,80,128,60,15,128,64,37,144,61,70,128,61,29]);eq(live.midi.take(),[128,63,37,144,61,70,128,61,29]);
+eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);
+live.setOnline(true);live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.flush(1000);
+live.midi.feed([144,60,82,128,60,33]);eq(live.midi.take(),[144,62,82,128,62,33]);
+// A queued callback belonging to the detached observer must not disrupt recovery.
+oldObserver.callback(['id',0]);eq(live.labels.status_label,'7/7 notes');eq(live.tasks.filter(t=>t.scheduled).length,0);
+live.state.scaleselect(1);live.subscriptions.find(s=>s.property).id=0;
+live.midi.feed([144,64,83,128,64,34]);eq(live.midi.take(),[144,65,83,128,65,34]);
+live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
+// Invalid song IDs must be rejected even when the host getters retain old data.
+live=liveChain();live.state.init();live.api.init();live.subscriptions[0].id=0;live.change();live.flush(0);
+eq(live.labels.status_label,'Live unavailable');live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[]);
+eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log(`${checks} total MIDI/API message assertions passed`);
