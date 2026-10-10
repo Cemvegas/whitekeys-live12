@@ -76,7 +76,7 @@ eq(flow.menus.scale_menu.slice(13),['Also matches','D Dorian','E Phrygian','F Ly
 const alternative=flow.menus.scale_menu.indexOf('A Minor');flow.midiBytes.length=0;flow.send(146,60,98);flow.state.scaleselect(alternative);flow.send(130,60,35);
 eq(flow.state.getvalueof().slice(8,11),[9,1453,'Minor']);eq(flow.views.at(-1),['view',9,1453]);eq(flow.midiBytes,[146,60,98,130,60,35]);eq(flow.note(60),[144,69,91,128,69,27]);
 // Unknown Live names survive source updates, but Local adopts catalog recognition.
-flow=integration();flow.state.livescale(2,'Live Special',1,0,2,3,5,7,9,10);eq(flow.labels.scale_title,'Scale: D Live Special (7 notes)');flow.state.followselect(0);eq(flow.state.getvalueof().slice(8,11),[2,1709,'Dorian']);
+flow=integration();flow.state.livescale(2,'Live Special',1,0,2,3,5,7,9,10);eq(flow.labels.status_label,'Playing: D Live Special (7 notes)');flow.state.followselect(0);eq(flow.state.getvalueof().slice(8,11),[2,1709,'Dorian']);
 // Legacy Local labels are reidentified from the saved sounding membership, not draft.
 flow=integration();flow.state.setvalueof(3,0,9,'Minor',1453,0,'Old Label',2741,0,1);eq(flow.state.getvalueof().slice(8,11),[0,2741,'Major']);
 // Worked catalog fixtures through source->Local recognition at every Root.
