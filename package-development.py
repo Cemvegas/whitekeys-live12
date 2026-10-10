@@ -51,13 +51,12 @@ def integrity():
               (('keyboard', 0), ('model', 0)), (('model', 1), ('keyboard', 0)),
               (('midi', 1), ('keyboard', 0)), (('panic', 0), ('panicmsg', 0)),
               (('panicmsg', 0), ('midi', 0))}
-    for control in ('root', 'scale', 'black', 'follow', 'mode'):
+    for control in ('root', 'scale', 'black', 'follow'):
         needed |= {((control, 0), (control + 'prep', 0)), ((control + 'prep', 0), ('model', 0))}
-    needed |= {(("apply", 0), ("applymsg", 0)), (("applymsg", 0), ("model", 0))}
     if not needed <= routes:
-        raise ValueError('Missing MIDI/API/editor/mode/Apply/panic route')
-    if boxes['applymsg']['text'] != 'apply' or boxes['apply'].get('varname') != 'apply_button':
-        raise ValueError('Invalid Apply control')
+        raise ValueError('Missing MIDI/API/editor/panic route')
+    if any(name in boxes for name in ('apply', 'applymsg', 'mode', 'modeprep', 'modestatus', 'modelabel')):
+        raise ValueError('Removed Mode or Apply controls remain')
     if p.get('openrect') != [0, 0, 360, 169]:
         raise ValueError('Expected 360 by 169 Live device panel')
     for box in boxes.values():
@@ -67,8 +66,6 @@ def integrity():
                 raise ValueError('Presentation control outside panel: ' + box['id'])
     if boxes['keyboard']['presentation_rect'][2:] != [332, 62]:
         raise ValueError('Scale Keyboard must retain 332 by 62 size')
-    if [item for item in boxes['mode']['items'] if item != ','] != ['Octave Anchored', 'Continuous Degrees']:
-        raise ValueError('Mapping Mode choices missing')
     if boxes['store']['text'] != 'pattr scale_state @bindto model @parameter_enable 1' or boxes['model'].get('varname') != 'model':
         raise ValueError('Invalid per-device pattr binding')
     attrs = boxes['store']['saved_attribute_attributes']['valueof']
