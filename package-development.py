@@ -58,6 +58,17 @@ def integrity():
         raise ValueError('Missing MIDI/API/editor/mode/Apply/panic route')
     if boxes['applymsg']['text'] != 'apply' or boxes['apply'].get('varname') != 'apply_button':
         raise ValueError('Invalid Apply control')
+    if p.get('openrect') != [0, 0, 360, 205]:
+        raise ValueError('Expected 360 by 205 device panel')
+    for box in boxes.values():
+        if box.get('presentation'):
+            x, y, width, height = box['presentation_rect']
+            if min(x, y) < 0 or min(width, height) <= 0 or x + width > 360 or y + height > 205:
+                raise ValueError('Presentation control outside panel: ' + box['id'])
+    if boxes['keyboard']['presentation_rect'][2:] != [332, 62]:
+        raise ValueError('Scale Keyboard must retain 332 by 62 size')
+    if [item for item in boxes['mode']['items'] if item != ','] != ['Octave Anchored', 'Continuous Degrees']:
+        raise ValueError('Mapping Mode choices missing')
     if boxes['store']['text'] != 'pattr scale_state @bindto model @parameter_enable 1' or boxes['model'].get('varname') != 'model':
         raise ValueError('Invalid per-device pattr binding')
     attrs = boxes['store']['saved_attribute_attributes']['valueof']
@@ -76,7 +87,7 @@ def package(output):
     if output.resolve().is_relative_to(ROOT):
         raise ValueError('ZIP must be outside the source checkout (use chat outputs)')
     data = {name: (ROOT / name).read_bytes() for name in files}
-    manifest = {'status': 'DEVELOPMENT — host acceptance pending issue #8',
+    manifest = {'status': 'DEVELOPMENT — host acceptance pending issue #15',
                 'source_commit': commit, 'package_version': 'development-' + commit[:12],
                 'files': {name: {'bytes': len(content), 'sha256': hashlib.sha256(content).hexdigest()} for name, content in data.items()}}
     data['MANIFEST.json'] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode()
