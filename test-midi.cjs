@@ -83,9 +83,9 @@ live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_in
 live.midi.feed([128,64,39,144,64,77,128,64,23]);eq(live.midi.take(),[128,63,39,144,65,77,128,65,23]);
 live.state.scaleselect(1);live.values.root_note=[7];live.change();live.flush(0);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,62,80,128,62,30]);
 live.state.followselect(1);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,67,80,128,67,30]);
-live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Continuous Degrees - 7 notes - Scale Mode off');
+live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Playing: G Dorian (7 notes) - Scale Mode off');
 live.midi.feed([144,64,90]);eq(live.midi.take(),[144,70,90]);
-live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Continuous Degrees - 5 notes - Scale Mode off');
+live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Playing: G Dorian (5 notes) - Scale Mode off');
 live.setOnline(false);live.change();live.flush(0);eq(live.labels.status_label,'Live unavailable');
 // Disconnect immediately detaches the old host observers, before retrying.
 eq(live.subscriptions.filter(s=>s.property).length,0);
@@ -108,7 +108,7 @@ eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);
 live.setOnline(true);live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.flush(1000);
 live.midi.feed([144,60,82,128,60,33]);eq(live.midi.take(),[144,62,82,128,62,33]);
 // A queued callback belonging to the detached observer must not disrupt recovery.
-oldObserver.callback(['id',0]);eq(live.labels.status_label,'Continuous Degrees - 7 notes');eq(live.tasks.filter(t=>t.scheduled).length,0);
+oldObserver.callback(['id',0]);eq(live.labels.status_label,'Playing: D Dorian (7 notes)');eq(live.tasks.filter(t=>t.scheduled).length,0);
 live.state.scaleselect(1);live.subscriptions.find(s=>s.property).id=0;
 live.midi.feed([144,64,83,128,64,34]);eq(live.midi.take(),[144,65,83,128,65,34]);
 live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);

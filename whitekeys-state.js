@@ -30,7 +30,7 @@ function init() { if(follow&&apiReady)useLive();render(); }
 function ui(id) { return this.patcher.getnamed(id); }
 function setui(id,value) { var b=ui(id); if(b) b.message('set',value); }
 function save() { notifyclients(); }
-function adopt() { if(draft.length===7){active=draft.slice(0);activeRoot=root;activeName=name;} }
+function apply() { if(follow)return;active=draft.slice(0);activeRoot=root;activeName=name;render();save(); }
 function useLive() { root=liveRoot;name=liveName;draft=liveNotes.slice(0);active=draft.slice(0);activeRoot=root;activeName=name; }
 function livescale() {
     var a=arrayfromargs(arguments),r=Number(a.shift()),nm=String(a.shift()),mode=Number(a.shift());
@@ -42,16 +42,23 @@ function livescale() {
 function apistatus() { apiReady=false;apiError=arrayfromargs(arguments).join(' ');render(); }
 function rootselect(v) {
     v=Number(v);if(v<0||v>11||v!==Math.floor(v))return;
-    follow=0;root=v;adopt();render();save();
+    follow=0;root=v;render();save();
 }
 function scaleselect(v) {
     v=Number(v);if(v<0||v>=scaleNames.length||v!==Math.floor(v))return;
     follow=0;name=scaleNames[v];
     if(v<scaleNotes.length)draft=scaleNotes[v].slice(0);
     else if(name!=='Custom'&&name===liveName)draft=liveNotes.slice(0);
-    adopt();render();save();
+    render();save();
 }
-function followselect(v) { follow=Number(v)?1:0; if(follow&&apiReady)useLive();render();save(); }
+function followselect(v) {
+    follow=Number(v)?1:0;
+    if(follow){
+        if(apiReady)useLive();
+        else {root=activeRoot;name=activeName;draft=active.slice(0);}
+    }
+    render();save();
+}
 function modeselect(v) { v=Number(v);if(v!==0&&v!==1)return;preferredMode=v;render();save(); }
 function blackselect(v) { black=Number(v)===1?1:0;render();save(); }
 function toggle(pc) {
@@ -60,7 +67,7 @@ function toggle(pc) {
     if(interval===0)return; // Root is an invariant, not a removable degree.
     follow=0;name='Custom';var idx=draft.indexOf(interval);
     if(idx>=0)draft.splice(idx,1);else{draft.push(interval);draft.sort(function(a,b){return a-b;});}
-    adopt();render();save();
+    render();save();
 }
 function audition(pc) { pc=Number(pc);if(pc>=0&&pc<12)outlet(0,'audition',60+pc); }
 function render() {
@@ -69,16 +76,15 @@ function render() {
     var signature=scaleNames.join('|');
     var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(var i=0;i<scaleNames.length;i++)sm.message('append',scaleNames[i]);}
     setui('root_menu',root);setui('scale_menu',menuIndex);setui('follow_toggle',follow);setui('black_menu',black);
-    setui('scale_title',pitchNames[root]+' '+name);
+    setui('scale_title','Draft: '+pitchNames[root]+' '+name+' ('+draft.length+(draft.length===1?' note)':' notes)'));
     setui('mode_menu',preferredMode);
     var effective = preferredMode===0 && active.length===7 ? 'Octave Anchored' : 'Continuous Degrees';
-    setui('mode_status',effective+(preferredMode===0&&active.length!==7?' (automatic)':''));
-    var text=draft.length+' notes';
+    setui('mode_status',effective+(preferredMode===0&&active.length!==7?': '+active.length+(active.length===1?' note':' notes')+'; Anchored needs 7':''));
+    var text='Playing: '+pitchNames[activeRoot]+' '+activeName+' ('+active.length+(active.length===1?' note)':' notes)');
     if(follow&&!apiReady)text='Live unavailable';
-    else if(follow)text=effective+' - '+active.length+' notes'+(preferredMode===0&&active.length!==7?' (automatic fallback)':'');
-    else if(draft.length!==7)text+=' - playing '+pitchNames[activeRoot]+' '+activeName;
     if(follow&&apiReady&&!liveMode)text+=' - Scale Mode off';
-    var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',draft.length===7?0.36:0.65,draft.length===7?0.44:0.36,draft.length===7?0.27:0.13,1);}
+    var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',0.36,0.44,0.27,1);}
+    var button=ui('apply_button');if(button)button.message('ignoreclick',follow?1:0);
     outlet(1,['view',root,mask(draft)]);
     outlet(0,'blackkeys',black);
     if(follow&&!apiReady)outlet(0,'unavailable');
