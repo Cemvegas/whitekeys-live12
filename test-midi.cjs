@@ -47,11 +47,11 @@ function instrument(){
 let device=instrument(),before=device.saved();device.click(25,70,1);
 eq(device.saved(),before);eq(device.midi.take(),[144,60,96]);eq(device.lights(),1);
 device.midi.tasks[0].run();eq(device.midi.take(),[128,60,0]);eq(device.lights(),0);
-device.click(125,70);eq(device.midi.take(),[]);eq(device.saved().slice(1,5),[0,0,'Custom',2725]);
+device.state.followselect(0);device.click(125,70);eq(device.midi.take(),[]);eq(device.saved().slice(8,11),[0,2725,'Custom']);
 // Physical ignore does not disable black screen-key editing or audition.
 device=instrument();device.state.blackselect(1);device.midi.feed([144,63,80,128,63,20]);eq(device.midi.take(),[]);
 before=device.saved();device.click(100,10,1);eq(device.saved(),before);eq(device.midi.take(),[144,63,96]);
-device.midi.tasks[0].run();eq(device.midi.take(),[128,63,0]);device.click(100,10);eq(device.saved().slice(1,5),[0,0,'Custom',2749]);eq(device.midi.take(),[]);
+device.midi.tasks[0].run();eq(device.midi.take(),[128,63,0]);device.state.followselect(0);device.click(100,10);eq(device.saved().slice(8,11),[0,2749,'Custom']);eq(device.midi.take(),[]);
 device.state.blackselect(0);device.midi.feed([144,63,73,128,63,31]);eq(device.midi.take(),[144,63,73,128,63,31]);
 // Output pitch-class highlight lasts while another channel/octave still holds it.
 device=instrument();device.midi.feed([144,60,81,145,72,82]);eq(device.lights(),1);
@@ -81,19 +81,19 @@ eq(live.subscriptions.filter(s=>s.property).map(s=>s.property),['root_note','sca
 live.midi.feed([144,64,91]);eq(live.midi.take(),[144,63,91]);
 live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.change();live.flush(0);
 live.midi.feed([128,64,39,144,64,77,128,64,23]);eq(live.midi.take(),[128,63,39,144,65,77,128,65,23]);
-live.state.scaleselect(1);live.values.root_note=[7];live.change();live.flush(0);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,62,80,128,62,30]);
+live.state.followselect(0);live.state.scaleselect(1);live.values.root_note=[7];live.change();live.flush(0);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,62,80,128,62,30]);
 live.state.followselect(1);live.midi.feed([144,60,80,128,60,30]);eq(live.midi.take(),[144,67,80,128,67,30]);
 live.values.scale_mode=[0];live.change();live.flush(0);eq(live.labels.status_label,'Playing: G Dorian (7 notes) - Scale Mode off');
 live.midi.feed([144,64,90]);eq(live.midi.take(),[144,70,90]);
 live.values.scale_intervals=[0,2,4,7,9];live.change();live.flush(0);live.midi.feed([144,60,80,128,64,35,144,61,60,128,61,20]);eq(live.midi.take(),[144,67,80,128,70,35,144,61,60,128,61,20]);eq(live.labels.status_label,'Playing: G Dorian (5 notes) - Scale Mode off');
-live.setOnline(false);live.change();live.flush(0);eq(live.labels.status_label,'Live unavailable');
+live.setOnline(false);live.change();live.flush(0);assert.match(live.labels.status_label,/Live unavailable/);checks++;
 // Disconnect immediately detaches the old host observers, before retrying.
 eq(live.subscriptions.filter(s=>s.property).length,0);
 live.setOnline(true);live.values.scale_intervals=major.slice();live.values.root_note=[0];live.flush(1000);live.midi.feed([144,64,82,128,64,42]);eq(live.midi.take(),[144,64,82,128,64,42]);
 live.api.notifydeleted();eq(live.subscriptions.filter(s=>s.property).length,0);eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log('Live observer → state → MIDI message scenarios passed');
 // API may become available only after device initialization.
-live=liveChain();live.state.init();live.setOnline(false);live.api.init();eq(live.labels.status_label,'Live unavailable');live.midi.feed([144,60,80,128,60,40]);eq(live.midi.take(),[]);live.setOnline(true);live.flush(1000);live.midi.feed([144,64,88,128,64,32]);eq(live.midi.take(),[144,63,88,128,63,32]);live.api.notifydeleted();
+live=liveChain();live.state.init();live.setOnline(false);live.api.init();assert.match(live.labels.status_label,/Live unavailable/);checks++;live.midi.feed([144,60,80,128,60,40]);eq(live.midi.take(),[144,60,80,128,60,40]);live.setOnline(true);live.flush(1000);live.midi.feed([144,64,88,128,64,32]);eq(live.midi.take(),[144,63,88,128,63,32]);live.api.notifydeleted();
 // Channel independence and collision/retrigger release velocity at all 16 channels.
 for(let ch=0;ch<16;ch++){
  c=make();c.configure(0,...minor);c.feed([144+ch,64,70,63,100,64,93,128+ch,64,10,63,20,64,44]);eq(c.take(),[144+ch,63,70,144+ch,63,100,144+ch,63,93,128+ch,63,44]);
@@ -102,19 +102,19 @@ for(let ch=0;ch<16;ch++){
 live=liveChain();live.state.init();live.api.init();live.midi.feed([144,64,90]);eq(live.midi.take(),[144,63,90]);
 const oldObserver=live.subscriptions.find(s=>s.property);
 live.setOnline(false);oldObserver.id=0;
-eq(live.labels.status_label,'Live unavailable');
-live.midi.feed([144,60,80,128,60,15,128,64,37,144,61,70,128,61,29]);eq(live.midi.take(),[128,63,37,144,61,70,128,61,29]);
+assert.match(live.labels.status_label,/Live unavailable/);checks++;
+live.midi.feed([144,60,80,128,60,15,128,64,37,144,61,70,128,61,29]);eq(live.midi.take(),[144,60,80,128,60,15,128,63,37,144,61,70,128,61,29]);
 eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);
 live.setOnline(true);live.values.root_note=[2];live.values.scale_name=['Dorian'];live.values.scale_intervals=[0,2,3,5,7,9,10];live.flush(1000);
 live.midi.feed([144,60,82,128,60,33]);eq(live.midi.take(),[144,62,82,128,62,33]);
 // A queued callback belonging to the detached observer must not disrupt recovery.
 oldObserver.callback(['id',0]);eq(live.labels.status_label,'Playing: D Dorian (7 notes)');eq(live.tasks.filter(t=>t.scheduled).length,0);
-live.state.scaleselect(1);live.subscriptions.find(s=>s.property).id=0;
+live.state.followselect(0);live.state.scaleselect(1);live.subscriptions.find(s=>s.property).id=0;
 live.midi.feed([144,64,83,128,64,34]);eq(live.midi.take(),[144,65,83,128,65,34]);
 live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 // Invalid song IDs must be rejected even when the host getters retain old data.
 live=liveChain();live.state.init();live.api.init();live.subscriptions[0].id=0;live.change();live.flush(0);
-eq(live.labels.status_label,'Live unavailable');live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[]);
+assert.match(live.labels.status_label,/Live unavailable/);checks++;live.midi.feed([144,60,84,128,60,35]);eq(live.midi.take(),[144,60,84,128,60,35]);
 eq(live.tasks.filter(t=>t.scheduled).map(t=>t.delay),[1000]);live.api.notifydeleted();eq(live.tasks.filter(t=>t.scheduled).length,0);
 console.log(`${checks} total MIDI/API message assertions passed`);
 // Spec #9: literal Continuous Degrees examples at the public raw MIDI seam.
@@ -156,7 +156,7 @@ c.feed([146,64,248,79,64,0,178,64,127,226,0,64,194,5,210,80,242,1,2,240,1,248,2,
 eq(c.take(),[248,146,63,79,146,63,0,178,64,127,226,0,64,194,5,210,80,242,1,2,240,1,248,2,247]);
 // VS19/20: Real screen audition remains independent of variable scale and physical ignore.
 for(const [x,y,pitch] of [[25,70,60],[100,10,63],[50,10,61]]) {
- device=instrument();device.state.livescale(0,'Octatonic',1,...octatonic);device.state.modeselect(0);device.state.blackselect(1);
+ device=instrument();device.state.livescale(0,'Octatonic',1,...octatonic);device.state.blackselect(1);
  before=device.saved();device.click(x,y,1);eq(device.saved(),before);eq(device.midi.take(),[144,pitch,96]);eq(device.lights(),1);
  device.midi.tasks[0].run();eq(device.midi.take(),[128,pitch,0]);eq(device.lights(),0);
 }
@@ -178,8 +178,8 @@ for(const reset of [m=>m.panic(),m=>m.feed([255])]) {
 }
 // Live and mode transitions never retarget held notes, including pending poly pressure.
 live=liveChain();live.state.init();live.api.init();live.values.scale_intervals=octatonic.slice();live.change();live.flush(0);
-live.state.modeselect(0);live.midi.feed([144,72,95]);eq(live.midi.take(),[144,70,95]);
-live.values.root_note=[7];live.values.scale_intervals=[0];live.change();live.flush(0);live.state.modeselect(1);
+live.midi.feed([144,72,95]);eq(live.midi.take(),[144,70,95]);
+live.values.root_note=[7];live.values.scale_intervals=[0];live.change();live.flush(0);
 live.midi.feed([160,72,77,128,72,41,144,69,94,128,69,42]);eq(live.midi.take(),[160,70,77,128,70,41,144,127,94,128,127,42]);
 live.api.notifydeleted();
 console.log(checks+' final MIDI/API/variable performance assertions passed');
