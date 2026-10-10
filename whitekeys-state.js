@@ -8,7 +8,7 @@ var scaleNotes = [[0,2,4,5,7,9,11],[0,2,3,5,7,8,10],[0,2,3,5,7,9,10],[0,2,4,5,7,
 var follow = 1, root = 0, name = 'Major', notes = scaleNotes[0].slice(0);
 var activeRoot = 0, activeName = 'Major', active = notes.slice(0), black = 0;
 var liveRoot = 0, liveName = 'Major', liveNotes = notes.slice(0), liveMode = 1;
-var menuSignature = '';
+var menuSignature = '', menuEntries = [];
 var apiReady = false, apiError = '';
 function mask(a) { var n=0; for(var i=0;i<a.length;i++) n |= 1<<a[i]; return n; }
 function unmask(m) { var a=[]; for(var i=0;i<12;i++) if(m & (1<<i)) a.push(i); return a; }
@@ -40,13 +40,15 @@ function setvalueof() {
     else {sourceKind=f?'Live':'Local';hostEnabled=0;sourceSet='';sourceDevice='';sourceLabel='';}
     follow=f;root=activeRoot=r;name=activeName=n;notes=unmask(m);active=notes.slice(0);black=b;
     if(follow&&apiReady)useLive();
+    if(sourceKind==='Local')name=activeName=recognizedName(notes);
     render();
 }
 function init() { if(follow&&apiReady)useLive();render(); }
 function ui(id) { return this.patcher.getnamed(id); }
 function setui(id,value) { var b=ui(id); if(b) b.message('set',value); }
 function save() { notifyclients(); }
-function changed() { active=notes.slice(0);activeRoot=root;activeName=name;render();save(); }
+function recognizedName(a) { var m=mask(a);for(var i=0;i<scaleNotes.length;i++)if(mask(scaleNotes[i])===m)return scaleNames[i];return 'Custom'; }
+function changed() { name=recognizedName(notes);active=notes.slice(0);activeRoot=root;activeName=name;render();save(); }
 function useLive() { root=liveRoot;name=liveName;notes=liveNotes.slice(0);active=notes.slice(0);activeRoot=root;activeName=name; }
 function livescale() {
     var a=arrayfromargs(arguments),r=Number(a.shift()),nm=String(a.shift()),mode=Number(a.shift());
@@ -61,11 +63,24 @@ function rootselect(v) {
     if(sourceKind!=='Local')return;root=v;changed();
 }
 function scaleselect(v) {
-    v=Number(v);if(v<0||v>=scaleNames.length||v!==Math.floor(v))return;
-    if(sourceKind!=='Local')return;name=scaleNames[v];
-    if(v<scaleNotes.length)notes=scaleNotes[v].slice(0);
-    else if(name!=='Custom'&&name===liveName)notes=liveNotes.slice(0);
+    v=Number(v);if(v<0||v>=menuEntries.length||v!==Math.floor(v)||sourceKind!=='Local')return;
+    var entry=menuEntries[v];if(entry.kind==='alternate'){root=entry.root;notes=entry.notes.slice(0);}
+    else if(entry.kind==='catalog')notes=scaleNotes[entry.index].slice(0);
+    else return; // Section labels and Custom describe membership, not an edit.
     changed();
+}
+function scaleMenu() {
+    var entries=[],i,r,relative,m=0;
+    for(i=0;i<scaleNames.length;i++)entries.push({label:scaleNames[i],kind:i<scaleNotes.length?'catalog':'description',index:i});
+    if(scaleNames.indexOf(name)<0)entries.push({label:name,kind:'description'});
+    for(i=0;i<notes.length;i++)m|=1<<((root+notes[i])%12);
+    var alternatives=[];
+    for(r=0;r<12;r++)if(r!==root){
+        relative=0;for(i=0;i<12;i++)if(m&(1<<i))relative|=1<<((i-r+12)%12);
+        for(i=0;i<scaleNotes.length;i++)if(mask(scaleNotes[i])===relative)alternatives.push({label:pitchNames[r]+' '+scaleNames[i],kind:'alternate',root:r,notes:scaleNotes[i]});
+    }
+    if(alternatives.length)entries.push({label:'Also matches',kind:'section'});
+    return entries.concat(alternatives);
 }
 function followselect(v) {
     follow=Number(v)?1:0;sourceKind=follow?'Live':'Local';sourceSet='';sourceDevice='';sourceLabel='';
@@ -73,6 +88,7 @@ function followselect(v) {
         if(apiReady)useLive();
         else {root=activeRoot;name=activeName;notes=active.slice(0);}
     }
+    if(sourceKind==='Local')name=activeName=recognizedName(notes);
     render();save();
 }
 function blackselect(v) { black=Number(v)===1?1:0;render();save(); }
@@ -86,10 +102,10 @@ function toggle(pc) {
 }
 function audition(pc) { pc=Number(pc);if(pc>=0&&pc<12)outlet(0,'audition',60+pc); }
 function render() {
-    var menuIndex=scaleNames.indexOf(name);
-    if(menuIndex<0){scaleNames.push(name);menuIndex=scaleNames.length-1;}
-    var signature=scaleNames.join('|');
-    var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(var i=0;i<scaleNames.length;i++)sm.message('append',scaleNames[i]);}
+    menuEntries=scaleMenu();var menuIndex=0,labels=[];
+    for(var i=0;i<menuEntries.length;i++){labels.push(menuEntries[i].label);if(menuEntries[i].label===name)menuIndex=i;}
+    var signature=labels.join('|');
+    var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(i=0;i<labels.length;i++)sm.message('append',labels[i]);}
     setui('root_menu',root);setui('scale_menu',menuIndex);setui('follow_toggle',follow);setui('black_menu',black);
     setui('scale_title','Scale: '+pitchNames[root]+' '+name+' ('+notes.length+(notes.length===1?' note)':' notes)'));
     var text='Playing: '+pitchNames[activeRoot]+' '+activeName+' ('+active.length+(active.length===1?' note)':' notes)');
