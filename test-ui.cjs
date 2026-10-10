@@ -15,4 +15,5 @@ select('source',1);select('root',0);assert.deepStrictEqual(note(),[144,62,90,128
 state.apistatus('Offline');assert.strictEqual(ui.source_status,'Live unavailable');assert.match(ui.status_label,/Playing: D Dorian/);assert.deepStrictEqual(note(),[144,62,90,128,62,23]);
 const before=JSON.stringify(state.getvalueof());select('source',2);assert.strictEqual(JSON.stringify(state.getvalueof()),before);assert.strictEqual(ui.source_menu,1);assert.strictEqual(ui.source_status,'Sharing unavailable');
 select('host',1);assert.strictEqual(JSON.stringify(state.getvalueof()),before);assert.strictEqual(ui.host_toggle,0);assert.strictEqual(ui.source_status,'Sharing unavailable');
+state.livescale(2,'A deliberately long external scale name that would overflow the panel',1,0,2,3,5,7,9,10);assert.ok(ui.status_label.length<=60);assert.match(ui.status_label,/Playing: D/);
 console.log('Scale Source panel routing, Local/Live MIDI, unavailable sharing and retained Playing passed');
