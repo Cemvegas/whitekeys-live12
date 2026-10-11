@@ -1,6 +1,6 @@
 // Production adapter/model/MIDI through controlled native LiveAPI.
 const assert=require('assert');
-const {make,run,last,record,reset,devices,remove}=require('./sharing-test-fixture.cjs');
+const {make,run,last,record,reset,devices,remove,nativeGraph}=require('./sharing-test-fixture.cjs');
 reset();const discoveryHost=make(90,record('discovery-host',1,7)),discoveryFollower=make(91,record('discovery-follower',0));discoveryHost.transport.init();discoveryFollower.transport.init();run();discoveryFollower.state.sourceselect(2);run();assert.deepEqual(discoveryFollower.note(),[144,67,90,128,67,23]);console.log('Native enrollment discovery and automatic Follow MIDI passed');
 reset();const ah=make(500,record('host',1,7),{deferAnchor:true}),af=make(501,[4,'follow','set-A','WhiteKeys',0,'set-A','host','Piano',0,2741,'Major',0]);ah.transport.init();af.transport.init();run();assert.deepEqual(af.note(),[144,60,90,128,60,23]);ah.transport.nativeanchor('id',99);run();assert.deepEqual(af.note(),[144,67,90,128,67,23]);const foreign=make(502,[4,'alien','other-set','Local',1,'','','',2,2741,'Major',0],{anchor:88});foreign.transport.init();run();ah.state.rootselect(9);run();assert.deepEqual(af.note(),[144,69,90,128,69,23]);assert.match(last(foreign.ui,'source_status'),/different Set/);
 console.log('Deferred native anchor and foreign-device isolation without stalling independent Host passed');
@@ -21,3 +21,33 @@ for(const order of [[0,1],[1,0]]){
 }
 console.log('Distinct saved Host conflict never elects by discovery order passed');
 reset();const failure={censusError:false},retryHost=make(1600,record('retry-host',1,7),failure),retryFollow=make(1601,record('retry-follow',0));retryHost.transport.init();retryFollow.transport.init();run();retryFollow.state.sourceselect(2);run();failure.censusError=true;retryHost.transport.tick();failure.censusError=false;run();assert.deepEqual(retryFollow.note(),[144,67,90,128,67,23]);console.log('Transient native census failure recovers automatic Follow passed');
+
+// Native traversal includes return, master and nested Rack chains.
+for(const placement of ['return','master','rack']){
+ reset();const graph=nativeGraph();
+ if(placement==='return')graph.container(30,'Return A',1,'return_tracks');
+ if(placement==='rack'){graph.rack(40,10);graph.container(41,'Chain',40,'chains');graph.rack(42,41);graph.container(43,'Inner chain',42,'chains');}
+ const parent=placement==='return'?30:placement==='master'?20:43;
+ const nestedHost=make(1800,record('nested-host',1,7),{parent}),nestedFollow=make(1801,[4,'nested-follow','set-A','WhiteKeys',0,'set-A','nested-host','Piano',0,2741,'Major',0]);
+ nestedFollow.transport.init();nestedHost.transport.init();run();
+ assert.deepEqual(nestedFollow.note(),[144,67,90,128,67,23]);
+ remove(1800);run();assert.equal(last(nestedFollow.ui,'source_status'),'Waiting for Host');assert.deepEqual(nestedFollow.note(),[144,67,90,128,67,23]);
+}
+console.log('Return/master/nested Rack discovery and removed Host retained scale passed');
+// A late native enrollment must reconnect without an explicit Host action.
+reset();const lateHost=make(1900,record('late-host',1,7),{enrollmentReady:false}),lateFollow=make(1901,[4,'late-follow','set-A','WhiteKeys',0,'set-A','late-host','Piano',2,2741,'Major',0]);lateHost.transport.init();lateFollow.transport.init();run();
+assert.equal(last(lateFollow.ui,'source_status'),'Waiting for Host');assert.deepEqual(lateFollow.note(),[144,62,90,128,62,23]);
+nativeGraph().enrollment(1900,true);run();assert.match(last(lateFollow.ui,'source_status'),/Following/);assert.deepEqual(lateFollow.note(),[144,67,90,128,67,23]);
+console.log('Late native enrollment reconnects automatic Follow passed');
+// Literal native names keep the captured short-name regression independent of patch metadata.
+for(const markerName of ['WK enrollment','WhiteKeys sharing enrollment','Unrelated parameter']){
+ reset();const namedHost=make(2000,record('named-host',1,7),{markerName}),namedFollow=make(2001,[4,'named-follow','set-A','WhiteKeys',0,'set-A','named-host','Piano',2,2741,'Major',0]);namedHost.transport.init();namedFollow.transport.init();run();
+ assert.deepEqual(namedFollow.note(),markerName==='Unrelated parameter'?[144,62,90,128,62,23]:[144,67,90,128,67,23]);
+}
+console.log('Observed short/compatible long enrollment names and unrelated parameter rejection passed');
+// Cold identity ownership follows native traversal, even across different containers.
+reset();const orderedGraph=nativeGraph();orderedGraph.container(30,'Return A',1,'return_tracks');orderedGraph.rack(40,10);orderedGraph.container(41,'Chain',40,'chains');
+const masterCopy=make(2200,record('nested-collision',1,2),{parent:20}),returnCopy=make(2201,record('nested-collision',1,7),{parent:30}),rackCopy=make(2202,record('nested-collision',1,9),{parent:41}),orderedFollow=make(2203,[4,'ordered-follow','set-A','WhiteKeys',0,'set-A','nested-collision','Piano',0,2741,'Major',0]);
+masterCopy.transport.init();returnCopy.transport.init();orderedFollow.transport.init();rackCopy.transport.init();run(15);
+assert.equal(rackCopy.state.getvalueof()[1],'nested-collision');assert.equal(rackCopy.state.getvalueof()[4],1);assert.notEqual(masterCopy.state.getvalueof()[1],'nested-collision');assert.notEqual(returnCopy.state.getvalueof()[1],'nested-collision');assert.equal(masterCopy.state.getvalueof()[4],0);assert.equal(returnCopy.state.getvalueof()[4],0);assert.deepEqual(orderedFollow.note(),[144,69,90,128,69,23]);
+console.log('Cold identity resolution retains native Rack/return/master order passed');
