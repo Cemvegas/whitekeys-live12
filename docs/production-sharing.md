@@ -1,12 +1,12 @@
 # Üretim Host/Follower paylaşımı — #20 / #21
 
-Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve workspace ADR 0006 ve ADR 0007 / ADR 0008. #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
+Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve [ADR 0007](adr/0007-single-active-host-and-automatic-follow.md) ve onu kimlik çözümü bakımından güncelleyen [ADR 0008](adr/0008-automatic-identity-conflict-resolution.md). #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
 
 ## Kullanım
 
 Host yazısının bütün yüzeyine basın; yalnız aktif Host sarı görünür. Local ve Follow Live paylaşabilir. Follow WhiteKeys seçen cihaz Set’in tek aktif Host’una otomatik bağlanır; ayrıca Host seçilmez. Follower’da Host açmak son gamı koruyarak Local’a geçer.
 
-Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Kimlik çakışması otomatik çözülür: canlı mevcut cihaz kimliği/Host tercihini korur, kopyalar yeni kimlik ve Host kapalı alır. Eski çakışmalı Set açılışında ilk native cihaz korunur; manuel aday menüsü yoktur. Ayrıntılar docs/specs/automatic-identity-resolution.md içinde. Gerçek kayıt/açılış kabulü bekler.
+Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Kimlik çakışması otomatik çözülür: canlı mevcut cihaz kimliği/Host tercihini korur, kopyalar yeni kimlik ve Host kapalı alır. Eski çakışmalı Set açılışında ilk native cihaz korunur; manuel aday menüsü yoktur. Ayrıntılar [otomatik kimlik sözleşmesinde](specs/automatic-identity-resolution.md). Gerçek kayıt/açılış kabulü bekler.
 
 ## Kayıt ve adapter
 
@@ -14,13 +14,15 @@ V4'ün önceki 12 atomlu kayıtları okunur. Çözülmemiş kimlik çakışması
 
 Native adapter `live.object` persistent Master volume referansını yeniden bağlamadan önce okur. Kalıcı Set UUID ile oturumdaki Live nesne kapsamı ayrıdır. Başka Set anchor/kayıtları kaynak olarak alınmaz. Native cihaz census'u track/return/master ve iç Rack chain'leri tarar; `WhiteKeys sharing enrollment` Automated and Stored sayısal parametresi (değeri paylaşım kararlarında kullanılmaz) kayıt bekleyen cihazları sayar. Her mevcut cihazın kaydı görülmeden snapshot kabulüne başlanmaz. Süre aşımı, ilk gelme veya runtime sayısı sahiplik kanıtı değildir. Yabancı cihazlar census bakımından tamamlanır ama paylaşım grubuna alınmaz.
 
-Global yalnız deferred adapter JSON kayıtlarını taşır. 100 ms polling, native keşif ve mesaj dağıtımı içindir. Native LiveAPI handle’ları yeniden kullanılır; sabit parametre adları ve değişmeyen model mesajları tekrar işlenmez. Bu düzeltmenin gerçek profil kanıtı ve kabul sınırı `docs/performance-diagnosis/README.md` içinde kayıtlıdır. Kaynak yayınları Set, kalıcı UID, ayrı transport epoch, revision ve atomik Root/maske/ad taşır. Kaynak kaybında aynı epoch'un revision eşiği korunur. Kimlik çözümü bütün adayların assignment onayı ve unblock aşaması tamamlanana kadar ilgili yayınları engeller; değişen/silinen grup aşamalı assignment'ı geri alır. Kullanıcı seçimi, kimlik/oturum/adayı doğrular; tekrar seçim kimlik tahsis etmez. MIDI scripti ve basılı-nota defteri transporttan bağımsızdır.
+Global yalnız deferred adapter JSON kayıtlarını taşır. 100 ms polling, native keşif ve mesaj dağıtımı içindir. Native LiveAPI handle’ları yeniden kullanılır; sabit parametre adları ve değişmeyen model mesajları tekrar işlenmez. Bu düzeltmenin gerçek profil kanıtı ve kabul sınırı `docs/performance-diagnosis/README.md` içinde kayıtlıdır. Kaynak yayınları Set, kalıcı UID, ayrı transport epoch, revision ve atomik Root/maske/ad taşır. Kaynak kaybında aynı epoch'un revision eşiği korunur. Kimlik çözümü bütün adayların assignment onayı ve unblock aşaması tamamlanana kadar ilgili yayınları engeller; değişen/silinen grup aşamalı assignment'ı geri alır. Otomatik sahiplik kararı ve yeniden denemeler ADR 0008’e göre yürütülür. MIDI scripti ve basılı-nota defteri transporttan bağımsızdır.
 
 ## Otomatik kanıtın sınırı
 
 `test-sharing.cjs`: gerçek model → gerçek MIDI; kaynak seçimleri, bozuk/eski/yanlış mesajlar, kaynak kaybı ve revision eşiği, basılı nota kanalı, çakışma kaydı, kaynak seçmeden kaydet/aç.
 
-`test-sharing-adapter.cjs`: gerçek üretim adapter/model/MIDI, kontrollü Live API sınır ikamesi; startup kayıt barajı, üç kopyanın 6 sırası × 3 keeper seçimi, aynı anda/tekrar/eski seçim, runtime değişmiş kaydet/aç, gecikmiş anchor, yabancı cihaz yanında bağımsız Host, silinen adayda rollback. Bu native Max/Live davranışının ölçümü değildir.
+`test-sharing-adapter.cjs`: gerçek üretim adapter/model/MIDI, kontrollü Live API sınır ikamesi; native enrollment keşfi, otomatik takip ve Host devri, eski snapshot reddi, runtime değişmiş kaydet/aç, gecikmiş anchor, yabancı Set izolasyonu ve silinen adayda rollback. Bu native Max/Live davranışının ölçümü değildir.
+
+`test-auto-identity.cjs`: güncel otomatik kimlik politikası; canlı kopyalar, native sıra, yeniden açılış ve geçersiz kayıtlar.
 
 ## #20 kısa Live demo — HC01–HC03
 

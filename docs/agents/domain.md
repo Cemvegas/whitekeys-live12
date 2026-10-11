@@ -1,17 +1,12 @@
 # Domain Docs
 
-## Layout
+## Authority and portable snapshots
 
-This project uses a single-context layout, relative to this workspace root:
+In the original White Keys workspace, the parent workspace's `GLOSSARY.md` and `docs/adr/` are authoritative. This source checkout carries byte-identical snapshots at [GLOSSARY.md](../../GLOSSARY.md) and `docs/adr/`, so a standalone clone or development ZIP can read the same decisions.
 
-- `GLOSSARY.md`: domain terms.
-- `docs/adr/`: architecture decision records.
+`docs/domain-snapshot.json` records hashes of the copied files. Update domain decisions in the workspace first, then refresh their source snapshots and this manifest. `check-navigation.py` validates snapshot hashes; in the original workspace it also compares snapshots with the authoritative files. Standalone checks require no parent workspace.
 
-## Before exploring, read these
-
-Read `GLOSSARY.md` and the ADRs in `docs/adr/` relevant to the area being explored. If a root `GLOSSARY-MAP.md` exists later, use it to find the relevant context glossaries and check `src/<context>/docs/adr/` for scoped decisions.
-
-If any of these files do not exist, proceed silently. Do not flag their absence or suggest creating them upfront. The `domain-modeling` skill creates them lazily when terms or decisions are actually resolved.
+Read the glossary and relevant ADRs before exploration. ADR 0008 supersedes ADR 0006's manual identity selection and ADR 0007's corresponding conflict clause. Earlier records remain historical evidence.
 
 ## Use the glossary's vocabulary
 

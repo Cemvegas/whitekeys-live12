@@ -1,6 +1,6 @@
 # Otomatik kimlik çözümü — 2026-10-11 değişikliği
 
-Yetkili kullanıcı kararı: workspace ADR 0008. Bu belge Spec #23’ün manuel Identity conflict seçimini isteyen eski hükümlerini (AC13–AC16, AC18, AC22 ve HC05’in seçim adımı dahil) değiştirir. Diğer MIDI, Set izolasyonu, tek Host ve performans şartları korunur.
+Yetkili kullanıcı kararı: [ADR 0008](../adr/0008-automatic-identity-conflict-resolution.md). Bu belge Spec #23’ün manuel Identity conflict seçimini isteyen eski hükümlerini (AC13–AC16, AC18, AC22 ve HC05’in seçim adımı dahil) değiştirir. Diğer MIDI, Set izolasyonu, tek Host ve performans şartları korunur.
 
 1. Manuel aday menüsü görünmez; kullanıcı kimlik seçmez.
 2. Canlı oturumda önceden tek/geçerli cihaz mevcut kimlik ve Host tercihini korur; yeni kopya farklı kimlik ve Host kapalı alır. Kopyanın native sırada öne taşınması mevcut sahipliği değiştirmez.

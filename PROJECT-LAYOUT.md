@@ -2,21 +2,23 @@
 
 This document ships with the source repository and development ZIP. Run source commands from this repository. In the original White Keys workspace, this checkout is `WhiteKeysLive12/`; its parent contains the installation and archive. A standalone clone uses its own parent for those paths.
 
-| Location | Purpose |
+The following paths are relative to the original enclosing workspace. In a standalone clone, source files live at the clone root and delivery directories live beside it. Source `GLOSSARY.md` and `docs/adr/` are portable snapshots; see [domain authority](docs/agents/domain.md).
+
+| Workspace location | Purpose |
 | --- | --- |
 | `WhiteKeysLive12/` | Production device, adjacent JavaScript dependencies, regression tests, build and packaging commands |
-| `GLOSSARY.md`, `docs/adr/` | Authoritative domain vocabulary and decisions |
+| Workspace `GLOSSARY.md`, `docs/adr/` | Authoritative domain vocabulary and decisions |
 | `WhiteKeysLive12/docs/` | Technical references, specifications and diagnostic evidence |
 | `work/<issue>/` | Active experiments with an issue, purpose and completion condition |
 | `current/` | Current development ZIP, installation and `MANIFEST.json` |
 | `outputs/* Project/` | Live acceptance Sets; retained at their existing paths |
 | `archive/` | Historical packages, extracted installations, experiments and reports |
 
-Read `current/MANIFEST.json` for the current source commit, package checksum and installation path. The manifest records development/acceptance status; packaging does not establish Live acceptance.
+Read the sibling `current/MANIFEST.json` for the current source commit, package checksum and installation path. The manifest records development/acceptance status; packaging does not establish Live acceptance.
 
 ## Commands
 
-From `WhiteKeysLive12/`:
+From the source checkout root:
 
 - `python3 check.py` runs the production JavaScript, MIDI, state, sharing, persistence and package checks. GitHub Actions runs the same command on pushes and pull requests.
 - `python3 package-development.py --current` publishes one current installation after production source changes have been committed. The previous current directory moves to `archive/package-<commit>-<timestamp>/`.

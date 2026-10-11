@@ -19,6 +19,11 @@ REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
                  'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md', 'docs/automatic-identity-review.md', 'docs/production-sharing-review.md',
                  'docs/performance-diagnosis/README.md'}
 
+REQUIRED |= {'docs/navigation.md', 'check-navigation.py', 'test-navigation.py',
+             'docs/domain-snapshot.json', 'GLOSSARY.md',
+             'docs/agents/domain.md', 'docs/agents/issue-tracker.md', 'docs/agents/triage-labels.md'}
+REQUIRED |= {path.relative_to(ROOT).as_posix() for path in (ROOT / 'docs/adr').glob('*.md')}
+
 
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args]).decode().strip()

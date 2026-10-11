@@ -1,0 +1,14 @@
+{
+  "authority": "Original White Keys workspace root; source files are portable snapshots",
+  "files": {
+    "GLOSSARY.md": "845f1f2e6a7c378d4e59beab48b198d59b8652faf15fbfff12c5877760dae601",
+    "docs/adr/0001-variable-scale-mapping.md": "ae4c4fd514e34c65b225d34035cb0d030ee2c766431078b10a52640ee241b6b5",
+    "docs/adr/0002-apply-local-scale-drafts.md": "19fbc85fdc4c03ae96aee015f5589733531f63e42ec43f96282678443345e5e6",
+    "docs/adr/0003-fit-live-device-height.md": "6ab5aa26fed2077020413ee328b252ad804c05f1226bde296cbd1241947a8dcd",
+    "docs/adr/0004-continuous-degrees-only.md": "741ec15d5daeb19142a630726d8fa18890c7b68fbff03c6cef8d3f5ad98d5807",
+    "docs/adr/0005-immediate-scale-editing-and-sharing.md": "0fbe572ed6bcf179f34f5d0a72055042c3d5d3ae4fe12f4244fb86ff5843c219",
+    "docs/adr/0006-explicit-identity-conflict-resolution.md": "5ef6f0b659ed5f5e99a19ba0c42b3369c3b6e3376e5222affa7142d7163e8937",
+    "docs/adr/0007-single-active-host-and-automatic-follow.md": "ae27592655d9263e8d27b95e7e4f9d98376b2ac3968290ce25c434ed69cfe2be",
+    "docs/adr/0008-automatic-identity-conflict-resolution.md": "8ec1849bc6fc64e4964e142bc43b1a97cf4c846dc41b693d282512cfceb79370"
+  }
+}

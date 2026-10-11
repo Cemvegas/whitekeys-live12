@@ -1,6 +1,6 @@
 # WhiteKeys Live 12 — anlık düzenleme geliştirme paketi
 
-**DEVELOPMENT — üretim Live kabulü bekliyor (#22).** Local, Follow Live ve aynı Set içindeki WhiteKeys Host/Follower paylaşımı uygulanmıştır. Kimlik çakışması yalnız açık kullanıcı seçimiyle çözülür. #19 teşhis kabulü bu üretim sürümünün gerçek Live kabulünün yerine geçmez. Paylaşım adımları ve otomatik test kapsamı: [Üretim paylaşımı](docs/production-sharing.md).
+**DEVELOPMENT — üretim Live kabulü bekliyor (#22).** Local, Follow Live ve aynı Set içindeki WhiteKeys Host/Follower paylaşımı uygulanmıştır. Kimlik çakışması otomatik çözülür; manuel aday seçimi yoktur. #19 teşhis kabulü bu üretim sürümünün gerçek Live kabulünün yerine geçmez. Paylaşım adımları ve otomatik test kapsamı: [Üretim paylaşımı](docs/production-sharing.md).
 ## Kurulum
 
 1. ZIP'i yeni, kalıcı bir klasöre açın. AMXD ve beş `whitekeys-*.js` dosyası yan yana kalsın. Düzenlenebilir maxpat, testler ve derleme/paketleme scriptleri pakettedir.
@@ -31,4 +31,4 @@ Host paylaşımının yeniden açılış, çoğaltma, kaynak kaybı ve Set izola
 
 ## Otomatik kontroller
 
-`node test-midi.cjs`, `node test-state.cjs`, `node test-ui.cjs`, `node test-sharing.cjs`, `node test-sharing-adapter.cjs` ve `python3 package-development.py --check` mesaj/MIDI, kayıt geçişi, panel yönlendirmesi ve paket bütünlüğünü kontrol eder. Gerçek Live kabulünü kapatmaz.
+`python3 check.py` mesaj/MIDI, kayıt geçişi, panel yönlendirmesi ve paket bütünlüğünü kontrol eder. Gerçek Live kabulünü kapatmaz.
