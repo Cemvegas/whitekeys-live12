@@ -12,9 +12,8 @@
 | `current/` | Current development ZIP, installation and `MANIFEST.json` |
 | `outputs/* Project/` | Live acceptance Sets, retained at their existing paths |
 | `archive/` | Historical packages, experiments and migration backups |
-| `WhiteKeysLive12` local compatibility link | Resolves old source device paths to this root; no second checkout |
 
-`current/`, `outputs/`, `archive/`, `work/` and the local compatibility link are ignored by Git. A fresh clone has one root and does not need that legacy link. Read `current/MANIFEST.json` for the installed commit and checksum; packaging does not establish Live acceptance.
+`current/`, `outputs/`, `archive/` and `work/` are ignored by Git. Source files live directly at this single project root. Read `current/MANIFEST.json` for the installed commit and checksum; packaging does not establish Live acceptance.
 
 ## Commands
 
@@ -42,6 +41,6 @@ Clean generated temporary files and duplicate extracted packages only after veri
 
 The earlier cleanup is recorded in `archive/session-2026-10-11-MIGRATION.json`; its compatibility links retain historical experiment and Live Set paths.
 
-Root unification preserved the original source Git history, branch and remote. `archive/root-unification-2026-10-11.zip` contains the pre-migration source, Git metadata and colliding workspace files; `archive/starter-git-metadata-2026-10-11/` retains the former empty workspace metadata. The source files now live at the root. `WhiteKeysLive12 -> .` keeps old source device paths working; remove it only after referring Live Sets have been migrated and verified. No Live Set was rewritten during migration.
+Root unification preserved the original source Git history, branch and remote. `archive/root-unification-2026-10-11.zip` contains the pre-migration source, Git metadata and colliding workspace files; `archive/starter-git-metadata-2026-10-11/` retains the former empty workspace metadata. The source files now live at the root. The former `WhiteKeysLive12` source path and its temporary compatibility link have been removed at the user’s request. Existing Live Sets referencing that path can load the device from `current/` instead. No Live Set was rewritten during migration.
 
 Migration evidence and compatibility links are local conveniences, not requirements for a fresh clone. Current installation and archives remain at their existing workspace paths.
