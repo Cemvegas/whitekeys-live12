@@ -190,10 +190,13 @@
               "parameter_longname": "Scale state",
               "parameter_shortname": "Scale state",
               "parameter_type": 3,
-              "parameter_invisible": 2
+              "parameter_invisible": 1
             }
           },
-          "text": "pattr scale_state @bindto model @parameter_enable 1"
+          "text": "pattr scale_state @bindto model @parameter_enable 1",
+          "saved_object_attributes": {
+            "parameter_enable": 1
+          }
         }
       },
       {

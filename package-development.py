@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
-                 'test-midi.cjs', 'test-state.cjs', 'test-ui.cjs', 'build-amxd.py',
+                 'test-midi.cjs', 'test-state.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
                  'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md'}
 
 
@@ -74,9 +74,9 @@ def integrity():
     if boxes['store']['text'] != 'pattr scale_state @bindto model @parameter_enable 1' or boxes['model'].get('varname') != 'model':
         raise ValueError('Invalid per-device pattr binding')
     attrs = boxes['store']['saved_attribute_attributes']['valueof']
-    if attrs['parameter_type'] != 3 or attrs['parameter_invisible'] != 2 or 'store' not in p['parameters']:
-        raise ValueError('Hidden blob parameter missing')
-    print('Integrity OK: AMXD JSON equals maxpat; four local JS; routing; hidden per-device blob')
+    if boxes['store'].get('saved_object_attributes', {}).get('parameter_enable') != 1 or attrs['parameter_type'] != 3 or attrs['parameter_invisible'] != 1 or 'store' not in p['parameters']:
+        raise ValueError('Enabled Stored Only blob parameter missing')
+    print('Integrity OK: AMXD JSON equals maxpat; four local JS; routing; Stored Only per-device blob')
 
 
 def package(output):
