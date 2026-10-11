@@ -11,3 +11,7 @@ Use the default triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, 
 ### Domain docs
 
 Use a single-context layout: `GLOSSARY.md` and `docs/adr/` at this workspace root. See `docs/agents/domain.md`.
+
+### Workspace files
+
+When packaging a device or organizing experiments and outputs, read `../PROJECT-LAYOUT.md`. Run production checks with `python3 check.py`.

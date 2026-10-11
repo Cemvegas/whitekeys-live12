@@ -8,12 +8,14 @@ from pathlib import Path
 import struct
 import subprocess
 import zipfile
+import shutil
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js', 'whitekeys-sharing.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
                  'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-auto-identity.cjs', 'sharing-test-fixture.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
-                 'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
+                 'package-development.py', 'check.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
                  'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md', 'docs/automatic-identity-review.md', 'docs/production-sharing-review.md',
                  'docs/performance-diagnosis/README.md'}
 
@@ -120,13 +122,53 @@ def package(output):
     print(str(output), 'source', commit, 'sha256', hashlib.sha256(output.read_bytes()).hexdigest())
 
 
+def publish_current():
+    """Publish one current installation; retain the previous one in the workspace archive."""
+    workspace = ROOT.parent
+    current = workspace / 'outputs' / 'current'
+    staging = workspace / 'outputs' / '.current-staging'
+    if staging.exists():
+        raise ValueError('Unfinished publication at ' + str(staging))
+    staging.mkdir(parents=True)
+    try:
+        output = staging / 'WhiteKeysLive12-development.zip'
+        package(output)
+        with zipfile.ZipFile(output) as bundle:
+            manifest = json.loads(bundle.read('WhiteKeysLive12/MANIFEST.json'))
+            install = staging / 'WhiteKeysLive12'
+            install.mkdir()
+            for name in sorted(JS | {'WhiteKeys Live 12.amxd'}):
+                (install / name).write_bytes(bundle.read('WhiteKeysLive12/' + name))
+        manifest['package'] = 'WhiteKeysLive12-development.zip'
+        manifest['installation'] = 'WhiteKeysLive12/WhiteKeys Live 12.amxd'
+        manifest['package_sha256'] = hashlib.sha256(output.read_bytes()).hexdigest()
+        (staging / 'MANIFEST.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+        if current.exists():
+            previous = json.loads((current / 'MANIFEST.json').read_text())
+            stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+            destination = workspace / 'archive' / 'packages' / (previous['source_commit'][:12] + '-' + stamp)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            current.rename(destination)
+        staging.rename(current)
+        print('Current installation:', current)
+    except Exception:
+        if staging.exists():
+            shutil.rmtree(staging)
+        raise
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--current', action='store_true', help='Publish outputs/current and archive its previous contents')
     args = parser.parse_args()
-    if not args.check and args.output is None:
+    if args.current and args.output:
+        parser.error('Choose --current or --output')
+    if not args.check and args.output is None and not args.current:
         parser.error('Use --check or --output /absolute/chat/outputs/package.zip')
     integrity()
     if args.output:
         package(args.output)
+    if args.current:
+        publish_current()
