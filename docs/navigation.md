@@ -7,8 +7,8 @@ Start here to locate implementation and its regression checks. Run commands from
 | MIDI mapping and held-note release | [whitekeys-midi.js](../whitekeys-midi.js) | `node test-midi.cjs` |
 | Scale editing, source selection and saved state | [whitekeys-state.js](../whitekeys-state.js) | `node test-state.cjs`, `python3 test-persistence.py` |
 | Native Host discovery, transport and automatic identity | [whitekeys-sharing.js](../whitekeys-sharing.js) | `node test-sharing-adapter.cjs`, `node test-auto-identity.cjs`, `node test-sharing-performance.cjs` |
-| Live scale observation | [whitekeys-api.js](../whitekeys-api.js) | `node test-ui.cjs`; native behavior needs Live acceptance |
-| Keyboard drawing and input | [whitekeys-keyboard.js](../whitekeys-keyboard.js) | `node test-ui.cjs` |
+| Live scale observation | [whitekeys-api.js](../whitekeys-api.js) | `node test-midi.cjs` (LiveAPI boundary simulation); native behavior needs Live acceptance |
+| Keyboard drawing and input | [whitekeys-keyboard.js](../whitekeys-keyboard.js) | `node test-midi.cjs` (click/message and graphics simulation); native rendering needs Live acceptance |
 | Model-to-MIDI sharing | [whitekeys-state.js](../whitekeys-state.js) | `node test-sharing.cjs` |
 | Device wiring and AMXD container | [editable patch](../WhiteKeys%20Live%2012.maxpat), [builder](../build-amxd.py), [packager](../package-development.py) | `python3 package-development.py --check`, `python3 test-packaging.py` |
 | Navigation and domain snapshots | [navigation check](../check-navigation.py) | `python3 check-navigation.py`, `python3 test-navigation.py` |
