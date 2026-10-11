@@ -186,7 +186,7 @@ menuEntries=scaleMenu();var menuIndex=0,labels=[];
     var sourceMenu=ui('source_menu'),sourceLabels=['Local','Follow Live','Follow WhiteKeys'];
     var sourceSignature=sourceLabels.join('|');if(sourceMenu&&sourceMenuSignature!==sourceSignature){sourceMenuSignature=sourceSignature;sourceMenu.message('clear');for(i=0;i<sourceLabels.length;i++)sourceMenu.message('append',sourceLabels[i]);}
     setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));
-    var hostControl=ui('host_toggle');if(hostControl)hostControl.message('ignoreclick',identityBlocked||sourceIdentityConflict?1:0);
+    var hostControl=ui('host_toggle');if(hostControl){hostControl.message('usebgoncolor',1);hostControl.message('ignoreclick',identityBlocked||sourceIdentityConflict?1:0);}
     if(identityBlocked)setui('source_status','Identity conflict');else if(currentSet&&setIdentity!==currentSet)setui('source_status','Source unavailable - different Set');
     outlet(2,'sharingstate',JSON.stringify({record:getvalueof(),valid:recordValid?1:0}));
     outlet(1,['view',root,mask(notes)]);

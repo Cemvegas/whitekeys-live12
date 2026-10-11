@@ -62,7 +62,7 @@ def integrity():
         raise ValueError('Missing MIDI/API/editor/panic route')
     if boxes.get('source',{}).get('varname') != 'source_menu' or boxes.get('host',{}).get('varname') != 'host_toggle':
         raise ValueError('Scale Source and gated Host controls required')
-    if boxes['host'].get('maxclass') != 'textbutton' or boxes['host'].get('mode') != 1 or boxes['host'].get('ignoreclick') != 0:
+    if boxes['host'].get('maxclass') != 'textbutton' or boxes['host'].get('mode') != 1 or boxes['host'].get('ignoreclick') != 0 or boxes['host'].get('usebgoncolor') != 1:
         raise ValueError('Native Host textbutton must be clickable')
     if boxes.get('anchor', {}).get('saved_object_attributes', {}).get('_persistence') != 1:
         raise ValueError('Persistent native Set anchor missing')
