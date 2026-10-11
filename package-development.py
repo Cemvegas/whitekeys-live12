@@ -12,9 +12,9 @@ import zipfile
 ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js', 'whitekeys-sharing.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
-                 'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
+                 'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-auto-identity.cjs', 'sharing-test-fixture.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
                  'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
-                 'docs/production-sharing.md', 'docs/production-sharing-review.md',
+                 'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md', 'docs/automatic-identity-review.md', 'docs/production-sharing-review.md',
                  'docs/performance-diagnosis/README.md'}
 
 
@@ -55,8 +55,7 @@ def integrity():
               (('panicmsg', 0), ('midi', 0)), (('host', 0), ('hostprep', 0)),
               (('hostprep', 0), ('model', 0)), (('init', 0), ('sharing', 0)),
               (('model', 2), ('sharing', 0)), (('anchor', 0), ('anchorprep', 0)),
-              (('anchorprep', 0), ('sharing', 0)), (('conflict', 0), ('conflictprep', 0)),
-              (('conflictprep', 0), ('model', 0))}
+              (('anchorprep', 0), ('sharing', 0))}
     for control in ('root', 'scale', 'black', 'source'):
         needed |= {((control, 0), (control + 'prep', 0)), ((control + 'prep', 0), ('model', 0))}
     if not needed <= routes:

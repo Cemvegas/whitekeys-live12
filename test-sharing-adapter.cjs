@@ -1,46 +1,10 @@
-// Live boundary substitute exercises production scripts, not actual Live persistence.
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const marker=JSON.parse(fs.readFileSync('WhiteKeys Live 12.maxpat','utf8')).patcher.boxes.find(b=>b.box.id==='enrollment').box;
-const markerAutomatable=marker.parameter_enable===1&&marker.saved_attribute_attributes.valueof.parameter_invisible===0;
-let liveIds=[],data='',counter=0;const nodes={},devices=[];
-function make(runtime,record,options={}){liveIds.push(String(runtime));const ui={},out=[],bytes=[];let transport;
- const midi={arrayfromargs:a=>Array.from(a),outlet:(p,...a)=>{if(p===0)bytes.push(...a)},Task:function(){this.schedule=()=>{};this.cancel=()=>{}}};vm.createContext(midi);vm.runInContext(fs.readFileSync('whitekeys-midi.js','utf8'),midi);
- const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{(ui[n]||(ui[n]=[])).push(a)}})},outlet:(p,...a)=>{if(Array.isArray(a[0]))a=a[0];if(p===0)midi[a[0]](...a.slice(1));if(p===2){out.push(a);if(transport)transport[a[0]](...a.slice(1));}}};vm.createContext(state);vm.runInContext(fs.readFileSync('whitekeys-state.js','utf8'),state);state.setvalueof(...record);
- nodes[String(runtime)]={name:['WhiteKeys'],parameters:markerAutomatable?['id',runtime+1000]:[],canonical_parent:['id',10],can_have_chains:[0]};nodes[runtime+1000]={name:['WhiteKeys sharing enrollment']};
- function LiveAPI(cb,path){if(path==='this_device')this.id=runtime;else if(path==='live_set')this.id=1;else if(path==='live_set master_track mixer_device volume')this.id=99;else if(path==='live_set master_track')this.id=20;else this.id=Number(path.replace('id ',''));this.path='live_set tracks 0 devices '+liveIds.indexOf(String(this.id));this.get=p=>{if(options.censusError&&this.id===1)throw new Error('API pending');if(this.id===1){if(p==='name'||p==='canonical_parent')throw new Error('Song has no '+p);return p==='tracks'?['id',10]:[];}if(this.id===10)return p==='devices'?liveIds.flatMap(x=>['id',Number(x)]):p==='name'?['Piano']:p==='canonical_parent'?['id',1]:[];if(this.id===20)return [];return (nodes[this.id]||{})[p]||[];};}
- const anchor={message:(cmd,id)=>{if(cmd==='getid'&&!options.deferAnchor)transport.nativeanchor('id',options.anchor??99)}};
- transport={Global:function(){Object.defineProperty(this,'data',{get:()=>data,set:x=>data=x})},Date:class extends Date {getTime(){return 1000+counter++}},arrayfromargs:a=>Array.from(a),post:()=>{},outlet:()=>{},Task:function(){this.cancel=()=>{};this.schedule=()=>{};this.repeat=()=>{}},LiveAPI,patcher:{getnamed:n=>n==='song_anchor'?anchor:{message:(cmd,...a)=>state[cmd](...a)}}};vm.createContext(transport);vm.runInContext(fs.readFileSync('whitekeys-sharing.js','utf8'),transport);transport.sharingstate(JSON.stringify({record:Array.from(state.getvalueof()),valid:1}));
- const d={state,transport,ui,out,bytes,midi,note(){bytes.length=0;midi.note(144,60,90);midi.note(128,60,23);return bytes.slice()}};devices.push(d);return d;
-}
-function run(n=5){for(let i=0;i<n;i++)for(const d of devices)d.transport.tick()}
-function menuItems(d){let a=[];for(const m of d.ui.conflict_menu||[]){if(m[0]==='clear')a=[];if(m[0]==='append')a.push(m[1]);}return a.slice(1)}
-function last(ui,name){return (ui[name]||[]).filter(a=>a[0]==='set').at(-1)?.[1]}
-const record=(id,host,root=0)=>[4,id,'set-A','Local',host,'','','',root,2741,'Major',0];
-const a=make(100,record('original',1,2)),b=make(101,record('original',1,7)),f=make(102,[4,'follower','set-A','WhiteKeys',0,'set-A','original','Piano',0,2741,'Major',0]);
-f.transport.init();a.transport.init();f.transport.tick();assert.deepEqual(f.note(),[144,60,90,128,60,23]); // pending copied native device prevents premature A snapshot
-b.transport.init();run();assert.equal(last(a.ui,'source_status'),'Identity conflict');assert.equal(last(f.ui,'source_status'),'Identity conflict');assert.deepEqual(f.note(),[144,60,90,128,60,23]);
-assert.equal(menuItems(a).length,2);a.state.conflictselect(2);b.state.conflictselect(1);run();assert.equal(b.state.getvalueof()[1],'original');assert.equal(a.state.getvalueof()[4],0);assert.notEqual(a.state.getvalueof()[1],'original');assert.deepEqual(f.note(),[144,67,90,128,67,23]);
-const ids=devices.map(d=>d.state.getvalueof()[1]);a.state.conflictselect(2);run();assert.deepEqual(devices.map(d=>d.state.getvalueof()[1]),ids);
-console.log('Native registration barrier, collision pause, concurrent/repeated choice and production MIDI passed');
-function reset(){liveIds=[];data='';devices.length=0;for(const k in nodes)delete nodes[k]}
-for(const order of [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]])for(let keeper=0;keeper<3;keeper++){
- reset();const copies=[make(200,record('same',1,2)),make(201,record('same',1,7)),make(202,record('same',1,9))];const follow=make(203,[4,'f','set-A','WhiteKeys',0,'set-A','same','Piano',0,2741,'Major',1]);follow.transport.init();
- for(const index of order){copies[index].transport.init();follow.transport.tick();assert.deepEqual(follow.note(),[144,60,90,128,60,23])}
- run();assert.equal(menuItems(copies[0]).length,3);copies[0].state.conflictselect(keeper+1);run();const blobs=copies.map(d=>Array.from(d.state.getvalueof()));assert.equal(blobs[keeper][1],'same');assert.equal(blobs[keeper][4],1);assert.equal(new Set(blobs.map(b=>b[1])).size,3);for(let k=0;k<3;k++)if(k!==keeper)assert.equal(blobs[k][4],0);
- assert.deepEqual(follow.note(),[144,[62,67,69][keeper],90,128,[62,67,69][keeper],23]);const followBlob=Array.from(follow.state.getvalueof());reset();const re=blobs.map((blob,k)=>make(300+k,blob)),rf=make(303,followBlob);rf.transport.init();for(const k of order.slice().reverse())re[k].transport.init();run();assert.deepEqual(rf.note(),[144,[62,67,69][keeper],90,128,[62,67,69][keeper],23]);assert.equal(menuItems(re[keeper]).length,0);
-}
-console.log('All three-copy registration orders/keepers and changed-runtime saved reconnect passed');
-reset();const x=make(400,record('collision',1,2)),y=make(401,record('collision',1,7));x.transport.init();y.transport.init();run();make(402,record('collision',1,9));x.state.conflictselect(1);run();assert.equal(x.state.getvalueof()[1],'collision');assert.equal(y.state.getvalueof()[1],'collision');
-console.log('Changed native candidate group rejects stale selection passed');
+// Production adapter/model/MIDI through controlled native LiveAPI.
+const assert=require('assert');
+const {make,run,last,record,reset,devices,remove}=require('./sharing-test-fixture.cjs');
+reset();const discoveryHost=make(90,record('discovery-host',1,7)),discoveryFollower=make(91,record('discovery-follower',0));discoveryHost.transport.init();discoveryFollower.transport.init();run();discoveryFollower.state.sourceselect(2);run();assert.deepEqual(discoveryFollower.note(),[144,67,90,128,67,23]);console.log('Native enrollment discovery and automatic Follow MIDI passed');
 reset();const ah=make(500,record('host',1,7),{deferAnchor:true}),af=make(501,[4,'follow','set-A','WhiteKeys',0,'set-A','host','Piano',0,2741,'Major',0]);ah.transport.init();af.transport.init();run();assert.deepEqual(af.note(),[144,60,90,128,60,23]);ah.transport.nativeanchor('id',99);run();assert.deepEqual(af.note(),[144,67,90,128,67,23]);const foreign=make(502,[4,'alien','other-set','Local',1,'','','',2,2741,'Major',0],{anchor:88});foreign.transport.init();run();ah.state.rootselect(9);run();assert.deepEqual(af.note(),[144,69,90,128,69,23]);assert.match(last(foreign.ui,'source_status'),/different Set/);
 console.log('Deferred native anchor and foreign-device isolation without stalling independent Host passed');
-reset();const rollback=make(600,record('copied',1,2)),gone=make(601,record('copied',1,7));rollback.transport.init();gone.transport.init();run();rollback.state.conflictselect(2);liveIds=liveIds.filter(x=>x!=='601');devices.splice(devices.indexOf(gone),1);run();assert.equal(rollback.state.getvalueof()[1],'copied');assert.equal(rollback.state.getvalueof()[4],1);assert.equal(rollback.state.getvalueof()[12],1);assert.equal(menuItems(rollback).length,1);rollback.state.conflictselect(1);run();assert.equal(rollback.state.getvalueof()[12],undefined);
-console.log('Removed participant rolls staged identity back and permits explicit surviving-owner choice passed');
 reset();const foreignFirst=make(700,[4,'alien','other-set','Local',1,'','','',2,2741,'Major',0],{anchor:88}),realHost=make(701,record('real-host',1,7)),realFollow=make(702,[4,'real-follow','set-A','WhiteKeys',0,'set-A','real-host','Piano',0,2741,'Major',0]);foreignFirst.transport.init();realFollow.transport.init();realHost.transport.init();run();assert.deepEqual(realFollow.note(),[144,67,90,128,67,23]);
-reset();const source=make(800,record('source',1,7)),copyF1=make(801,[4,'copy-follow','set-A','WhiteKeys',0,'set-A','source','Piano',2,2741,'Major',1]),copyF2=make(802,[4,'copy-follow','set-A','WhiteKeys',0,'set-A','source','Piano',2,2741,'Major',1]);source.transport.init();copyF1.transport.init();copyF2.transport.init();run();liveIds=liveIds.filter(x=>x!=='802');devices.splice(devices.indexOf(copyF2),1);run();copyF1.state.conflictselect(1);run();assert.equal(copyF1.state.getvalueof()[12],undefined);assert.equal(copyF1.state.getvalueof()[4],0);assert.equal(copyF1.state.getvalueof()[6],'source');assert.equal(copyF1.state.getvalueof()[11],1);assert.deepEqual(copyF1.note(),[144,67,90,128,67,23]);
-console.log('Foreign-first registration and deleted duplicate Follower survivor resolution passed');
-reset();const failure={censusError:false},failA=make(900,record('same-fail',1),failure),failB=make(901,record('same-fail',1));failA.transport.init();failB.transport.init();run();failure.censusError=true;failA.transport.tick();failure.censusError=false;run();const recent=failA.ui.conflict_menu.filter(a=>a[0]==='hidden').at(-1);assert.equal(recent[1],0);
-console.log('Transient native failure restores conflict selector passed');
 // AC19/20/23: explicit handoff through real production messages and MIDI.
 reset();const h1=make(1100,record('host-A',0,2)),h2=make(1101,record('host-B',0,7)),auto=make(1102,record('auto',0));
 for(const d of devices)d.transport.init();run();auto.state.sourceselect(2);run();assert.equal(last(auto.ui,'source_status'),'Waiting for Host');
@@ -51,21 +15,9 @@ h1.state.rootselect(9);run();assert.deepEqual(auto.note(),[144,67,90,128,67,23])
 h1.state.hostselect(1);h2.state.hostselect(1);run();assert.equal(h1.state.getvalueof()[4],0);assert.equal(h2.state.getvalueof()[4],1);
 auto.state.hostselect(1);run();assert.equal(auto.state.getvalueof()[3],'Local');assert.equal(h2.state.getvalueof()[4],0);assert.equal(auto.state.getvalueof()[4],1);
 console.log('Automatic Follow, explicit single Host handoff, retained scale and held MIDI passed');
-// Identity conflict has priority over automatic handoff, while independent Host stays live.
-reset();const ca=make(1200,record('conflicted',1,2)),cf=make(1201,record('bound',0)),independent=make(1202,record('independent',0,9));for(const d of devices)d.transport.init();run();cf.state.sourceselect(2);run();assert.deepEqual(cf.note(),[144,62,90,128,62,23]);
-const duplicate=make(1203,record('conflicted',1,7));duplicate.transport.init();run();independent.state.hostselect(1);run();assert.equal(last(independent.ui,'host_toggle'),1);assert.equal(last(cf.ui,'source_status'),'Identity conflict');assert.equal(cf.state.getvalueof()[6],'conflicted');assert.deepEqual(cf.note(),[144,62,90,128,62,23]);
-cf.state.hostselect(1);run();assert.equal(cf.state.getvalueof()[3],'WhiteKeys');assert.equal(last(independent.ui,'host_toggle'),1);
-console.log('Identity conflict blocks automatic escape and Host action without pausing independent Host passed');
 // Distinct restored preferences wait for an explicit action in either discovery order.
 for(const order of [[0,1],[1,0]]){
  reset();const restored=[make(1300,record('restored-A',1,2)),make(1301,record('restored-B',1,7))],rFollow=make(1302,record('waiting',0));rFollow.transport.init();for(const i of order)restored[i].transport.init();run();rFollow.state.sourceselect(2);run();assert.equal(last(rFollow.ui,'source_status'),'Host conflict');for(const h of restored)assert.equal(last(h.ui,'host_toggle'),0);restored[1].state.hostselect(1);run();assert.equal(restored[0].state.getvalueof()[4],0);assert.deepEqual(rFollow.note(),[144,67,90,128,67,23]);
 }
 console.log('Distinct saved Host conflict never elects by discovery order passed');
-// Explicitly activated Host duplication must keep its preference on either chosen keeper.
-for(const keeper of [1,2]){
- reset();const original=make(1400,record('explicit-copy',0,2)),bound=make(1401,record('bound-explicit',0));original.transport.init();bound.transport.init();run();original.state.hostselect(1);run();bound.state.sourceselect(2);run();const copied=make(1402,Array.from(original.state.getvalueof()));copied.transport.init();run();assert.equal(copied.state.getvalueof()[4],1);original.state.conflictselect(keeper);run();const winner=keeper===1?original:copied,loser=keeper===1?copied:original;assert.equal(winner.state.getvalueof()[1],'explicit-copy');assert.equal(winner.state.getvalueof()[4],1);assert.equal(loser.state.getvalueof()[4],0);assert.match(last(bound.ui,'source_status'),/Following/);assert.deepEqual(bound.note(),[144,62,90,128,62,23]);
-}
-console.log('Explicit active Host duplication preserves selected keeper preference and Follow passed');
-// Deleted chosen keeper rolls the explicit role back with the identity transaction.
-reset();const survivor=make(1500,record('surviving-role',0,2)),survivorFollow=make(1501,record('survivor-follow',0));survivor.transport.init();survivorFollow.transport.init();run();survivor.state.hostselect(1);run();survivorFollow.state.sourceselect(2);run();const removedKeeper=make(1502,Array.from(survivor.state.getvalueof()));removedKeeper.transport.init();run();survivor.state.conflictselect(2);liveIds=liveIds.filter(id=>id!=='1502');devices.splice(devices.indexOf(removedKeeper),1);run();survivor.state.conflictselect(1);run();assert.equal(survivor.state.getvalueof()[4],1);assert.match(last(survivorFollow.ui,'source_status'),/Following/);
-console.log('Removed selected keeper restores explicit role before survivor resolution passed');
+reset();const failure={censusError:false},retryHost=make(1600,record('retry-host',1,7),failure),retryFollow=make(1601,record('retry-follow',0));retryHost.transport.init();retryFollow.transport.init();run();retryFollow.state.sourceselect(2);run();failure.censusError=true;retryHost.transport.tick();failure.censusError=false;run();assert.deepEqual(retryFollow.note(),[144,67,90,128,67,23]);console.log('Transient native census failure recovers automatic Follow passed');

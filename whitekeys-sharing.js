@@ -1,17 +1,17 @@
 // Native transport adapter. Every operation runs on Max's deferred scheduler.
-// Runtime IDs locate devices only; ownership is decided exclusively by user choice.
+// Runtime IDs locate devices only; live incumbents are retained; cold collisions use native Set order.
 autowatch=0;inlets=1;outlets=1;
 var nativeApis={}, nativeSeen={}, parameterNames={}, lastMessages={};
 var bus=new Global('whitekeys_production_sharing_v1');
 var runtime='',scope='',session='',anchor=-1,master=0,record=null,validRecord=0,label='',poll=null;
-var transportEpoch='',lastResolution='',topology=[],nativeReady=false,revision=0,snapshotKey='',conflictKey='',foreign=false,roleGeneration='';
+var transportEpoch='',lastResolution='',topology=[],nativeReady=false,revision=0,snapshotKey='',foreign=false,roleGeneration='';
 function uid(){return 'wk-'+new Date().getTime().toString(36)+'-'+Math.floor(Math.random()*4294967296).toString(36)+'-'+Math.floor(Math.random()*4294967296).toString(36);}
 function read(){try{return JSON.parse(bus.data||'{}');}catch(e){return {};}}
 function write(table){bus.data=JSON.stringify(table);}
 function model(){return this.patcher.getnamed('model');}
 function send(){
     var a=arrayfromargs(arguments),command=a[0];
-    var cacheable=command==='sharingrole'||command==='sharingcontext'||command==='sharingdirectory'||command==='sharingchoices'||command==='sharingstatus';
+    var cacheable=command==='sharingrole'||command==='sharingcontext'||command==='sharingdirectory'||command==='sharingstatus';
     var signature=cacheable?JSON.stringify(a):'';if(cacheable&&lastMessages[command]===signature)return;
     if(command==='sharingdirectory')delete lastMessages.sharingstatus;
     model().message.apply(model(),a);if(cacheable)lastMessages[command]=signature;
@@ -38,12 +38,12 @@ function scanContainer(container,found){
     var devices=ids(container.get('devices'));
     for(var i=0;i<devices.length;i++){
         var d=api(devices[i]),params=ids(d.get('parameters')),enrolled=false;
-        for(var j=0;j<params.length;j++)if(parameterName(params[j])==='WhiteKeys sharing enrollment')enrolled=true;
+        for(var j=0;j<params.length;j++){var name=parameterName(params[j]);if(name==='WK enrollment'||name==='WhiteKeys sharing enrollment')enrolled=true;}
         if(enrolled)found.push(devices[i]);
         if(Number(d.get('can_have_chains')[0])){var chains=ids(d.get('chains'));for(j=0;j<chains.length;j++)scanContainer(api(chains[j]),found);}
     }
 }
-function census(song){var found=[],tracks=ids(song.get('tracks')).concat(ids(song.get('return_tracks')));for(var i=0;i<tracks.length;i++)scanContainer(api(tracks[i]),found);scanContainer(pathApi('live_set master_track'),found);return found.sort();}
+function census(song){var found=[],tracks=ids(song.get('tracks')).concat(ids(song.get('return_tracks')));for(var i=0;i<tracks.length;i++)scanContainer(api(tracks[i]),found);scanContainer(pathApi('live_set master_track'),found);return found;}
 function location(d){
     var names=[d.get('name').join(' ')],parent=ids(d.get('canonical_parent')),seen={},hops=0;
     while(parent.length&&parent[0]!==scope.split(':')[0]&&hops++<24&&!seen[parent[0]]){seen[parent[0]]=1;var p=api(parent[0]);try{names.unshift(p.get('name').join(' '));}catch(e){}parent=ids(p.get('canonical_parent'));}
@@ -87,6 +87,26 @@ function applyRole(s){
         if(record[4]!==enabled){send('sharingrole',enabled,0);s.entries[runtime].record=record;}
     }
 }
+// A known incumbent is meaningful only within this live native session.
+// At cold startup, native Set traversal order is the user's chosen fallback.
+function automaticIdentity(s){
+    s.owners=s.owners||{};
+    var visited={};
+    for(var r in s.entries){
+        var e=s.entries[r];if(e.excluded||visited[e.record[1]])continue;
+        var id=e.record[1],g=group(s.entries,id);visited[id]=1;
+        var busy=false;for(var t in s.transactions)for(var k in s.transactions[t].assignments)for(var i=0;i<g.length;i++)if(g[i].runtime===k)busy=true;
+        if(busy)continue;
+        if(g.length===1&&g[0].valid&&g[0].record[12]!==1){s.owners[id]={runtime:g[0].runtime,session:g[0].session};continue;}
+        var ready=g.length>0;for(i=0;i<g.length;i++)if(!g[i].valid||g[i].record[12]!==1)ready=false;
+        if(!ready)continue;
+        var owner=s.owners[id],keeper=null;
+        for(i=0;i<g.length;i++)if(owner&&g[i].runtime===owner.runtime&&g[i].session===owner.session)keeper=g[i];
+        if(!keeper)for(i=0;i<topology.length&&!keeper;i++)for(k=0;k<g.length;k++)if(g[k].runtime===topology[i])keeper=g[k];
+        if(keeper){var table=read();table[scope]=s;write(table);resolveIdentity(scope+'#'+signature(g),keeper.runtime);return;}
+    }
+    var table=read();table[scope]=s;write(table);
+}
 function tick(){
     try{
         nativeSeen={};
@@ -98,7 +118,7 @@ function tick(){
         if(!s.set&&!foreign)s.set=record[2]!=='unresolved'?record[2]:uid();
         if(foreign||(record[2]!=='unresolved'&&record[2]!==s.set)){
             s.entries[runtime]={runtime:runtime,session:session,record:record,valid:0,label:label,excluded:1};write(table);
-            send('sharingdirectory','[]');conflictKey='';send('sharingchoices','[]');send('sharingstatus','Source unavailable - different Set');return;
+            send('sharingdirectory','[]');send('sharingstatus','Source unavailable - different Set');return;
         }
         if(!nativeReady)return;
         send('sharingcontext',s.set,session,runtime);
@@ -110,19 +130,19 @@ function tick(){
         var ready=topology.indexOf(runtime)>=0;
         for(var i=0;i<topology.length;i++)if(!s.entries[topology[i]])ready=false;
         write(table);
-        if(!ready){send('sharingdirectory','[]');conflictKey='';send('sharingchoices','[]');return;}
+        if(!ready){send('sharingdirectory','[]');return;}
         applyRole(s);write(table);
         // Mark ALL claimants blocked before exposing any source directory.
         var own=group(s.entries,record[1]);if(own.length>1&&record[12]!==1){send('sharingblocked',1);s.entries[runtime].record=record;write(table);}
         var tx=null;for(var t in s.transactions)if(s.transactions[t].assignments[runtime]){tx=s.transactions[t];break;}
         if(tx){
-            var members=[],intact=true;for(r in tx.assignments){var e=s.entries[r];if(!e||e.session!==tx.sessions[r])intact=false;else members.push(e);}
+            var members=[],intact=true;for(r in tx.assignments){var e=s.entries[r];if(!e||!e.valid||e.session!==tx.sessions[r])intact=false;else members.push(e);}
             // A changed native membership aborts before any sharing can resume.
             if(!intact||topology.join('|')!==tx.topology)tx.cancelled=1;
             if(tx.cancelled){
                 var old=tx.original[runtime];send('sharingblocked',1);if(record[1]!==old.id||record[4]!==old.host){send('sharingidentity',old.id,old.host);s.entries[runtime].record=record;}
                 var rolledBack=true;for(r in tx.original)if(s.entries[r]&&(s.entries[r].record[1]!==tx.original[r].id||s.entries[r].record[4]!==tx.original[r].host))rolledBack=false;
-                if(rolledBack){if(tx.roleBefore&&s.role&&s.role.generation===tx.roleBefore.generation)s.role=tx.roleBefore;delete s.transactions[t];}write(table);send('sharingdirectory','[]');conflictKey='';send('sharingchoices','[]');return;
+                if(rolledBack){if(tx.roleBefore&&s.role&&s.role.generation===tx.roleBefore.generation)s.role=tx.roleBefore;delete s.transactions[t];}write(table);send('sharingdirectory','[]');return;
             }
             var a=tx.assignments[runtime];if(record[1]!==a.id||record[4]!==a.host){send('sharingidentity',a.id,a.host);s.entries[runtime].record=record;write(table);}
             var applied=true;for(r in tx.assignments)if(s.entries[r].record[1]!==tx.assignments[r].id||s.entries[r].record[4]!==tx.assignments[r].host)applied=false;
@@ -144,13 +164,11 @@ function tick(){
         if(roleConflict)send('sharingstatus','Host conflict');
         var sourceGroup=record[6]?group(s.entries,record[6]):[];if(sourceGroup.length>1||sourceGroup.some(function(e){return e.record[12]===1;}))send('sharingstatus','Identity conflict');
         if(selected)send('sharingsnapshot',JSON.stringify({set:s.set,id:selected.record[1],session:selected.epoch,revision:selected.revision,root:selected.record[8],mask:selected.record[9],name:selected.record[10]}));
-        // Own conflict, or selected source conflict, can be resolved from this panel.
-        own=group(s.entries,record[1]);if(own.length<2&&!own.some(function(e){return e.record[12]===1;})&&record[6])own=group(s.entries,record[6]);
-        var choices=[];if(own.length>1||own.some(function(e){return e.record[12]===1;})){var sig=scope+'#'+signature(own);for(i=0;i<own.length;i++)choices.push({runtime:own[i].runtime,label:own[i].label,signature:sig});}
-        var ck=JSON.stringify(choices);if(ck!==conflictKey){conflictKey=ck;send('sharingchoices',ck);}
-    }catch(e){send('sharingdirectory','[]');conflictKey='';send('sharingchoices','[]');post('WhiteKeys sharing unavailable: '+e.message+'\n');}
+
+        automaticIdentity(s);
+    }catch(e){send('sharingdirectory','[]');post('WhiteKeys sharing unavailable: '+e.message+'\n');}
 }
-function sharingchoose(sig,keeper){
+function resolveIdentity(sig,keeper){
     // Re-read native topology and shared state at the moment of choice.
     var table=read(),s=table[scope];if(!s||!nativeReady)return;
     var entry=s.entries[String(keeper)];if(!entry)return;
@@ -160,7 +178,7 @@ function sharingchoose(sig,keeper){
     var tx={assignments:{},sessions:{},original:{},topology:live.join('|')};var allocated={};for(k in s.entries)allocated[s.entries[k].record[1]]=1;
     for(i=0;i<g.length;i++){if(g[i].record[12]!==1)return;var id=g[i].record[1];if(g[i].runtime!==String(keeper)){do{id=uid();}while(allocated[id]);allocated[id]=1;}tx.assignments[g[i].runtime]={id:id,host:g[i].runtime===String(keeper)?g[i].record[4]:0};tx.sessions[g[i].runtime]=g[i].session;tx.original[g[i].runtime]={id:g[i].record[1],host:g[i].record[4]};}
     if(s.role&&g.some(function(e){return e.runtime===s.role.runtime&&e.session===s.role.session;})){tx.roleBefore=JSON.parse(JSON.stringify(s.role));s.role.runtime=String(keeper);s.role.session=entry.session;}
-    s.transactions[String(sig)]=tx;write(table);tick();
+    s.transactions[String(sig)]=tx;write(table);
 }
 function dispose(){for(var path in nativeApis){try{nativeApis[path].id=0;}catch(e){}}nativeApis={};nativeSeen={};parameterNames={};lastMessages={};if(poll){poll.cancel();poll=null;}if(scope&&runtime){var table=read();if(table[scope]){delete table[scope].entries[runtime];if(!Object.keys(table[scope].entries).length)delete table[scope];write(table);}}runtime='';nativeReady=false;}
 function notifydeleted(){dispose();}

@@ -897,67 +897,6 @@
             }
           }
         }
-      },
-      {
-        "box": {
-          "id": "conflict",
-          "maxclass": "umenu",
-          "patching_rect": [
-            400,
-            520,
-            250,
-            20
-          ],
-          "numinlets": 1,
-          "numoutlets": 3,
-          "varname": "conflict_menu",
-          "parameter_enable": 0,
-          "bgcolor": [
-            0.25882352941176473,
-            0.29411764705882354,
-            0.27058823529411763,
-            1
-          ],
-          "textcolor": [
-            0.8627450980392157,
-            0.8901960784313725,
-            0.8666666666666667,
-            1
-          ],
-          "presentation": 1,
-          "presentation_rect": [
-            14,
-            128,
-            332,
-            19
-          ],
-          "fontsize": 10,
-          "bordercolor": [
-            0.396078431372549,
-            0.44313725490196076,
-            0.40784313725490196,
-            1
-          ],
-          "items": [
-            "Identity conflict: keep identity on..."
-          ],
-          "hidden": 1
-        }
-      },
-      {
-        "box": {
-          "id": "conflictprep",
-          "maxclass": "newobj",
-          "text": "prepend conflictselect",
-          "patching_rect": [
-            400,
-            550,
-            150,
-            22
-          ],
-          "numinlets": 1,
-          "numoutlets": 1
-        }
       }
     ],
     "lines": [
@@ -1284,30 +1223,6 @@
           ],
           "destination": [
             "sharing",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "conflict",
-            0
-          ],
-          "destination": [
-            "conflictprep",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "conflictprep",
-            0
-          ],
-          "destination": [
-            "model",
             0
           ]
         }

@@ -1,12 +1,12 @@
 # Üretim Host/Follower paylaşımı — #20 / #21
 
-Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve workspace ADR 0006 ve ADR 0007. #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
+Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve workspace ADR 0006 ve ADR 0007 / ADR 0008. #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
 
 ## Kullanım
 
 Host yazısının bütün yüzeyine basın; yalnız aktif Host sarı görünür. Local ve Follow Live paylaşabilir. Follow WhiteKeys seçen cihaz Set’in tek aktif Host’una otomatik bağlanır; ayrıca Host seçilmez. Follower’da Host açmak son gamı koruyarak Local’a geçer.
 
-Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Identity conflict durumunda otomatik takip çözümü atlamaz; mevcut aday menüsüyle kimliği koruyacak cihazı seçin. Kalıcı restore ve çözüm kabulü #21 kapsamındadır.
+Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Kimlik çakışması otomatik çözülür: canlı mevcut cihaz kimliği/Host tercihini korur, kopyalar yeni kimlik ve Host kapalı alır. Eski çakışmalı Set açılışında ilk native cihaz korunur; manuel aday menüsü yoktur. Ayrıntılar docs/specs/automatic-identity-resolution.md içinde. Gerçek kayıt/açılış kabulü bekler.
 
 ## Kayıt ve adapter
 

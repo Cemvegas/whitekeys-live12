@@ -1,5 +1,7 @@
 # WhiteKeys Live 12 — Anlık gam düzenleme, Host paylaşımı ve gam tanıma
 
+> 2026-10-11 sonraki kullanıcı kararı: Manuel kimlik seçimi kaldırılmıştır. İlgili eski hükümler yerine [otomatik kimlik çözümü değişikliği](automatic-identity-resolution.md) ve workspace ADR 0008 uygulanır.
+
 Durum: İnceleme taslağı · 2026-10-11. Kullanıcı davranış kararları onaylıdır; paylaşımın teknik yöntemi doğrulama bekler. Bu belge üretim kodu, ticket veya GitHub yayını oluşturmaz.
 
 ## Problem Statement

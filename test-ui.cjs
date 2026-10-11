@@ -22,3 +22,5 @@ state.livescale(2,'A deliberately long external scale name that would overflow t
 console.log('Scale Source panel routing, Local/Live MIDI, Host/WhiteKeys transitions and retained Playing passed');
 
 assert.equal(patch.lines.find(x=>x.patchline.source[0]==='host').patchline.source[1],0);assert.equal(boxes.host.mode,1);assert.equal(boxes.hostlabel,undefined);assert.deepEqual(boxes.host.bgoncolor,[242/255,201/255,76/255,1]);assert.deepEqual(boxes.host.presentation_rect,[251,4,45,19]);
+
+assert.equal(boxes.conflict,undefined);assert.equal(boxes.conflictprep,undefined);

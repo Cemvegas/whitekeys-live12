@@ -74,12 +74,6 @@ function sharingsnapshot(json) {
 function sharingstatus(text) {sharingNotice=String(text);render();}
 function sharingblocked(v) { v=Number(v)===1?1:0;if(identityBlocked===v)return;identityBlocked=v;sourceAvailable=false;sourceSession='';sourceRevision=-1;render();save(); }
 function sharingidentity(id,host) { if(!identityBlocked||!token(id)||!integer(Number(host),0,1))return;deviceIdentity=id;hostEnabled=sourceKind==='WhiteKeys'?0:Number(host);render();save(); }
-function sharingchoices(json) {
-    var c;try{c=JSON.parse(String(json));}catch(e){return;}if(!(c instanceof Array))return;
-    conflictChoices=c;var status=ui('source_status');if(status)status.message('hidden',c.length?1:0);var menu=ui('conflict_menu');if(menu){menu.message('clear');menu.message('append','Identity conflict: keep identity on...');for(var i=0;i<c.length;i++)menu.message('append',c[i].label);menu.message('hidden',c.length?0:1);menu.message('set',0);}
-}
-var conflictChoices=[];
-function conflictselect(v) {var c=conflictChoices[Number(v)-1];if(c)outlet(2,'sharingchoose',c.signature,c.runtime);}
 function mask(a) { var n=0; for(var i=0;i<a.length;i++) n |= 1<<a[i]; return n; }
 function unmask(m) { var a=[]; for(var i=0;i<12;i++) if(m & (1<<i)) a.push(i); return a; }
 function valid(a) { if(!a.length||a[0]!==0) return false; for(var i=0;i<a.length;i++) if(a[i]!==Math.floor(a[i])||a[i]<0||a[i]>11||(i&&a[i]<=a[i-1]))return false; return true; }
