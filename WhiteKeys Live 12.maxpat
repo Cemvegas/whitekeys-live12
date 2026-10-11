@@ -752,7 +752,7 @@
             0.8666666666666667,
             1
           ],
-          "text": "Host",
+          "text": "Host Off",
           "presentation": 1,
           "presentation_rect": [
             254,
@@ -768,7 +768,7 @@
           ],
           "varname": "host_toggle",
           "parameter_enable": 0,
-          "texton": "Host",
+          "texton": "Host On",
           "bgoncolor": [
             0.7176470588235294,
             0.8235294117647058,
@@ -782,7 +782,31 @@
             1
           ],
           "active": 1,
-          "hint": "Share the sounding scale with WhiteKeys in this Set"
+          "hint": "Host On shares this scale; Host Off stops sharing. Unavailable while following WhiteKeys.",
+          "activebgcolor": [
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
+            1
+          ],
+          "activebgoncolor": [
+            0.7176470588235294,
+            0.8235294117647058,
+            0.6549019607843137,
+            1
+          ],
+          "activetextcolor": [
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
+            1
+          ],
+          "activetextoncolor": [
+            0.12549019607843137,
+            0.18823529411764706,
+            0.12941176470588237,
+            1
+          ]
         }
       },
       {
