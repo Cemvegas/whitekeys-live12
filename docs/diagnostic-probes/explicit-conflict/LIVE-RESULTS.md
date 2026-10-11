@@ -1,6 +1,6 @@
 # Live observations — 2026-10-11
 
-Status: partial evidence; acceptance NOT complete. Issue #19 stays open.
+Status: #19 closed at the user's explicit request on 2026-10-11 after all guided manual checks were reported passed. Historical entries below preserve the status at each checkpoint. Remaining measurement limits are not passed claims.
 
 Agent operated Live with the user's Computer Use permission, in a separate test Set. Production devices and pre-existing diagnostic work were not edited.
 
@@ -93,3 +93,7 @@ User reported all eleven grouped checks passed on 2026-10-11:
 11. Repeated notes and device-local Panic passed in the user's grouped report. Different MIDI channels were conditional in the instruction; the blanket result does not separately establish whether that optional subcheck was exercised.
 
 These are user-attested results, not independently captured traces. All requested grouped manual checks are now reported passed; do not ask the user to repeat them without a specific new failure. Real registration order, transient startup MIDI snapshots, exact Live/Max versions and separately confirmed multichannel execution were not captured. Those evidence limits must not be relabeled as passed. #19 has not been closed, and #20–#21 have not been started.
+
+## Closure
+
+GitHub #19 was verified CLOSED on 2026-10-11. Closure comment: https://github.com/Cemvegas/whitekeys-live12/issues/19#issuecomment-6106697461. The user explicitly requested completion after reporting all manual checks passed. Registration-order traces, sub-visible startup MIDI snapshots, exact versions and separately confirmed multichannel execution remain evidence limitations for final production acceptance (#22). #20–#21 were not started.

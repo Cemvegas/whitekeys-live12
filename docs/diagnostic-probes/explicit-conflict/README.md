@@ -1,6 +1,6 @@
 # #19 — Explicit Conflict Probe
 
-Durum: otomatik mesaj senaryoları geçti; kullanıcı yönlendirilmiş Live kontrollerinin tamamını geçti olarak bildirdi. Ayrıntılar ve kalan kanıt sınırları `LIVE-RESULTS.md` içindedir. Aşağıdaki boş form başlangıç şablonudur, güncel sonuç kaydı değildir. Gerçek kayıt sırası ve çok kısa açılış MIDI geçişleri henüz ölçülmediği için #19 açık kalır, #20–#21 başlamaz. Spec #23 / ADR 0006 için ayrı tanılama cihazıdır, üretim paylaşım uygulaması değildir.
+Durum: otomatik mesaj senaryoları geçti; kullanıcı yönlendirilmiş Live kontrollerinin tamamını geçti olarak bildirdi. Ayrıntılar ve kalan kanıt sınırları `LIVE-RESULTS.md` içindedir. Aşağıdaki boş form başlangıç şablonudur, güncel sonuç kaydı değildir. Kullanıcının açık kapanış talimatıyla #19 tamamlandı; gerçek kayıt sırası ve çok kısa açılış MIDI geçişleri ölçülmüş sayılmadı, kapanış kaydında son üretim kabulü (#22) için sınır olarak belirtildi. #20–#21 başlamadı. Spec #23 / ADR 0006 için ayrı tanılama cihazıdır, üretim paylaşım uygulaması değildir.
 
 ## Paket ve test
 
@@ -55,6 +55,6 @@ Her satır için beklenen ve gözlenen sonucu ayrı yazın. Başlangıç durumu 
 
 Live sürümü: … · Max sürümü: … · Set adı: … · Tarih: …
 
-Bir Failed veya zorunlu Not run varsa #19 kapanmaz. Bu paket bağımsız #19 hazırlığıdır; #20–#21 üretim işlerinin yerine geçmez.
+Bu form ilk kabul planını gösterir. #19 kullanıcı talimatıyla, LIVE-RESULTS.md içindeki ölçüm sınırları açıkça belirtilerek kapatıldı. Bu paket bağımsız #19 hazırlığıdır; #20–#21 üretim işlerinin yerine geçmez.
 
 Kaynaklar: [live.object persistence](https://docs.cycling74.com/reference/live.object), [live.thisdevice](https://docs.cycling74.com/reference/live.thisdevice), [Live API lifecycle](https://docs.cycling74.com/userguide/m4l/live_api_overview/). Native referansın nasıl taşındığını gerçek kullanıcı denemesi belirleyecek.
