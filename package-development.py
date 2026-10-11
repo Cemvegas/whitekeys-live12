@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js', 'whitekeys-sharing.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
                  'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-auto-identity.cjs', 'sharing-test-fixture.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
-                 'package-development.py', 'check.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
+                 'package-development.py', 'check.py', 'test-packaging.py', 'PROJECT-LAYOUT.md', 'AGENTS.md', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
                  'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md', 'docs/automatic-identity-review.md', 'docs/production-sharing-review.md',
                  'docs/performance-diagnosis/README.md'}
 
@@ -130,6 +130,7 @@ def publish_current():
     if staging.exists():
         raise ValueError('Unfinished publication at ' + str(staging))
     staging.mkdir(parents=True)
+    archived_previous = None
     try:
         output = staging / 'WhiteKeysLive12-development.zip'
         package(output)
@@ -148,9 +149,12 @@ def publish_current():
             destination = workspace / 'archive' / ('package-' + previous['source_commit'][:12] + '-' + stamp)
             destination.parent.mkdir(parents=True, exist_ok=True)
             current.rename(destination)
+            archived_previous = destination
         staging.rename(current)
         print('Current installation:', current)
     except Exception:
+        if archived_previous is not None and not current.exists():
+            archived_previous.rename(current)
         if staging.exists():
             shutil.rmtree(staging)
         raise

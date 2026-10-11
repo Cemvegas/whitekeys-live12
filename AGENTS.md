@@ -14,4 +14,4 @@ Use a single-context layout: `GLOSSARY.md` and `docs/adr/` at this workspace roo
 
 ### Workspace files
 
-When packaging a device or organizing experiments and outputs, read `../PROJECT-LAYOUT.md`. Run production checks with `python3 check.py`.
+When packaging a device or organizing experiments and outputs, read `PROJECT-LAYOUT.md`. Run production checks with `python3 check.py`.

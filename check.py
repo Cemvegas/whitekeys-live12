@@ -8,7 +8,8 @@ commands = [['node', '--check', str(path.name)] for path in sorted(ROOT.glob('wh
 commands += [['node', name] for name in (
     'test-midi.cjs', 'test-state.cjs', 'test-ui.cjs', 'test-sharing.cjs',
     'test-sharing-adapter.cjs', 'test-auto-identity.cjs', 'test-sharing-performance.cjs')]
-commands += [[sys.executable, 'test-persistence.py'],
+commands += [[sys.executable, 'test-packaging.py'],
+             [sys.executable, 'test-persistence.py'],
              [sys.executable, 'package-development.py', '--check'],
              ['git', 'diff', '--check']]
 for command in commands:
