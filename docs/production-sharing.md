@@ -34,8 +34,8 @@ AMXD ve beş JS dosyasını aynı klasörde tutun. A, B ve C ayrı kimlikli ciha
 
 | Kriter | Sonuç |
 |---|---|
-| HC01 native düğme, sarı renk ve otomatik keşif | Passed — kullanıcı, 2026-10-11; f43ed90 |
-| HC02 gerçek Host devri ve basılı nota | Passed — kullanıcı, 2026-10-11; f43ed90 |
-| HC03 gerçek kapat/yeniden bağlan | Passed — kullanıcı, 2026-10-11; f43ed90 |
+| HC01 Host açma ve otomatik takip (kısa kullanıcı adımı) | Passed — kullanıcı, 2026-10-11; f43ed90 |
+| HC02 Host devri ve basılı notanın kapanması (kısa kullanıcı adımı) | Passed — kullanıcı, 2026-10-11; f43ed90 |
+| HC03 kapat/yeniden bağlan (kısa kullanıcı adımı) | Passed — kullanıcı, 2026-10-11; f43ed90 |
 
-Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 ana kayıt/çoğaltma adımları kullanıcı tarafından geçti bildirildi. Eski çakışmalı Set kurtarma, ham MIDI ve diğer eksik güvenlik alt koşulları [kabul formunda](../HOST-SONUC-FORMU.md) ayrı izlenir; ana adımların geçmesi bunları tamamlanmış saymaz.
+Yukarıdaki Passed sonuçlar kullanıcıya verilen kısa adımları kapsar; bu belgedeki geniş demo tarifinin her alt gözleminin yapıldığı iddia edilmez. Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 ana kayıt/çoğaltma adımları kullanıcı tarafından geçti bildirildi. Eski çakışmalı Set kurtarma, ham MIDI ve diğer eksik güvenlik alt koşulları [kabul formunda](../HOST-SONUC-FORMU.md) ayrı izlenir; ana adımların geçmesi bunları tamamlanmış saymaz.

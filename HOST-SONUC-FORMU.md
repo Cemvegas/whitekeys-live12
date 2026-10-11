@@ -15,11 +15,11 @@ Güncel sözleşme: [üretim paylaşımı](docs/production-sharing.md), [otomati
 
 | Kriter | Beklenen | Gözlenen / kanıt | Sonuç |
 |---|---|---|---|
-| HC01 aç/takip | A Local D Major / sarı Host; B Follow WhiteKeys otomatik A'yı bulur. A G olduğunda B'nin Playing ve sesi G olur. Çarpı veya manuel kaynak seçimi yoktur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
-| HC02 devir | C Local A Major / Host açılır; A kapanır, yalnız C sarıdır. B A Major'a geçer; A'yı düzenlemek B'yi etkilemez. Devir sırasında tutulan nota eski hedefte bırakılınca kapanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
-| HC03 kapat/geri aç | C Host kapanınca B son gamı korur ve Waiting for Host gösterir; yeniden açınca otomatik bağlanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
+| HC01 aç/takip | A Local D Major / Host açık; B Follow WhiteKeys otomatik A'yı bulur. A G olduğunda B'nin Playing ve sesi G olur. B ayrıca Host seçmeden bağlanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
+| HC02 devir | C Local A Major / Host açılır; A kapanır, yalnız C sarıdır. B A Major'a geçer; Devir sırasında tutulan nota eski hedefte bırakılınca kapanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
+| HC03 kapat/geri aç | C Host kapanınca B son gamı korur ; yeniden açınca otomatik bağlanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 | HC04 normal kayıt/açılış | C Host ve B Follower durumunda kaydet; Set'i tamamen kapatıp yeniden aç. Host, takip ve gam korunur; Black Keys ayrı güvenlik koşuludur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
-| HC05 çoğaltma/kimlik kaydı | Aktif C'yi çoğalt. C Host kalır, kopya Host kapalı ve aynı gamdadır; manuel kimlik seçimi yoktur. Kaydet/kapat/aç: tek Host ve B'nin takibi korunur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
+| HC05 çoğaltma/kimlik kaydı | Aktif C'yi çoğalt. C Host kalır, kopya Host kapalıdır; manuel kimlik seçimi yoktur. Kaydet/kapat/aç: tek Host ve B'nin takibi korunur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 
 Ana beş kullanıcı adımı Passed olarak kaydedilmiştir. Bu sonuç, aşağıdaki henüz denenmeyen alt koşulları kapsamaz; native yükleme sırası veya ham MIDI kaydı gözlendiği iddia edilmez.
 
@@ -29,7 +29,8 @@ Her koşul için fixture, beklenen/gözlenen ve kanıt kaydedilir; önceki sonu�
 
 | Koşul | Gözlenen / kanıt | Sonuç |
 |---|---|---|
-| UI ve Local/Follow Live; anlık Root/üyelik, gam tanıma ve alternatif Root | | Not run |
+| Ayrıntılı UI: sarı renk/çarpı yokluğu/Waiting for Host metni; Local/Follow Live, Root/üyelik, gam tanıma ve alternatif Root | Bu gözlemler verilen kısa test adımlarında ayrıca istenmedi. | Not run |
+| Önceki Host düzenlemesinin yeni Follower gamını etkilememesi; Host kopyasının yerel gamı ve Black Keys kayıt korunumu | Ayrıntılı alt koşullar kullanıcıdan ayrıca bildirilmedi. | Not run |
 | Gerçek enstrüman: Host devir sırasında tutulan notanın kapanması, Black Keys Pass/Ignore, Option-click audition ve Panic | Kullanıcı beş ana adımı ve sonraki MIDI güvenliği adımını geçti bildirdi; ham MIDI kaydı paylaşılmadı. | Passed (user-reported) |
 | Kanal/release velocity ham MIDI doğrulaması | Ham kayıt yok; otomatik MIDI kontrolleri geçti. | Not run (native) |
 | 1–12 notalı gamlar, MIDI sınırları ve velocity | | Not run |
