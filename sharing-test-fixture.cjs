@@ -29,13 +29,15 @@ function createNativeGraph(){
  return {nodes,container,rack,enroll,enrollment,remove,liveAPI};
 }
 let graph=createNativeGraph(),data='',counter=0;const devices=[];
-function make(runtime,record,options={}){graph.enroll(runtime,options);const ui={},out=[],bytes=[];let transport;
+function make(runtime,record,options={}){graph.enroll(runtime,options);const ui={},out=[],bytes=[];let transport,persisted=Array.from(record);
  const midi={arrayfromargs:a=>Array.from(a),outlet:(p,...a)=>{if(p===0)bytes.push(...a)},Task:function(){this.schedule=()=>{};this.cancel=()=>{}}};vm.createContext(midi);vm.runInContext(fs.readFileSync('whitekeys-midi.js','utf8'),midi);
- const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{(ui[n]||(ui[n]=[])).push(a)}})},outlet:(p,...a)=>{if(Array.isArray(a[0]))a=a[0];if(p===0)midi[a[0]](...a.slice(1));if(p===2){out.push(a);if(transport)transport[a[0]](...a.slice(1));}}};vm.createContext(state);vm.runInContext(fs.readFileSync('whitekeys-state.js','utf8'),state);state.setvalueof(...record);
+ const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{persisted=Array.from(state.getvalueof());},patcher:{getnamed:n=>({message:(...a)=>{(ui[n]||(ui[n]=[])).push(a)}})},outlet:(p,...a)=>{if(Array.isArray(a[0]))a=a[0];if(p===0)midi[a[0]](...a.slice(1));if(p===2){out.push(a);if(transport)transport[a[0]](...a.slice(1));}}};vm.createContext(state);vm.runInContext(fs.readFileSync('whitekeys-state.js','utf8'),state);state.setvalueof(...record);
  const LiveAPI=graph.liveAPI(runtime,options);
  const anchor={message:(cmd,id)=>{if(cmd==='getid'&&!options.deferAnchor)transport.nativeanchor('id',options.anchor??99)}};
  transport={Global:function(){Object.defineProperty(this,'data',{get:()=>data,set:x=>data=x})},Date:class extends Date {getTime(){return 1000+counter++}},arrayfromargs:a=>Array.from(a),post:()=>{},outlet:()=>{},Task:function(){this.cancel=()=>{};this.schedule=()=>{};this.repeat=()=>{}},LiveAPI,patcher:{getnamed:n=>n==='song_anchor'?anchor:{message:(cmd,...a)=>state[cmd](...a)}}};vm.createContext(transport);vm.runInContext(fs.readFileSync('whitekeys-sharing.js','utf8'),transport);transport.sharingstate(JSON.stringify({record:Array.from(state.getvalueof()),valid:1}));
- const d={state,transport,ui,out,bytes,midi,note(){bytes.length=0;midi.note(144,60,90);midi.note(128,60,23);return bytes.slice()}};devices.push(d);return d;
+// Simulate the existing pattr @bindto model client: capture only on notification.
+ // The initial blob is the previously saved input; this does not model Max disk storage.
+ const d={state,transport,ui,out,bytes,midi,saved(){return persisted.slice();},note(){bytes.length=0;midi.note(144,60,90);midi.note(128,60,23);return bytes.slice()}};devices.push(d);return d;
 }
 function run(n=5){for(let i=0;i<n;i++)for(const d of devices)d.transport.tick()}
 function menuItems(d){let a=[];for(const m of d.ui.conflict_menu||[]){if(m[0]==='clear')a=[];if(m[0]==='append')a.push(m[1]);}return a.slice(1)}

@@ -8,7 +8,10 @@ for(const order of [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]]){
  reset();const copies=[make(202,record('cold-copy',1,2)),make(101,record('cold-copy',1,7)),make(300,record('cold-copy',1,9))],follow=make(400,[4,'cold-follow','set-A','WhiteKeys',0,'set-A','cold-copy','Piano',0,2741,'Major',1]);follow.transport.init();
  for(const i of order){copies[i].transport.init();follow.transport.tick();if(i!==order.at(-1))assert.deepEqual(follow.note(),[144,60,90,128,60,23]);}run(15);
  assert.equal(copies[0].state.getvalueof()[1],'cold-copy');assert.equal(copies[0].state.getvalueof()[4],1);assert.equal(copies[1].state.getvalueof()[4],0);assert.equal(copies[2].state.getvalueof()[4],0);assert.equal(new Set(copies.map(d=>d.state.getvalueof()[1])).size,3);assert.deepEqual(follow.note(),[144,62,90,128,62,23]);assert.equal(follow.state.getvalueof()[11],1);for(const d of devices)assert.equal(menuItems(d).length,0);
- const blobs=copies.map(d=>Array.from(d.state.getvalueof())),followBlob=Array.from(follow.state.getvalueof());reset();const re=blobs.map((b,i)=>make(500+i,b)),rf=make(503,followBlob);rf.transport.init();for(const i of order.slice().reverse())re[i].transport.init();run(15);assert.deepEqual(rf.note(),[144,62,90,128,62,23]);assert.equal(rf.state.getvalueof()[6],'cold-copy');
+ const blobs=copies.map(d=>d.saved()),followBlob=follow.saved();
+ assert.deepEqual(blobs,copies.map(d=>Array.from(d.state.getvalueof())));
+ assert.equal(followBlob[6],'cold-copy');assert.equal(followBlob[11],1);
+ reset();const re=blobs.map((b,i)=>make(500+i,b)),rf=make(503,followBlob);rf.transport.init();for(const i of order.slice().reverse())re[i].transport.init();run(15);assert.deepEqual(rf.note(),[144,62,90,128,62,23]);assert.equal(rf.state.getvalueof()[6],'cold-copy');
 }
 console.log('Three-copy cold resolution in all six initialization orders and saved reopen passed');
 
@@ -55,3 +58,19 @@ assert.equal(stepCopy.state.getvalueof()[4],0);
 assert.equal(stepHost.state.getvalueof()[12],undefined);
 assert.match(last(stepFollow.ui,'source_status'),/Following/);
 console.log('Every identity poll preserves Host/source/scale and held-note release passed');
+// User edits reach the simulated pattr client only through save notifications.
+reset();const savedHost=make(2400,record('saved-host',1)),savedFollow=make(2401,record('saved-follow',0));savedHost.transport.init();savedFollow.transport.init();run();
+// Add G-sharp to G Major: relative notes 0,1,2,4,5,7,9,11; mask 2743.
+savedHost.state.rootselect(7);savedHost.state.toggle(8);savedHost.state.blackselect(1);run();
+savedFollow.state.sourceselect(2);run();savedFollow.state.blackselect(1);
+const hostBlob=savedHost.saved(),followerBlob=savedFollow.saved();
+assert.deepEqual(hostBlob,[4,'saved-host','set-A','Local',1,'','','',7,2743,'Custom',1]);
+assert.deepEqual(followerBlob,[4,'saved-follow','set-A','WhiteKeys',0,'set-A','saved-host','Piano',7,2743,'Custom',1]);
+// A rejected restore cannot replace the last valid notified blob.
+savedHost.state.setvalueof(4,'broken');assert.deepEqual(savedHost.saved(),hostBlob);
+// Reading the saved snapshot cannot mutate the retained client value.
+const detached=savedFollow.saved();detached[6]='wrong-host';assert.deepEqual(savedFollow.saved(),followerBlob);
+reset();const reopenedFollow=make(2501,followerBlob),reopenedHost=make(2500,hostBlob);reopenedFollow.transport.init();reopenedHost.transport.init();run();
+assert.deepEqual(Array.from(reopenedHost.state.getvalueof()),hostBlob);assert.deepEqual(Array.from(reopenedFollow.state.getvalueof()),followerBlob);
+assert.match(last(reopenedFollow.ui,'source_status'),/Following/);assert.deepEqual(reopenedFollow.note(),[144,67,90,128,67,23]);
+console.log('Save-notified custom scale/Black Keys/source survive invalid restore and reopen passed');
