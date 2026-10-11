@@ -125,8 +125,8 @@ def package(output):
 def publish_current():
     """Publish one current installation; retain the previous one in the workspace archive."""
     workspace = ROOT.parent
-    current = workspace / 'outputs' / 'current'
-    staging = workspace / 'outputs' / '.current-staging'
+    current = workspace / 'current'
+    staging = workspace / '.current-staging'
     if staging.exists():
         raise ValueError('Unfinished publication at ' + str(staging))
     staging.mkdir(parents=True)
@@ -135,18 +135,17 @@ def publish_current():
         package(output)
         with zipfile.ZipFile(output) as bundle:
             manifest = json.loads(bundle.read('WhiteKeysLive12/MANIFEST.json'))
-            install = staging / 'WhiteKeysLive12'
-            install.mkdir()
+            install = staging
             for name in sorted(JS | {'WhiteKeys Live 12.amxd'}):
                 (install / name).write_bytes(bundle.read('WhiteKeysLive12/' + name))
         manifest['package'] = 'WhiteKeysLive12-development.zip'
-        manifest['installation'] = 'WhiteKeysLive12/WhiteKeys Live 12.amxd'
+        manifest['installation'] = 'WhiteKeys Live 12.amxd'
         manifest['package_sha256'] = hashlib.sha256(output.read_bytes()).hexdigest()
         (staging / 'MANIFEST.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
         if current.exists():
             previous = json.loads((current / 'MANIFEST.json').read_text())
             stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
-            destination = workspace / 'archive' / 'packages' / (previous['source_commit'][:12] + '-' + stamp)
+            destination = workspace / 'archive' / ('package-' + previous['source_commit'][:12] + '-' + stamp)
             destination.parent.mkdir(parents=True, exist_ok=True)
             current.rename(destination)
         staging.rename(current)
@@ -161,7 +160,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--current', action='store_true', help='Publish outputs/current and archive its previous contents')
+    parser.add_argument('--current', action='store_true', help='Publish current/ and archive its previous contents')
     args = parser.parse_args()
     if args.current and args.output:
         parser.error('Choose --current or --output')
