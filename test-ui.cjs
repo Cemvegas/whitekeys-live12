@@ -15,11 +15,11 @@ select('source',1);select('root',0);assert.deepStrictEqual(note(),[144,62,90,128
 state.apistatus('Offline');assert.strictEqual(ui.source_status,'Live unavailable');assert.match(ui.status_label,/Playing: D Dorian/);assert.deepStrictEqual(note(),[144,62,90,128,62,23]);
 select('source',2);assert.strictEqual(state.getvalueof()[3],'WhiteKeys');assert.strictEqual(ui.source_menu,2);assert.strictEqual(ui.source_status,'Select a Host');
 select('host',1);assert.strictEqual(state.getvalueof()[4],0);select('source',1);select('host',1);assert.strictEqual(state.getvalueof()[4],1);assert.strictEqual(ui.host_toggle,1);
-// Visible native toggle state: a click routed through Host must be distinguishable.
-function hostCaption(){return ui.host_toggle===1?boxes.host.texton:boxes.host.text}
-assert.strictEqual(hostCaption(),'Host On');
-select('host',0);assert.strictEqual(hostCaption(),'Host Off');
-assert.ok(Array.isArray(boxes.host.activebgcolor)&&Array.isArray(boxes.host.activebgoncolor),'Active native UI needs active colors');
-assert.notDeepStrictEqual(boxes.host.activebgcolor,boxes.host.activebgoncolor);
+// Native control boundary: plain toggle emits 0/1 without parameter UI machinery.
+assert.strictEqual(boxes.host.maxclass,'toggle');
+assert.strictEqual(ui.host_toggle,1);select('host',0);assert.strictEqual(ui.host_toggle,0);
+const raw=patch.lines.find(x=>x.patchline.source[0]==='host'&&x.patchline.destination[0]==='hostinputprep');
+assert.ok(raw,'Raw native click indicator must branch before the JS model');
+assert.strictEqual(boxes.hostinputprep.text,'prepend set Host input');
 state.livescale(2,'A deliberately long external scale name that would overflow the panel',1,0,2,3,5,7,9,10);assert.ok(ui.status_label.length<=60);assert.match(ui.status_label,/Playing: D/);
 console.log('Scale Source panel routing, Local/Live MIDI, Host/WhiteKeys transitions and retained Playing passed');

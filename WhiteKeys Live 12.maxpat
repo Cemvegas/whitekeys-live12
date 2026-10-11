@@ -706,7 +706,7 @@
           "presentation_rect": [
             14,
             148,
-            332,
+            240,
             16
           ]
         }
@@ -729,84 +729,37 @@
       {
         "box": {
           "id": "host",
-          "maxclass": "live.text",
+          "maxclass": "toggle",
           "patching_rect": [
             302,
             145,
-            44,
-            20
-          ],
-          "numinlets": 1,
-          "numoutlets": 2,
-          "mode": 1,
-          "fontsize": 10,
-          "bgcolor": [
-            0.25882352941176473,
-            0.29411764705882354,
-            0.27058823529411763,
-            1
-          ],
-          "textcolor": [
-            0.8627450980392157,
-            0.8901960784313725,
-            0.8666666666666667,
-            1
-          ],
-          "text": "Host Off",
-          "presentation": 1,
-          "presentation_rect": [
-            254,
-            4,
-            42,
+            20,
             19
           ],
-          "bordercolor": [
-            0.396078431372549,
-            0.44313725490196076,
-            0.40784313725490196,
-            1
+          "numinlets": 1,
+          "numoutlets": 1,
+          "presentation": 1,
+          "presentation_rect": [
+            277,
+            4,
+            19,
+            19
           ],
           "varname": "host_toggle",
-          "parameter_enable": 0,
-          "texton": "Host On",
-          "bgoncolor": [
-            0.7176470588235294,
-            0.8235294117647058,
-            0.6549019607843137,
+          "ignoreclick": 0,
+          "bgcolor": [
+            0.2588,
+            0.2941,
+            0.2706,
             1
           ],
-          "textoncolor": [
-            0.12549019607843137,
-            0.18823529411764706,
-            0.12941176470588237,
+          "checkedcolor": [
+            0.7176,
+            0.8235,
+            0.6549,
             1
           ],
-          "active": 1,
-          "hint": "Host On shares this scale; Host Off stops sharing. Unavailable while following WhiteKeys.",
-          "activebgcolor": [
-            0.25882352941176473,
-            0.29411764705882354,
-            0.27058823529411763,
-            1
-          ],
-          "activebgoncolor": [
-            0.7176470588235294,
-            0.8235294117647058,
-            0.6549019607843137,
-            1
-          ],
-          "activetextcolor": [
-            0.8627450980392157,
-            0.8901960784313725,
-            0.8666666666666667,
-            1
-          ],
-          "activetextoncolor": [
-            0.12549019607843137,
-            0.18823529411764706,
-            0.12941176470588237,
-            1
-          ]
+          "hint": "Share this sounding scale. Not available while following WhiteKeys."
         }
       },
       {
@@ -985,6 +938,75 @@
             400,
             550,
             150,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "hostlabel",
+          "maxclass": "comment",
+          "text": "Host",
+          "fontsize": 10,
+          "patching_rect": [
+            275,
+            145,
+            25,
+            19
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            251,
+            4,
+            26,
+            19
+          ],
+          "textcolor": [
+            0.86,
+            0.89,
+            0.86,
+            1
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "hostinput",
+          "maxclass": "comment",
+          "text": "Host input 0",
+          "fontsize": 9,
+          "patching_rect": [
+            420,
+            610,
+            85,
+            16
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            260,
+            148,
+            86,
+            16
+          ],
+          "textcolor": [
+            0.86,
+            0.89,
+            0.86,
+            1
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "hostinputprep",
+          "maxclass": "newobj",
+          "text": "prepend set Host input",
+          "patching_rect": [
+            420,
+            580,
+            140,
             22
           ],
           "numinlets": 1,
@@ -1340,6 +1362,30 @@
           ],
           "destination": [
             "model",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "host",
+            0
+          ],
+          "destination": [
+            "hostinputprep",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "hostinputprep",
+            0
+          ],
+          "destination": [
+            "hostinput",
             0
           ]
         }
