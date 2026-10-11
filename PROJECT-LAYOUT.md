@@ -1,30 +1,30 @@
-# White Keys workspace
+# White Keys project
 
-This document ships with the source repository and development ZIP. Run source commands from this repository. In the original White Keys workspace, this checkout is `WhiteKeysLive12/`; its parent contains the installation and archive. A standalone clone uses its own parent for those paths.
+`White Keys/` is the single project and Git root. Production source, tests, build tools, [navigation](docs/navigation.md), [glossary](GLOSSARY.md) and `docs/adr/` live here. Commit and push from this directory.
 
-The following paths are relative to the original enclosing workspace. In a standalone clone, source files live at the clone root and delivery directories live beside it. Source `GLOSSARY.md` and `docs/adr/` are portable snapshots; see [domain authority](docs/agents/domain.md).
-
-| Workspace location | Purpose |
+| Location | Purpose |
 | --- | --- |
-| `WhiteKeysLive12/` | Production device, adjacent JavaScript dependencies, regression tests, build and packaging commands |
-| Workspace `GLOSSARY.md`, `docs/adr/` | Authoritative domain vocabulary and decisions |
-| `WhiteKeysLive12/docs/` | Technical references, specifications and diagnostic evidence |
+| Root AMXD, maxpat and five `whitekeys-*.js` files | Production device and editable source |
+| Root tests, `check.py`, build and package scripts | Regression checks and delivery tools |
+| `GLOSSARY.md`, `docs/adr/` | Authoritative domain vocabulary and decisions |
+| `docs/` | Technical references, specifications and diagnostic evidence |
 | `work/<issue>/` | Active experiments with an issue, purpose and completion condition |
 | `current/` | Current development ZIP, installation and `MANIFEST.json` |
-| `outputs/* Project/` | Live acceptance Sets; retained at their existing paths |
-| `archive/` | Historical packages, extracted installations, experiments and reports |
+| `outputs/* Project/` | Live acceptance Sets, retained at their existing paths |
+| `archive/` | Historical packages, experiments and migration backups |
+| `WhiteKeysLive12` local compatibility link | Resolves old source device paths to this root; no second checkout |
 
-Read the sibling `current/MANIFEST.json` for the current source commit, package checksum and installation path. The manifest records development/acceptance status; packaging does not establish Live acceptance.
+`current/`, `outputs/`, `archive/`, `work/` and the local compatibility link are ignored by Git. A fresh clone has one root and does not need that legacy link. Read `current/MANIFEST.json` for the installed commit and checksum; packaging does not establish Live acceptance.
 
 ## Commands
 
-From the source checkout root:
+From the project root:
 
-- `python3 check.py` runs the production JavaScript, MIDI, state, sharing, persistence and package checks. GitHub Actions runs the same command on pushes and pull requests.
-- `python3 package-development.py --current` publishes one current installation after production source changes have been committed. The previous current directory moves to `archive/package-<commit>-<timestamp>/`.
-- `--output /absolute/path/package.zip` remains available for an explicitly requested separate artifact.
+- `python3 check.py` runs all production and navigation checks. CI runs the same command.
+- `python3 package-development.py --current` publishes `current/` after source changes have been committed, archiving the previous installation under `archive/`.
+- `--output /absolute/path/package.zip` creates a separate explicitly requested artifact. Inside the project, use `outputs/` or the current delivery directories.
 
-The AMXD requires its five adjacent JavaScript files. Keep the installation directory intact. Source tests stay next to the source for the existing relative-path fixtures.
+Keep the AMXD and its five JavaScript files adjacent. Tests stay beside source for existing relative fixtures. The ZIP uses the product name `WhiteKeysLive12/` as its portable installation folder; this is not another Git repository.
 
 ## Retention and session completion
 
@@ -36,12 +36,12 @@ Use `work/<issue>/` for new experiments, rather than adding more executable prob
 
 Use `current/` for ordinary development delivery. Create separately named packages only for an explicit comparison or delivery requirement. At session completion, classify experiments as active, regression tests or archive, run `check.py`, and refresh the current package when production files changed.
 
-Clean generated temporary files and duplicate extracted packages only after verifying reproduction and Live/Max references. Ignore generated outputs and archives in the workspace Git repository. The source repository retains its own independent history.
+Clean generated temporary files and duplicate extracted packages only after verifying reproduction and Live/Max references. Ignore generated outputs and archives in the workspace Git repository. The project root retains the original source repository history and remote.
 
 ## Migration record
 
-The 2026-10-11 cleanup is recorded in `archive/session-2026-10-11-MIGRATION.json`. Historical output and work directories moved into that archive. Compatibility symlinks preserve referenced Live device paths and historical work references. These links can be retired after the referring Sets and documents have been migrated and verified.
+The earlier cleanup is recorded in `archive/session-2026-10-11-MIGRATION.json`; its compatibility links retain historical experiment and Live Set paths.
 
-Historical migration records exist only in the original workspace; they are optional evidence, not prerequisites for using a fresh clone. No source or historical evidence was deleted in this cleanup.
+Root unification preserved the original source Git history, branch and remote. `archive/root-unification-2026-10-11.zip` contains the pre-migration source, Git metadata and colliding workspace files; `archive/starter-git-metadata-2026-10-11/` retains the former empty workspace metadata. The source files now live at the root. `WhiteKeysLive12 -> .` keeps old source device paths working; remove it only after referring Live Sets have been migrated and verified. No Live Set was rewritten during migration.
 
-Archive entries sit directly under `archive/`; category and session wrapper directories have been removed. `current/` directly contains the ZIP, manifest, AMXD and five JS files. `outputs/` and `work/` retain only Live Sets and compatibility paths where needed.
+Migration evidence and compatibility links are local conveniences, not requirements for a fresh clone. Current installation and archives remain at their existing workspace paths.

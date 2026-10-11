@@ -10,7 +10,7 @@ Use the default triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, 
 
 ### Domain docs
 
-For domain terms and decisions, read `docs/agents/domain.md`; it distinguishes workspace authority from source snapshots.
+For domain terms and decisions, read `docs/agents/domain.md`; it identifies the authoritative glossary and ADRs at this project root.
 
 ### Workspace files
 

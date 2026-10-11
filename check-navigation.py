@@ -1,7 +1,5 @@
-"""Validate portable navigation targets, domain snapshots and ZIP dependencies."""
-import hashlib
+"""Validate portable navigation targets, domain documents and ZIP dependencies."""
 import importlib.util
-import json
 from pathlib import Path
 import re
 from urllib.parse import unquote, urlsplit
@@ -15,31 +13,13 @@ DOCUMENTS = ('AGENTS.md', 'PROJECT-LAYOUT.md', 'docs/navigation.md',
 
 def validate(root, packaged):
     errors = []
-    manifest_path = root / 'docs/domain-snapshot.json'
-    if not manifest_path.is_file():
-        return ['Missing docs/domain-snapshot.json']
-    snapshots = json.loads(manifest_path.read_text())['files']
-    required = set(DOCUMENTS) | set(snapshots) | {'docs/domain-snapshot.json',
-                                               'check-navigation.py', 'test-navigation.py'}
+    required = set(DOCUMENTS) | {'GLOSSARY.md', 'check-navigation.py', 'test-navigation.py'}
+    required |= {p.relative_to(root).as_posix() for p in (root / 'docs/adr').glob('*.md')}
     for name in sorted(required):
         if not (root / name).is_file():
             errors.append('Missing ' + name)
         if name not in packaged:
             errors.append('Not included in development ZIP: ' + name)
-    # Original workspace is identified by its named checkout and authority marker.
-    workspace = root.parent
-    authority = root.name == 'WhiteKeysLive12' and (workspace / 'AGENTS.md').is_file() and (workspace / 'docs/agents/domain.md').is_file()
-    for name, expected in snapshots.items():
-        path = root / name
-        if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() != expected:
-            errors.append('Snapshot hash differs: ' + name)
-        original = workspace / name
-        if authority and (not original.is_file() or not path.is_file() or original.read_bytes() != path.read_bytes()):
-            errors.append('Workspace authority differs: ' + name)
-    if authority:
-        authoritative_names = {'GLOSSARY.md'} | {str(p.relative_to(workspace)) for p in (workspace / 'docs/adr').glob('*.md')}
-        if authoritative_names != set(snapshots):
-            errors.append('Domain snapshot inventory differs from workspace authority')
     for name in DOCUMENTS:
         path = root / name
         if not path.is_file():
@@ -64,7 +44,7 @@ def main():
     errors = validate(ROOT, packaging.REQUIRED)
     if errors:
         raise SystemExit('\n'.join(errors))
-    print('Portable navigation and domain snapshots passed.')
+    print('Portable navigation and domain documents passed.')
 
 
 if __name__ == '__main__':

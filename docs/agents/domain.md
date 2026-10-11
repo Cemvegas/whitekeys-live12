@@ -1,10 +1,8 @@
 # Domain Docs
 
-## Authority and portable snapshots
+## Single project root
 
-In the original White Keys workspace, the parent workspace's `GLOSSARY.md` and `docs/adr/` are authoritative. This source checkout carries byte-identical snapshots at [GLOSSARY.md](../../GLOSSARY.md) and `docs/adr/`, so a standalone clone or development ZIP can read the same decisions.
-
-`docs/domain-snapshot.json` records hashes of the copied files. Update domain decisions in the workspace first, then refresh their source snapshots and this manifest. `check-navigation.py` validates snapshot hashes; in the original workspace it also compares snapshots with the authoritative files. Standalone checks require no parent workspace.
+[GLOSSARY.md](../../GLOSSARY.md) and `docs/adr/` at this project root are authoritative. Edit them directly; there is no separate workspace copy or snapshot manifest. A source clone and development ZIP carry the same domain documents.
 
 Read the glossary and relevant ADRs before exploration. ADR 0008 supersedes ADR 0006's manual identity selection and ADR 0007's corresponding conflict clause. Earlier records remain historical evidence.
 

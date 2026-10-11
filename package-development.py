@@ -20,7 +20,7 @@ REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
                  'docs/performance-diagnosis/README.md'}
 
 REQUIRED |= {'docs/navigation.md', 'check-navigation.py', 'test-navigation.py',
-             'docs/domain-snapshot.json', 'GLOSSARY.md',
+             'GLOSSARY.md',
              'docs/agents/domain.md', 'docs/agents/issue-tracker.md', 'docs/agents/triage-labels.md'}
 REQUIRED |= {path.relative_to(ROOT).as_posix() for path in (ROOT / 'docs/adr').glob('*.md')}
 
@@ -103,8 +103,8 @@ def package(output):
     files = sorted(git('ls-files').splitlines())
     if not REQUIRED <= set(files):
         raise ValueError('Required source files must be tracked')
-    if output.resolve().is_relative_to(ROOT):
-        raise ValueError('ZIP must be outside the source checkout (use chat outputs)')
+    if output.resolve().is_relative_to(ROOT) and output.resolve().relative_to(ROOT).parts[0] not in {'current', '.current-staging', 'outputs'}:
+        raise ValueError('ZIP inside the project must use current/, .current-staging/ or outputs/')
     # Bundle committed production files; preserve unrelated in-progress diagnostics.
     data = {name: subprocess.check_output(['git', '-C', str(ROOT), 'show', 'HEAD:' + name]) for name in sorted(REQUIRED)}
     manifest = {'status': 'PARTIAL DEVELOPMENT — Live acceptance pending issue #22; production sharing implemented; production Live acceptance pending',
@@ -129,7 +129,7 @@ def package(output):
 
 def publish_current():
     """Publish one current installation; retain the previous one in the workspace archive."""
-    workspace = ROOT.parent
+    workspace = ROOT
     current = workspace / 'current'
     staging = workspace / '.current-staging'
     if staging.exists():

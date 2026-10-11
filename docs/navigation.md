@@ -11,7 +11,7 @@ Start here to locate implementation and its regression checks. Run commands from
 | Keyboard drawing and input | [whitekeys-keyboard.js](../whitekeys-keyboard.js) | `node test-midi.cjs` (click/message and graphics simulation); native rendering needs Live acceptance |
 | Model-to-MIDI sharing | [whitekeys-state.js](../whitekeys-state.js) | `node test-sharing.cjs` |
 | Device wiring and AMXD container | [editable patch](../WhiteKeys%20Live%2012.maxpat), [builder](../build-amxd.py), [packager](../package-development.py) | `python3 package-development.py --check`, `python3 test-packaging.py` |
-| Navigation and domain snapshots | [navigation check](../check-navigation.py) | `python3 check-navigation.py`, `python3 test-navigation.py` |
+| Navigation and domain documents | [navigation check](../check-navigation.py) | `python3 check-navigation.py`, `python3 test-navigation.py` |
 
 [sharing-test-fixture.cjs](../sharing-test-fixture.cjs) is the shared adapter/model/MIDI test harness. Keep the five production JS files adjacent to the AMXD and tests beside source for relative fixtures.
 
@@ -19,10 +19,10 @@ Start here to locate implementation and its regression checks. Run commands from
 
 - [Installation and Live checks](../KURULUM-VE-TEST.md).
 - [Production sharing](production-sharing.md) and [automatic identity contract](specs/automatic-identity-resolution.md). The latter supersedes manual identity-selection requirements in older sharing specifications and reviews.
-- [Domain authority and snapshot policy](agents/domain.md). ADR 0008 supersedes the manual identity clauses of ADR 0006 and ADR 0007.
+- [Domain authority and document layout](agents/domain.md). ADR 0008 supersedes the manual identity clauses of ADR 0006 and ADR 0007.
 
 ## Experiments and continuation
 
-Existing `docs/diagnostic-probes/` holds historical and in-progress diagnostics; read its README and the relevant issue before using a probe. A frozen failing candidate is evidence, not a production regression. Preserve uncommitted diagnostic work. New experiments follow the workspace layout's `work/<issue>/` convention. Keep durable results with their experiment or GitHub issue; temporary handoffs link to those records.
+Existing `docs/diagnostic-probes/` holds historical and in-progress diagnostics; read its README and the relevant issue before using a probe. A frozen failing candidate is evidence, not a production regression. Preserve uncommitted diagnostic work. New experiments follow the project layout's `work/<issue>/` convention. Keep durable results with their experiment or GitHub issue; temporary handoffs link to those records.
 
 Run [check.py](../check.py) before completion. CI runs the same command. Packaging and simulated adapter tests do not establish native Live acceptance.

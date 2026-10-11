@@ -12,11 +12,24 @@ packaging = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(packaging)
 
 class PublicationTests(unittest.TestCase):
+    def test_current_installation_belongs_to_project_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'project'
+            source.mkdir()
+            def package(output):
+                with zipfile.ZipFile(output, 'w') as bundle:
+                    bundle.writestr('WhiteKeysLive12/MANIFEST.json', json.dumps({'source_commit': 'new-commit'}))
+                    for name in packaging.JS | {'WhiteKeys Live 12.amxd'}:
+                        bundle.writestr('WhiteKeysLive12/' + name, b'new content')
+            with patch.object(packaging, 'ROOT', source), patch.object(packaging, 'package', package):
+                packaging.publish_current()
+            self.assertTrue((source / 'current' / 'MANIFEST.json').is_file())
+            self.assertFalse((source.parent / 'current').exists())
+
     def test_failed_promotion_restores_previous_installation(self):
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory)
-            source = workspace / 'source'
-            source.mkdir()
+            source = workspace
             current = workspace / 'current'
             current.mkdir()
             previous = json.dumps({'source_commit': 'old-commit'})

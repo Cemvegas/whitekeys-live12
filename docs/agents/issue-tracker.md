@@ -2,7 +2,7 @@
 
 Issues and specs for this project live in GitHub Issues at https://github.com/Cemvegas/whitekeys-live12.
 
-Use the `gh` CLI. Always specify `--repo Cemvegas/whitekeys-live12` for issue operations. This source checkout has its own Git history and remote. The enclosing White Keys workspace has separate starter Git metadata; run source Git operations in this checkout.
+Use the `gh` CLI. Always specify `--repo Cemvegas/whitekeys-live12` for issue operations. White Keys is the single source checkout and Git root. Run source Git operations at this project root.
 
 ## Conventions
 

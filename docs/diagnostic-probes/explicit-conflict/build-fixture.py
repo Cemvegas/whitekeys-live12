@@ -30,7 +30,7 @@ raw=(json.dumps(d,indent=2)+'\n').encode();(here/'Explicit Conflict Probe.maxpat
 payload=raw+b'\0';amxd=b'ampf'+struct.pack('<I',4)+b'mmmm'+b'meta'+struct.pack('<II',4,0)+b'ptch'+struct.pack('<I',len(payload))+payload
 (here/'Explicit Conflict Probe.amxd').write_bytes(amxd)
 # Distributable folder keeps the JS beside the AMXD. No Live process is launched.
-workspace=here.parents[3];out=workspace/'outputs/explicit-conflict-probe-2026-10-11';out.mkdir(parents=True,exist_ok=True)
+workspace=here.parents[2];out=workspace/'outputs/explicit-conflict-probe-2026-10-11';out.mkdir(parents=True,exist_ok=True)
 for name in ['Explicit Conflict Probe.amxd','Explicit Conflict Probe.maxpat','explicit-conflict.js','probe-midi.js','README.md']:
  shutil.copy2(here/name,out/name)
 print(out)

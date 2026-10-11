@@ -14,7 +14,7 @@ class NavigationTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.clone = Path(self.directory.name) / 'source'
-        shutil.copytree(ROOT, self.clone, ignore=shutil.ignore_patterns('.git', '__pycache__'))
+        shutil.copytree(ROOT, self.clone, ignore=shutil.ignore_patterns('.git', '__pycache__', 'WhiteKeysLive12', 'archive', 'current', 'outputs', 'work'))
 
     def run_check(self):
         return subprocess.run([sys.executable, str(self.clone / 'check-navigation.py')],
@@ -48,10 +48,11 @@ class NavigationTests(unittest.TestCase):
         package.write_text(package.read_text() + "\nREQUIRED.discard('docs/navigation.md')\n")
         self.assert_failure('Not included in development ZIP: docs/navigation.md')
 
-    def test_changed_domain_snapshot_fails(self):
+    def test_domain_document_can_be_updated_in_single_root(self):
         with (self.clone / 'GLOSSARY.md').open('a') as doc:
             doc.write('\nUnrecorded domain change\n')
-        self.assert_failure('Snapshot hash differs: GLOSSARY.md')
+        result = self.run_check()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == '__main__':
