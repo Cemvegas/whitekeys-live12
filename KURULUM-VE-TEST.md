@@ -1,6 +1,6 @@
 # WhiteKeys Live 12 — anlık düzenleme geliştirme paketi
 
-**DEVELOPMENT — üretim Live kabulü bekliyor (#22).** Local, Follow Live ve aynı Set içindeki WhiteKeys Host/Follower paylaşımı uygulanmıştır. Kimlik çakışması otomatik çözülür; manuel aday seçimi yoktur. #19 teşhis kabulü bu üretim sürümünün gerçek Live kabulünün yerine geçmez. Paylaşım adımları ve otomatik test kapsamı: [Üretim paylaşımı](docs/production-sharing.md).
+**DEVELOPMENT — kullanıcı tarafından daraltılan Live kabul kapsamı tamamlandı (#22).** İstisnalar ve kullanıcı sonuçları [kabul formunda](HOST-SONUC-FORMU.md). Local, Follow Live ve aynı Set içindeki WhiteKeys Host/Follower paylaşımı uygulanmıştır. Kimlik çakışması otomatik çözülür; manuel aday seçimi yoktur. #19 teşhis kabulü bu üretim sürümünün gerçek Live kabulünün yerine geçmez. Paylaşım adımları ve otomatik test kapsamı: [Üretim paylaşımı](docs/production-sharing.md).
 ## Kurulum
 
 1. ZIP'i yeni, kalıcı bir klasöre açın. AMXD ve beş `whitekeys-*.js` dosyası yan yana kalsın. Düzenlenebilir maxpat, testler ve derleme/paketleme scriptleri pakettedir.
@@ -27,7 +27,7 @@ Basılı notalar gam/kaynak/Root değişiminde yeniden akort edilmez; özgün he
 - UI06: 1, 5, 7, 8, 12 notalı gamlarda aşağı/yukarı sıra, velocity, Black Keys ve MIDI sınırlarını ham mesajla doğrula.
 - UI07: Eski v2/v3 Set kopyasını aç. Uygulanmamış eski taslak yerine Sounding Scale korunmalı. Yeni v4 kaydet/aç; gam ve Black Keys aynı olmalı. V4 eski cihaz sürümlerinde açılma garantisi taşımaz.
 
-Host paylaşımının yeniden açılış, çoğaltma, kaynak kaybı ve Set izolasyonu bu üretim AMXD’siyle ayrıca doğrulanır; docs/production-sharing.md adımlarını kullanın.
+Host paylaşımının normal yeniden açılış, çoğaltma, kaynak kaybı ve Set izolasyonu kullanıcı tarafından geçti bildirildi; docs/production-sharing.md adımlarını kullanın.
 
 ## Otomatik kontroller
 

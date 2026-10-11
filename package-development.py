@@ -107,7 +107,7 @@ def package(output):
         raise ValueError('ZIP inside the project must use current/, .current-staging/ or outputs/')
     # Bundle committed production files; preserve unrelated in-progress diagnostics.
     data = {name: subprocess.check_output(['git', '-C', str(ROOT), 'show', 'HEAD:' + name]) for name in sorted(REQUIRED)}
-    manifest = {'status': 'PARTIAL DEVELOPMENT — Live acceptance pending issue #22; production sharing implemented; production Live acceptance pending',
+    manifest = {'status': 'DEVELOPMENT — user-approved scoped Live acceptance passed issue #22; waived native checks recorded in HOST-SONUC-FORMU.md',
                 'source_commit': commit, 'package_version': 'development-' + commit[:12],
                 'files': {name: {'bytes': len(content), 'sha256': hashlib.sha256(content).hexdigest()} for name, content in data.items()}}
     data['MANIFEST.json'] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode()

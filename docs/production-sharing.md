@@ -1,6 +1,6 @@
 # Üretim Host/Follower paylaşımı — #20 / #21
 
-Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve [ADR 0007](adr/0007-single-active-host-and-automatic-follow.md) ve onu kimlik çözümü bakımından güncelleyen [ADR 0008](adr/0008-automatic-identity-conflict-resolution.md). #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için beş ana Live adımı kullanıcı tarafından geçti bildirildi; kalan güvenlik koşulları bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
+Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve [ADR 0007](adr/0007-single-active-host-and-automatic-follow.md) ve onu kimlik çözümü bakımından güncelleyen [ADR 0008](adr/0008-automatic-identity-conflict-resolution.md). #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için beş ana Live adımı kullanıcı tarafından geçti bildirildi; son ek kontroller geçti bildirildi ve kullanıcı tarafından daraltılan #22 kabul kapsamı tamamlandı. Kapsam istisnaları kabul formundadır.
 
 ## Kullanım
 
@@ -38,4 +38,4 @@ AMXD ve beş JS dosyasını aynı klasörde tutun. A, B ve C ayrı kimlikli ciha
 | HC02 Host devri ve basılı notanın kapanması (kısa kullanıcı adımı) | Passed — kullanıcı, 2026-10-11; f43ed90 |
 | HC03 kapat/yeniden bağlan (kısa kullanıcı adımı) | Passed — kullanıcı, 2026-10-11; f43ed90 |
 
-Yukarıdaki Passed sonuçlar kullanıcıya verilen kısa adımları kapsar; bu belgedeki geniş demo tarifinin her alt gözleminin yapıldığı iddia edilmez. Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 ana kayıt/çoğaltma adımları kullanıcı tarafından geçti bildirildi. Eski çakışmalı Set kurtarma, ham MIDI ve diğer eksik güvenlik alt koşulları [kabul formunda](../HOST-SONUC-FORMU.md) ayrı izlenir; ana adımların geçmesi bunları tamamlanmış saymaz.
+Yukarıdaki Passed sonuçlar kullanıcıya verilen kısa adımları kapsar; bu belgedeki geniş demo tarifinin her alt gözleminin yapıldığı iddia edilmez. Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 ana kayıt/çoğaltma adımları kullanıcı tarafından geçti bildirildi. Son kullanıcı 1–3 ek koşullarını geçti bildirdi; eski çakışmalı Set kurtarma, ham MIDI ve işlem sırasında aday silme native kontrolleri açıkça kapsamdan çıkarıldı. Bunlar Passed değildir; [kabul formunda](../HOST-SONUC-FORMU.md) istisna olarak izlenir.

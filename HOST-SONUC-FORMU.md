@@ -21,25 +21,25 @@ Güncel sözleşme: [üretim paylaşımı](docs/production-sharing.md), [otomati
 | HC04 normal kayıt/açılış | C Host ve B Follower durumunda kaydet; Set'i tamamen kapatıp yeniden aç. Host, takip ve gam korunur; Black Keys ayrı güvenlik koşuludur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 | HC05 çoğaltma/kimlik kaydı | Aktif C'yi çoğalt. C Host kalır, kopya Host kapalıdır; manuel kimlik seçimi yoktur. Kaydet/kapat/aç: tek Host ve B'nin takibi korunur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 
-Ana beş kullanıcı adımı Passed olarak kaydedilmiştir. Bu sonuç, aşağıdaki henüz denenmeyen alt koşulları kapsamaz; native yükleme sırası veya ham MIDI kaydı gözlendiği iddia edilmez.
+Ana beş adım, ek üç kontrol ve son kalanlar listesindeki 1–3 kullanıcı tarafından Passed bildirildi. Son listedeki 4–6 ve eski v2/v3 geçişi kullanıcı tarafından kabul kapsamından çıkarıldı. Ham MIDI kaydı veya eski çakışmalı Set yükleme sırası gözlendiği iddia edilmez.
 
 ## Önceki güvenlik koşulları
 
-Her koşul için fixture, beklenen/gözlenen ve kanıt kaydedilir; önceki sonuçlar bu revizyonun Passed kanıtı sayılmaz. Gerçek yükleme sırası gözlenmediyse o alt koşul Not run kalır.
+Sonuçlar kullanıcı raporudur. Metadata alanlarında bildirilmeyen bilgiler boş/belirsiz kalır; kapsamdan çıkarılan koşullar Passed olarak sayılmaz.
 
 | Koşul | Gözlenen / kanıt | Sonuç |
 |---|---|---|
-| Ayrıntılı UI: sarı renk/çarpı yokluğu/Waiting for Host metni; Local/Follow Live, Root/üyelik, gam tanıma ve alternatif Root | Bu gözlemler verilen kısa test adımlarında ayrıca istenmedi. | Not run |
-| Önceki Host düzenlemesinin yeni Follower gamını etkilememesi; Host kopyasının yerel gamı ve Black Keys kayıt korunumu | Ayrıntılı alt koşullar kullanıcıdan ayrıca bildirilmedi. | Not run |
+| Görünüm ve gam düzenleme: sarı Host, çarpı yokluğu, Waiting for Host; Local Root/notalar ve Follow Live | Kullanıcı son listedeki 1. kontrolü test ettiğini ve geçtiğini bildirdi. | Passed (user-reported) |
+| Önceki Host değişikliğinin yeni Follower gamını etkilememesi; Host kopyası gamı ve Black Keys Ignore kayıt korunumu | Kullanıcı son listedeki 2. kontrolü geçti bildirdi. | Passed (user-reported) |
 | Gerçek enstrüman: Host devir sırasında tutulan notanın kapanması, Black Keys Pass/Ignore, Option-click audition ve Panic | Kullanıcı beş ana adımı ve sonraki MIDI güvenliği adımını geçti bildirdi; ham MIDI kaydı paylaşılmadı. | Passed (user-reported) |
-| Kanal/release velocity ham MIDI doğrulaması | Ham kayıt yok; otomatik MIDI kontrolleri geçti. | Not run (native) |
-| 1–12 notalı gamlar, MIDI sınırları ve velocity | | Not run |
+| Kanal, note-on velocity ve note-off release velocity ham MIDI doğrulaması | Kullanıcı son listedeki 4. kontrolü kapsamdan çıkardı; otomatik MIDI testleri geçti. | Waived by user — native test edilmedi |
+| 1, 5, 7, 8, 12 notalı gamlarda derece sırası ve düşük/yüksek MIDI sınırları | Kullanıcı son listedeki 3. kontrolü geçti bildirdi; bütün nota/velocity kombinasyonları için otomatik test kanıtı ayrıdır. | Passed (user-reported) |
 | Eski v2/v3 Set geçişi | Kullanıcı eski Set olmadığını ve bu testin gerekmediğini bildirdi; 2026-10-11 açık kapsam değişikliği. | Waived by user — test edilmedi |
 | Normal v4 yeniden açılış | HC04 ve HC05 kullanıcı tarafından geçti bildirildi. | Passed (user-reported) |
-| Follower track ve Rack çoğaltma; gam ve takip korunumu | Kullanıcı ek çoğaltma kontrolünü geçti bildirdi; Black Keys kayıt korunumu ayrıca bildirilmedi. | Passed (user-reported) |
+| Follower track ve Rack çoğaltma; gam ve takip korunumu | Kullanıcı ek çoğaltma kontrolünü geçti bildirdi; Black Keys kayıt korunumu son 2. kontrolde ayrıca geçti bildirildi. | Passed (user-reported) |
 | Host kopyasını native track sırasında öne taşıma | Kullanıcı mevcut Host değişmedi kontrolünü geçti bildirdi. | Passed (user-reported) |
-| Eski aynı-kimlikli Set'te ilk native cihaz kurtarma politikası; gözlenen yükleme sırası | | Not run |
-| Kimlik işlemi sırasında aday değişimi/silinmesi ve yeniden deneme | | Not run |
+| Eski aynı-kimlikli Set kurtarma ve native yükleme sırası | Kullanıcı son listedeki 5. kontrolü kapsamdan çıkardı. | Waived by user — test edilmedi |
+| Kimlik işlemi sırasında aday silinmesi/değişimi ve yeniden deneme | Kullanıcı son listedeki 6. kontrolü kapsamdan çıkardı; otomatik rollback testleri geçti. | Waived by user — native test edilmedi |
 | Ayrı Set izolasyonu ve Host kapat/aç kaynak kaybı | Kullanıcı yeni Set’in önceki Host’a bağlanmadığını ve HC03’ü geçti bildirdi. | Passed (user-reported) |
 
-Kullanıcının açıkça kapsamdan çıkardığı v2/v3 Set geçişi kapanış engeli değildir. Kapsamda kalan Failed veya Not run kabul koşulları varken #22 kapanmaz. Native başarısızlık çıkarsa yalnız o senaryo teşhis edilir; yeni teşhis altyapısı eklenmez.
+Kabul edilen kapsam tamamlandı: kapsamda kalan koşullar Passed (user-reported); v2/v3 geçişi ve son listedeki 4–6 Waived by user. İstisnalar test başarıları değildir. Üretim AMXD/JS değişmedi; kabul belgeleri ve paket durum metadata’sı güncellendi.
