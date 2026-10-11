@@ -729,7 +729,7 @@
       {
         "box": {
           "id": "host",
-          "maxclass": "toggle",
+          "maxclass": "textbutton",
           "patching_rect": [
             302,
             145,
@@ -737,12 +737,12 @@
             19
           ],
           "numinlets": 1,
-          "numoutlets": 1,
+          "numoutlets": 3,
           "presentation": 1,
           "presentation_rect": [
-            277,
+            251,
             4,
-            19,
+            45,
             19
           ],
           "varname": "host_toggle",
@@ -753,13 +753,28 @@
             0.2706,
             1
           ],
-          "checkedcolor": [
-            0.7176,
-            0.8235,
-            0.6549,
+          "hint": "Toggle the single active Host. Following WhiteKeys switches to Local.",
+          "mode": 1,
+          "text": "Host",
+          "texton": "Host",
+          "textcolor": [
+            0.8470588235294118,
+            0.8705882352941177,
+            0.8509803921568627,
             1
           ],
-          "hint": "Share this sounding scale. Not available while following WhiteKeys."
+          "textoncolor": [
+            0.12549019607843137,
+            0.18823529411764706,
+            0.12941176470588237,
+            1
+          ],
+          "bgoncolor": [
+            0.9490196078431372,
+            0.788235294117647,
+            0.2980392156862745,
+            1
+          ]
         }
       },
       {
@@ -942,33 +957,6 @@
           ],
           "numinlets": 1,
           "numoutlets": 1
-        }
-      },
-      {
-        "box": {
-          "id": "hostlabel",
-          "maxclass": "comment",
-          "text": "Host",
-          "fontsize": 10,
-          "patching_rect": [
-            275,
-            145,
-            25,
-            19
-          ],
-          "presentation": 1,
-          "presentation_rect": [
-            251,
-            4,
-            26,
-            19
-          ],
-          "textcolor": [
-            0.86,
-            0.89,
-            0.86,
-            1
-          ]
         }
       }
     ],

@@ -1,12 +1,12 @@
 # Üretim Host/Follower paylaşımı — #20 / #21
 
-Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve workspace ADR 0006. #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
+Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve workspace ADR 0006 ve ADR 0007. #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
 
 ## Kullanım
 
-Local veya Follow Live cihazında Host açın. Diğer cihazın üst Source menüsünde kanal/cihaz yoluyla gösterilen Host'u seçin. Follow WhiteKeys, Host'u kapatır; Local'a dönüş son alınan gamı korur. Kaynak yoksa referans ve son gam korunur; aynı kaynak geri geldiğinde otomatik bağlanır.
+Host yazısının bütün yüzeyine basın; yalnız aktif Host sarı görünür. Local ve Follow Live paylaşabilir. Follow WhiteKeys seçen cihaz Set’in tek aktif Host’una otomatik bağlanır; ayrıca Host seçilmez. Follower’da Host açmak son gamı koruyarak Local’a geçer.
 
-Identity conflict menüsü yalnız çakışmada çıkar. Mevcut kimliği korumasını istediğiniz cihazın tam kanal/Rack/chain/cihaz yolunu seçin. Seçilen cihaz kimliğini ve Host tercihini korur; diğerleri ayrı kimlikler ve Host kapalı alır. Çözüm tamamlandıktan sonra Set'i normal şekilde kaydedin. Çözülmemiş durum kayıtla gizlenmez. Tek kalan fakat önceden çakışmış cihaz da kullanıcı seçimini bekler.
+Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Identity conflict durumunda otomatik takip çözümü atlamaz; mevcut aday menüsüyle kimliği koruyacak cihazı seçin. Kalıcı restore ve çözüm kabulü #21 kapsamındadır.
 
 ## Kayıt ve adapter
 
@@ -22,14 +22,18 @@ Global yalnız deferred adapter JSON kayıtlarını taşır. 100 ms polling, nat
 
 `test-sharing-adapter.cjs`: gerçek üretim adapter/model/MIDI, kontrollü Live API sınır ikamesi; startup kayıt barajı, üç kopyanın 6 sırası × 3 keeper seçimi, aynı anda/tekrar/eski seçim, runtime değişmiş kaydet/aç, gecikmiş anchor, yabancı cihaz yanında bağımsız Host, silinen adayda rollback. Bu native Max/Live davranışının ölçümü değildir.
 
-## Gerçek üretim Live kabulü — tek toplu liste
+## #20 kısa Live demo — HC01–HC03
 
-AMXD ve beş JS dosyasını aynı klasörde tutun. Eski test Set'inin yeni bir kopyasını kullanın. Teşhis cihazı yerine bu **WhiteKeys Live 12.amxd** dosyasını yükleyin.
+AMXD ve beş JS dosyasını aynı klasörde tutun. A, B ve C ayrı kimlikli cihazlar olsun; C için A’yı çoğaltmayın. A/B keşfi çalışmadan sonraki adıma geçmeyin.
 
-1. İki WhiteKeys ekleyin. İlki Local / D Major / Host açık; ikinciden ilk Host'u Source menüsünde seçin. İlkini G yapınca ikincinin Playing ve sesi G olmalı. İkinci Host açılamamalı.
-2. İlk cihazı çoğaltın. İlgili cihazlarda Identity conflict çıkmalı; ikinci cihaz son gamını çalmalı. Menüden istediğiniz kopyayı seçin. Yalnız seçilen Host açık kalmalı; ikinci cihaz onu izlemeli. Aynı adlar ve Rack içinde aday yolları ayırt edilebilmeli.
-3. Bir nota basılıyken kaynağın gamını değiştirin, sonra bırakın: eski nota kapanmalı. Host'u kapatıp tekrar açın: Follower son gamı korumalı ve aynı Host'a yeniden bağlanmalı. Black Keys, audition ve Panic yalnız kendi cihazında etkili olmalı.
-4. Çözümü normal Set kaydıyla kaydedip kapat/açın. Seçim sorulmadan aynı Host/Follower bağı kurulmalı. Ayrıca çözülmemiş bir çoğaltmayı ayrı Set kopyasında kaydet/açın: çakışma seçimi yeniden görünmeli.
-5. Host'u yeniden adlandırın, Rack/track kopyasını deneyin; başka Set'e cihaz kopyaladığınızda eski kaynak sessizce bu Set'in kaynağına dönüşmemeli. Aynı Set'teki bağımsız Host/Follower çalışmaya devam etmeli.
+1. A’da Local / D Major seçip Host’a basın: çarpı yok, bütün düğme sarı. B’de Follow WhiteKeys seçin: ayrıca seçim olmadan A görünür; A’yı G yapınca B’nin Playing ve sesi G olur.
+2. C’de Local / A Major ve Host açın: A kapanır, yalnız C sarıdır; B otomatik A Major çalar. A’yı değiştirmek B’yi etkilemez. Devir boyunca basılı nota eski hedefinde kapanır. A’nın kaynak türü ve gamı korunur.
+3. C’de Host’u kapatın: B son gamı korur ve Waiting for Host gösterir. C’de tekrar açın: B elle seçim olmadan yeniden bağlanır.
 
-Live/Max sürümleri ve çoklu MIDI kanalındaki note-on/off ham mesaj ölçümü son kabul #22'ye yazılmalıdır. Bu beş işlemin üretim sürümünde sonucu henüz alınmadı.
+| Kriter | Sonuç |
+|---|---|
+| HC01 native düğme, sarı renk ve otomatik keşif | Not run |
+| HC02 gerçek Host devri ve basılı nota | Not run |
+| HC03 gerçek kapat/yeniden bağlan | Not run |
+
+Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 kayıt/kimlik çözümü ve önceki güvenlik regresyonları Spec #23 / #21 / #22 kapsamında ayrıca bekler; bu demo bunları tamamlanmış saymaz.

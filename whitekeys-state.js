@@ -13,16 +13,26 @@ var apiReady = false, apiError = '', sharingNotice = '';
 // Public sharing messages are delivered by the isolated native adapter.
 var currentSet='', currentSession='', runtimeToken='', directory=[], sourceRevision=-1;
 var sourceSession='', sourcePresent=false, sourceAvailable=false, identityBlocked=0, recordValid=true;
+var hostActive=0, hostAction=0, sourceIdentityConflict=false,sourceTransfer='';
 function sourceselect(v) {
     v=Number(v);
     if(v===0||v===1){sharingNotice='';followselect(v);return;}
-    if(v===2){hostEnabled=0;follow=0;sourceKind='WhiteKeys';sourceSet='';sourceDevice='';sourceLabel='';sourceAvailable=false;render();save();return;}
-    var peer=directory[v-3];
-    if(!peer||!eligible(peer))return;
-    follow=0;hostEnabled=0;sourceKind='WhiteKeys';sourceSet=peer.set;sourceDevice=peer.id;sourceLabel=peer.label;
-    sourceRevision=-1;sourceSession=peer.session;sourcePresent=true;sourceAvailable=false;render();save();
+    if(v!==2)return;
+    if(sourceKind!=='WhiteKeys'){hostEnabled=0;hostActive=0;follow=0;sourceKind='WhiteKeys';sourceSet='';sourceDevice='';sourceLabel='';sourceSession='';sourceRevision=-1;sourceAvailable=false;}
+    sharingdirectory(JSON.stringify(directory));save();
 }
-function hostselect(v) { if(sourceKind==='WhiteKeys')return;hostEnabled=Number(v)===1?1:0;render();save(); }
+function hostselect(v) {
+    var enabled=Number(v)===1?1:0;
+    if(identityBlocked||sourceIdentityConflict||!recordValid||(currentSet&&setIdentity!==currentSet)){render();return;}
+    if(enabled&&sourceKind==='WhiteKeys')followselect(0);
+    sharingNotice='';
+    if(currentSession&&runtimeToken){outlet(2,'sharinghost',currentSession,++hostAction,enabled);}
+    else {hostEnabled=enabled;hostActive=enabled;render();save();}
+}
+function sharingrole(enabled,active) {
+    var changed=hostEnabled!==Number(enabled);hostEnabled=Number(enabled)===1?1:0;hostActive=Number(active)===1?1:0;
+    render();if(changed)save();
+}
 function eligible(p) { return p&&p.set===currentSet&&token(p.id)&&p.id!==deviceIdentity&&p.host===1&&p.blocked===0&&(p.kind==='Local'||p.kind==='Live')&&token(p.session); }
 function sharingcontext(set,session,runtime) {
     if(!token(set)||!token(session)||!token(runtime))return;
@@ -32,15 +42,30 @@ function sharingcontext(set,session,runtime) {
 }
 function sharingdirectory(json) {
     var peers;try{peers=JSON.parse(String(json));}catch(e){return;}if(!(peers instanceof Array))return;
-    var next=[],selected=null;
-    for(var i=0;i<peers.length;i++){var p=peers[i];if(eligible(p)&&typeof p.label==='string'){next.push(p);if(p.id===sourceDevice&&p.set===sourceSet)selected=p;}}
-    directory=next;sharingNotice='';
+    var next=[],selected=null,blockedSource=false,sourceSeen=false,transferAllowed=false,transfer='';
+    for(var i=0;i<peers.length;i++){
+        var p=peers[i];
+        if(p&&p.set===sourceSet&&p.id===sourceDevice){sourceSeen=true;if(p.blocked===1)blockedSource=true;}
+        if(p&&token(p.transfer))transfer=p.transfer;
+        if(eligible(p)&&typeof p.label==='string')next.push(p);
+    }
+    blockedSource=blockedSource||(sourceIdentityConflict&&!sourceSeen);sourceIdentityConflict=blockedSource;
+    transferAllowed=!!transfer&&transfer!==sourceTransfer;
+    if(blockedSource||next.length===1)sourceTransfer=transfer||sourceTransfer;directory=peers;sharingNotice=blockedSource?'Identity conflict':(next.length>1?'Host conflict':'');
+    if(sourceKind==='WhiteKeys'&&!identityBlocked&&!blockedSource&&recordValid&&setIdentity===currentSet&&(!sourceSet||sourceSet===currentSet)&&next.length===1&&(!sourceDevice||next[0].id===sourceDevice||transferAllowed)){
+        selected=next[0];
+        if(selected.id!==sourceDevice||selected.set!==sourceSet){sourceRevision=-1;sourceSession='';}
+        var changed=sourceDevice!==selected.id||sourceSet!==selected.set||sourceLabel!==selected.label;
+        sourceDevice=selected.id;sourceSet=selected.set;sourceLabel=selected.label;
+        if(changed)save();
+    }
     sourcePresent=!!selected;
     if(!selected)sourceAvailable=false;
     else if(selected.session!==sourceSession){sourceSession=selected.session;sourceRevision=-1;sourceAvailable=false;}
     else sourceAvailable=sourceRevision>=0;
     render();
 }
+
 function sharingsnapshot(json) {
     var p;try{p=JSON.parse(String(json));}catch(e){return;}
     if(!p||!sourcePresent||identityBlocked||!recordValid||setIdentity!==currentSet||sourceKind!=='WhiteKeys'||p.set!==currentSet||p.set!==sourceSet||p.id!==sourceDevice||p.session!==sourceSession||!sourceSession||!integer(p.revision,0,9007199254740991)||p.revision<=sourceRevision||!integer(p.root,0,11)||!integer(p.mask,1,4095)||!(p.mask&1)||typeof p.name!=='string')return;
@@ -153,21 +178,21 @@ menuEntries=scaleMenu();var menuIndex=0,labels=[];
     for(var i=0;i<menuEntries.length;i++){labels.push(menuEntries[i].label);if(menuEntries[i].label===name)menuIndex=i;}
     var signature=labels.join('|');
     var sm=ui('scale_menu');if(sm && menuSignature!==signature){menuSignature=signature;sm.message('clear');for(i=0;i<labels.length;i++)sm.message('append',labels[i]);}
-    setui('root_menu',root);setui('scale_menu',menuIndex);setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));setui('host_toggle',hostEnabled);setui('black_menu',black);
+    setui('root_menu',root);setui('scale_menu',menuIndex);setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));setui('host_toggle',hostActive&&!identityBlocked?1:0);setui('black_menu',black);
     setui('scale_title','WhiteKeys');
     var visibleName=activeName.length>28?activeName.slice(0,25)+'...':activeName;
     var text='Playing: '+pitchNames[activeRoot]+' '+visibleName+' ('+active.length+(active.length===1?' note)':' notes)');
-    var sourceText=sourceKind==='Local'?'Local':(sourceKind==='WhiteKeys'?(sourceAvailable?'Following '+sourceLabel:(sourceDevice?'Source unavailable':'Select a Host')):(apiReady?'Following Live':'Live unavailable'));
+    var sourceText=sourceKind==='Local'?'Local':(sourceKind==='WhiteKeys'?(sourceAvailable?'Following '+sourceLabel:'Waiting for Host'):(apiReady?'Following Live':'Live unavailable'));
     if(follow&&apiReady&&!liveMode)sourceText+=' - Scale Mode off';
     setui('source_status',sharingNotice||sourceText);
     var status=ui('status_label');if(status){status.message('set',text);status.message('textcolor',184/255,197/255,186/255,1);}
     var editable=sourceKind==='Local'?0:1;
     var controls=['root_menu','scale_menu'];
     for(var j=0;j<controls.length;j++){var control=ui(controls[j]);if(control)control.message('ignoreclick',editable);}
-    var sourceMenu=ui('source_menu'),sourceLabels=['Local','Follow Live','Follow WhiteKeys'];for(i=0;i<directory.length;i++)sourceLabels.push(directory[i].label);
+    var sourceMenu=ui('source_menu'),sourceLabels=['Local','Follow Live','Follow WhiteKeys'];
     var sourceSignature=sourceLabels.join('|');if(sourceMenu&&sourceMenuSignature!==sourceSignature){sourceMenuSignature=sourceSignature;sourceMenu.message('clear');for(i=0;i<sourceLabels.length;i++)sourceMenu.message('append',sourceLabels[i]);}
     setui('source_menu',sourceKind==='Live'?1:(sourceKind==='WhiteKeys'?2:0));
-    var hostControl=ui('host_toggle');if(hostControl)hostControl.message('ignoreclick',sourceKind==='WhiteKeys'?1:0);
+    var hostControl=ui('host_toggle');if(hostControl)hostControl.message('ignoreclick',identityBlocked||sourceIdentityConflict?1:0);
     if(identityBlocked)setui('source_status','Identity conflict');else if(currentSet&&setIdentity!==currentSet)setui('source_status','Source unavailable - different Set');
     outlet(2,'sharingstate',JSON.stringify({record:getvalueof(),valid:recordValid?1:0}));
     outlet(1,['view',root,mask(notes)]);

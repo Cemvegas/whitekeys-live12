@@ -13,10 +13,12 @@ state.livescale(2,'Dorian',1,0,2,3,5,7,9,10);
 select('source',0);select('root',7);assert.deepStrictEqual(note(),[144,67,90,128,67,23]);assert.strictEqual(ui.source_menu,0);
 select('source',1);select('root',0);assert.deepStrictEqual(note(),[144,62,90,128,62,23]);assert.strictEqual(ui.source_menu,1);
 state.apistatus('Offline');assert.strictEqual(ui.source_status,'Live unavailable');assert.match(ui.status_label,/Playing: D Dorian/);assert.deepStrictEqual(note(),[144,62,90,128,62,23]);
-select('source',2);assert.strictEqual(state.getvalueof()[3],'WhiteKeys');assert.strictEqual(ui.source_menu,2);assert.strictEqual(ui.source_status,'Select a Host');
-select('host',1);assert.strictEqual(state.getvalueof()[4],0);select('source',1);select('host',1);assert.strictEqual(state.getvalueof()[4],1);assert.strictEqual(ui.host_toggle,1);
+select('source',2);assert.strictEqual(state.getvalueof()[3],'WhiteKeys');assert.strictEqual(ui.source_menu,2);assert.strictEqual(ui.source_status,'Waiting for Host');
+select('host',1);assert.strictEqual(state.getvalueof()[4],1);assert.strictEqual(state.getvalueof()[3],'Local');select('source',1);select('host',1);assert.strictEqual(state.getvalueof()[4],1);assert.strictEqual(ui.host_toggle,1);
 // Native control boundary: plain toggle emits 0/1 without parameter UI machinery.
-assert.strictEqual(boxes.host.maxclass,'toggle');
+assert.strictEqual(boxes.host.maxclass,'textbutton');
 assert.strictEqual(ui.host_toggle,1);select('host',0);assert.strictEqual(ui.host_toggle,0);
 state.livescale(2,'A deliberately long external scale name that would overflow the panel',1,0,2,3,5,7,9,10);assert.ok(ui.status_label.length<=60);assert.match(ui.status_label,/Playing: D/);
 console.log('Scale Source panel routing, Local/Live MIDI, Host/WhiteKeys transitions and retained Playing passed');
+
+assert.equal(patch.lines.find(x=>x.patchline.source[0]==='host').patchline.source[1],0);assert.equal(boxes.host.mode,1);assert.equal(boxes.hostlabel,undefined);assert.deepEqual(boxes.host.bgoncolor,[242/255,201/255,76/255,1]);assert.deepEqual(boxes.host.presentation_rect,[251,4,45,19]);

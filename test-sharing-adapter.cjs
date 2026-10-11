@@ -41,3 +41,31 @@ reset();const source=make(800,record('source',1,7)),copyF1=make(801,[4,'copy-fol
 console.log('Foreign-first registration and deleted duplicate Follower survivor resolution passed');
 reset();const failure={censusError:false},failA=make(900,record('same-fail',1),failure),failB=make(901,record('same-fail',1));failA.transport.init();failB.transport.init();run();failure.censusError=true;failA.transport.tick();failure.censusError=false;run();const recent=failA.ui.conflict_menu.filter(a=>a[0]==='hidden').at(-1);assert.equal(recent[1],0);
 console.log('Transient native failure restores conflict selector passed');
+// AC19/20/23: explicit handoff through real production messages and MIDI.
+reset();const h1=make(1100,record('host-A',0,2)),h2=make(1101,record('host-B',0,7)),auto=make(1102,record('auto',0));
+for(const d of devices)d.transport.init();run();auto.state.sourceselect(2);run();assert.equal(last(auto.ui,'source_status'),'Waiting for Host');
+h1.state.hostselect(1);run();assert.deepEqual(auto.note(),[144,62,90,128,62,23]);
+auto.bytes.length=0;auto.midi.note(147,60,101);h2.state.hostselect(1);run();auto.midi.note(131,60,39);assert.deepEqual(auto.bytes,[147,62,101,131,62,39]);
+assert.equal(h1.state.getvalueof()[4],0);assert.equal(h1.state.getvalueof()[3],'Local');assert.equal(h1.state.getvalueof()[8],2);assert.equal(last(h1.ui,'host_toggle'),0);assert.equal(last(h2.ui,'host_toggle'),1);assert.deepEqual(auto.note(),[144,67,90,128,67,23]);
+h1.state.rootselect(9);run();assert.deepEqual(auto.note(),[144,67,90,128,67,23]);h2.state.hostselect(0);run();assert.equal(last(auto.ui,'source_status'),'Waiting for Host');h2.state.hostselect(1);run();assert.deepEqual(auto.note(),[144,67,90,128,67,23]);
+h1.state.hostselect(1);h2.state.hostselect(1);run();assert.equal(h1.state.getvalueof()[4],0);assert.equal(h2.state.getvalueof()[4],1);
+auto.state.hostselect(1);run();assert.equal(auto.state.getvalueof()[3],'Local');assert.equal(h2.state.getvalueof()[4],0);assert.equal(auto.state.getvalueof()[4],1);
+console.log('Automatic Follow, explicit single Host handoff, retained scale and held MIDI passed');
+// Identity conflict has priority over automatic handoff, while independent Host stays live.
+reset();const ca=make(1200,record('conflicted',1,2)),cf=make(1201,record('bound',0)),independent=make(1202,record('independent',0,9));for(const d of devices)d.transport.init();run();cf.state.sourceselect(2);run();assert.deepEqual(cf.note(),[144,62,90,128,62,23]);
+const duplicate=make(1203,record('conflicted',1,7));duplicate.transport.init();run();independent.state.hostselect(1);run();assert.equal(last(independent.ui,'host_toggle'),1);assert.equal(last(cf.ui,'source_status'),'Identity conflict');assert.equal(cf.state.getvalueof()[6],'conflicted');assert.deepEqual(cf.note(),[144,62,90,128,62,23]);
+cf.state.hostselect(1);run();assert.equal(cf.state.getvalueof()[3],'WhiteKeys');assert.equal(last(independent.ui,'host_toggle'),1);
+console.log('Identity conflict blocks automatic escape and Host action without pausing independent Host passed');
+// Distinct restored preferences wait for an explicit action in either discovery order.
+for(const order of [[0,1],[1,0]]){
+ reset();const restored=[make(1300,record('restored-A',1,2)),make(1301,record('restored-B',1,7))],rFollow=make(1302,record('waiting',0));rFollow.transport.init();for(const i of order)restored[i].transport.init();run();rFollow.state.sourceselect(2);run();assert.equal(last(rFollow.ui,'source_status'),'Host conflict');for(const h of restored)assert.equal(last(h.ui,'host_toggle'),0);restored[1].state.hostselect(1);run();assert.equal(restored[0].state.getvalueof()[4],0);assert.deepEqual(rFollow.note(),[144,67,90,128,67,23]);
+}
+console.log('Distinct saved Host conflict never elects by discovery order passed');
+// Explicitly activated Host duplication must keep its preference on either chosen keeper.
+for(const keeper of [1,2]){
+ reset();const original=make(1400,record('explicit-copy',0,2)),bound=make(1401,record('bound-explicit',0));original.transport.init();bound.transport.init();run();original.state.hostselect(1);run();bound.state.sourceselect(2);run();const copied=make(1402,Array.from(original.state.getvalueof()));copied.transport.init();run();assert.equal(copied.state.getvalueof()[4],1);original.state.conflictselect(keeper);run();const winner=keeper===1?original:copied,loser=keeper===1?copied:original;assert.equal(winner.state.getvalueof()[1],'explicit-copy');assert.equal(winner.state.getvalueof()[4],1);assert.equal(loser.state.getvalueof()[4],0);assert.match(last(bound.ui,'source_status'),/Following/);assert.deepEqual(bound.note(),[144,62,90,128,62,23]);
+}
+console.log('Explicit active Host duplication preserves selected keeper preference and Follow passed');
+// Deleted chosen keeper rolls the explicit role back with the identity transaction.
+reset();const survivor=make(1500,record('surviving-role',0,2)),survivorFollow=make(1501,record('survivor-follow',0));survivor.transport.init();survivorFollow.transport.init();run();survivor.state.hostselect(1);run();survivorFollow.state.sourceselect(2);run();const removedKeeper=make(1502,Array.from(survivor.state.getvalueof()));removedKeeper.transport.init();run();survivor.state.conflictselect(2);liveIds=liveIds.filter(id=>id!=='1502');devices.splice(devices.indexOf(removedKeeper),1);run();survivor.state.conflictselect(1);run();assert.equal(survivor.state.getvalueof()[4],1);assert.match(last(survivorFollow.ui,'source_status'),/Following/);
+console.log('Removed selected keeper restores explicit role before survivor resolution passed');
