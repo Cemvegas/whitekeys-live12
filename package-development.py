@@ -12,9 +12,10 @@ import zipfile
 ROOT = Path(__file__).resolve().parent
 JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js', 'whitekeys-sharing.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
-                 'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
+                 'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
                  'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
-                 'docs/production-sharing.md', 'docs/production-sharing-review.md'}
+                 'docs/production-sharing.md', 'docs/production-sharing-review.md',
+                 'docs/performance-diagnosis/README.md'}
 
 
 def git(*args):
