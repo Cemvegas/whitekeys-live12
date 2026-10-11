@@ -38,4 +38,4 @@ AMXD ve beş JS dosyasını aynı klasörde tutun. A, B ve C ayrı kimlikli ciha
 | HC02 gerçek Host devri ve basılı nota | Passed — kullanıcı, 2026-10-11; f43ed90 |
 | HC03 gerçek kapat/yeniden bağlan | Passed — kullanıcı, 2026-10-11; f43ed90 |
 
-Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 kayıt/kimlik çözümü ve önceki güvenlik regresyonları Spec #23 / #21 / #22 kapsamında ayrıca bekler; bu demo bunları tamamlanmış saymaz.
+Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 ana kayıt/çoğaltma adımları kullanıcı tarafından geçti bildirildi. Eski çakışmalı Set kurtarma, ham MIDI ve diğer eksik güvenlik alt koşulları [kabul formunda](../HOST-SONUC-FORMU.md) ayrı izlenir; ana adımların geçmesi bunları tamamlanmış saymaz.
