@@ -706,7 +706,7 @@
           "presentation_rect": [
             14,
             148,
-            240,
+            332,
             16
           ]
         }
@@ -872,7 +872,7 @@
               "parameter_longname": "WhiteKeys sharing enrollment",
               "parameter_shortname": "WK enrollment",
               "parameter_type": 1,
-              "parameter_invisible": 1,
+              "parameter_invisible": 0,
               "parameter_mmin": 0,
               "parameter_mmax": 1,
               "parameter_initial_enable": 1,
@@ -969,48 +969,6 @@
             0.86,
             1
           ]
-        }
-      },
-      {
-        "box": {
-          "id": "hostinput",
-          "maxclass": "comment",
-          "text": "Host input 0",
-          "fontsize": 9,
-          "patching_rect": [
-            420,
-            610,
-            85,
-            16
-          ],
-          "presentation": 1,
-          "presentation_rect": [
-            260,
-            148,
-            86,
-            16
-          ],
-          "textcolor": [
-            0.86,
-            0.89,
-            0.86,
-            1
-          ]
-        }
-      },
-      {
-        "box": {
-          "id": "hostinputprep",
-          "maxclass": "newobj",
-          "text": "prepend set Host input",
-          "patching_rect": [
-            420,
-            580,
-            140,
-            22
-          ],
-          "numinlets": 1,
-          "numoutlets": 1
         }
       }
     ],
@@ -1362,30 +1320,6 @@
           ],
           "destination": [
             "model",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "host",
-            0
-          ],
-          "destination": [
-            "hostinputprep",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "hostinputprep",
-            0
-          ],
-          "destination": [
-            "hostinput",
             0
           ]
         }

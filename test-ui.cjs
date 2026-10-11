@@ -18,8 +18,5 @@ select('host',1);assert.strictEqual(state.getvalueof()[4],0);select('source',1);
 // Native control boundary: plain toggle emits 0/1 without parameter UI machinery.
 assert.strictEqual(boxes.host.maxclass,'toggle');
 assert.strictEqual(ui.host_toggle,1);select('host',0);assert.strictEqual(ui.host_toggle,0);
-const raw=patch.lines.find(x=>x.patchline.source[0]==='host'&&x.patchline.destination[0]==='hostinputprep');
-assert.ok(raw,'Raw native click indicator must branch before the JS model');
-assert.strictEqual(boxes.hostinputprep.text,'prepend set Host input');
 state.livescale(2,'A deliberately long external scale name that would overflow the panel',1,0,2,3,5,7,9,10);assert.ok(ui.status_label.length<=60);assert.match(ui.status_label,/Playing: D/);
 console.log('Scale Source panel routing, Local/Live MIDI, Host/WhiteKeys transitions and retained Playing passed');

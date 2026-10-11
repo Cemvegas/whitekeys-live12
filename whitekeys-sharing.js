@@ -46,7 +46,7 @@ function scanContainer(container,found){
 function census(song){var found=[],tracks=ids(song.get('tracks')).concat(ids(song.get('return_tracks')));for(var i=0;i<tracks.length;i++)scanContainer(api(tracks[i]),found);scanContainer(pathApi('live_set master_track'),found);return found.sort();}
 function location(d){
     var names=[d.get('name').join(' ')],parent=ids(d.get('canonical_parent')),seen={},hops=0;
-    while(parent.length&&hops++<24&&!seen[parent[0]]){seen[parent[0]]=1;var p=api(parent[0]);try{names.unshift(p.get('name').join(' '));}catch(e){}parent=ids(p.get('canonical_parent'));}
+    while(parent.length&&parent[0]!==scope.split(':')[0]&&hops++<24&&!seen[parent[0]]){seen[parent[0]]=1;var p=api(parent[0]);try{names.unshift(p.get('name').join(' '));}catch(e){}parent=ids(p.get('canonical_parent'));}
     return names.join(' / ')+' ['+String(d.path)+']';
 }
 function init(){

@@ -69,6 +69,8 @@ def integrity():
         raise ValueError('Persistent native Set anchor missing')
     if p['parameters'].get('enrollment', [None])[0] != 'WhiteKeys sharing enrollment':
         raise ValueError('Native census enrollment marker missing')
+    if boxes['enrollment']['saved_attribute_attributes']['valueof']['parameter_invisible'] != 0:
+        raise ValueError('Enrollment must be automatable to appear in Device.parameters')
     if any(name in boxes for name in ('apply', 'applymsg', 'mode', 'modeprep', 'modestatus', 'modelabel')):
         raise ValueError('Removed Mode or Apply controls remain')
     if p.get('openrect') != [0, 0, 360, 169]:
