@@ -16,7 +16,7 @@ Güncel sözleşme: [üretim paylaşımı](docs/production-sharing.md), [otomati
 | Kriter | Beklenen | Gözlenen / kanıt | Sonuç |
 |---|---|---|---|
 | HC01 aç/takip | A Local D Major / Host açık; B Follow WhiteKeys otomatik A'yı bulur. A G olduğunda B'nin Playing ve sesi G olur. B ayrıca Host seçmeden bağlanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
-| HC02 devir | C Local A Major / Host açılır; A kapanır, yalnız C sarıdır. B A Major'a geçer; Devir sırasında tutulan nota eski hedefte bırakılınca kapanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
+| HC02 devir | C Local A Major / Host açılır; A kapanır, C Host olur. B A Major'a geçer; Devir sırasında tutulan nota eski hedefte bırakılınca kapanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 | HC03 kapat/geri aç | C Host kapanınca B son gamı korur ; yeniden açınca otomatik bağlanır. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 | HC04 normal kayıt/açılış | C Host ve B Follower durumunda kaydet; Set'i tamamen kapatıp yeniden aç. Host, takip ve gam korunur; Black Keys ayrı güvenlik koşuludur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
 | HC05 çoğaltma/kimlik kaydı | Aktif C'yi çoğalt. C Host kalır, kopya Host kapalıdır; manuel kimlik seçimi yoktur. Kaydet/kapat/aç: tek Host ve B'nin takibi korunur. | Kullanıcı, verilen beş adımın tamamını geçti olarak bildirdi. | Passed (user-reported) |
