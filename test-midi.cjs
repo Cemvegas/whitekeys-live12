@@ -38,7 +38,7 @@ function instrument(){
  key={mgraphics:graphics,box:{rect:[0,0,350,80]},outlet:(i,...a)=>deliver(state,a)};
  vm.createContext(key);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-keyboard.js','utf8'),key);
  midi=make(a=>deliver(key,a));
- state={arrayfromargs:a=>Array.from(a),notifyclients(){},patcher:{getnamed(){return null}},outlet:(i,...a)=>deliver(i===0?midi:key,a.length===1&&Array.isArray(a[0])?a[0]:a)};
+ state={arrayfromargs:a=>Array.from(a),notifyclients(){},patcher:{getnamed(){return null}},outlet:(i,...a)=>{if(i<2)deliver(i===0?midi:key,a.length===1&&Array.isArray(a[0])?a[0]:a)}};
  vm.createContext(state);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-state.js','utf8'),state);
  state.livescale(0,'Major',1,...major);state.init();
  return {key,state,midi,click:(x,y,option=0)=>key.onclick(x,y,1,0,0,0,option,0),saved:()=>JSON.parse(JSON.stringify(state.getvalueof())),lights:()=>{painted=[];key.paint();return painted.length}};

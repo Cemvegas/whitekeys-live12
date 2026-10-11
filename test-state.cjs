@@ -11,7 +11,7 @@ function integration() {
     const state={arrayfromargs:a=>Array.from(a),notifyclients:()=>{},patcher:{getnamed:n=>({message:(...a)=>{if(a[0]==='set')labels[n]=a[1];if(a[0]==='clear')menus[n]=[];if(a[0]==='append')(menus[n]||(menus[n]=[])).push(a[1])}})},outlet:(port,...a)=>{
         if(Array.isArray(a[0]))a=Array.from(a[0]);
         if(port===0)midi[a[0]](...a.slice(1));
-        else {views.push(a);keyboard[a[0]](...a.slice(1));}
+        else if(port===1) {views.push(a);keyboard[a[0]](...a.slice(1));}
     }};
     vm.createContext(state);vm.runInContext(fs.readFileSync(__dirname+'/whitekeys-state.js','utf8'),state);
     keyboard={box:{rect:[0,0,350,70]},mgraphics:{init:()=>{},redraw:()=>{},set_source_rgba:(...a)=>paintColors.push(a),rectangle_rounded:()=>{},fill:()=>{},set_line_width:()=>{},stroke:()=>{},rectangle:()=>{},select_font_face:()=>{},set_font_size:()=>{},text_measure:()=>[4],move_to:()=>{},show_text:()=>{}},outlet:(port,command,pc)=>state[command](pc)};

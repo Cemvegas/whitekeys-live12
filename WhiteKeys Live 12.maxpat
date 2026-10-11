@@ -168,7 +168,7 @@
             22
           ],
           "numinlets": 1,
-          "numoutlets": 2,
+          "numoutlets": 3,
           "varname": "model",
           "text": "js whitekeys-state.js"
         }
@@ -275,7 +275,7 @@
             ",",
             "Follow Live",
             ",",
-            "Follow WhiteKeys (unavailable)"
+            "Follow WhiteKeys"
           ]
         }
       },
@@ -781,8 +781,8 @@
             0.12941176470588237,
             1
           ],
-          "active": 0,
-          "hint": "Sharing unavailable \u2014 real Live identity validation pending"
+          "active": 1,
+          "hint": "Share the sounding scale with WhiteKeys in this Set"
         }
       },
       {
@@ -828,6 +828,143 @@
             332,
             16
           ]
+        }
+      },
+      {
+        "box": {
+          "id": "sharing",
+          "maxclass": "newobj",
+          "text": "js whitekeys-sharing.js",
+          "patching_rect": [
+            400,
+            400,
+            170,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "anchor",
+          "varname": "song_anchor",
+          "maxclass": "newobj",
+          "text": "live.object",
+          "patching_rect": [
+            400,
+            430,
+            170,
+            22
+          ],
+          "numinlets": 2,
+          "numoutlets": 1,
+          "saved_object_attributes": {
+            "_persistence": 1
+          }
+        }
+      },
+      {
+        "box": {
+          "id": "anchorprep",
+          "maxclass": "newobj",
+          "text": "prepend nativeanchor",
+          "patching_rect": [
+            400,
+            460,
+            140,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "enrollment",
+          "maxclass": "live.numbox",
+          "patching_rect": [
+            400,
+            490,
+            80,
+            20
+          ],
+          "parameter_enable": 1,
+          "saved_attribute_attributes": {
+            "valueof": {
+              "parameter_longname": "WhiteKeys sharing enrollment",
+              "parameter_shortname": "WK enrollment",
+              "parameter_type": 1,
+              "parameter_invisible": 1,
+              "parameter_mmin": 0,
+              "parameter_mmax": 1,
+              "parameter_initial_enable": 1,
+              "parameter_initial": [
+                1
+              ]
+            }
+          }
+        }
+      },
+      {
+        "box": {
+          "id": "conflict",
+          "maxclass": "umenu",
+          "patching_rect": [
+            400,
+            520,
+            250,
+            20
+          ],
+          "numinlets": 1,
+          "numoutlets": 3,
+          "varname": "conflict_menu",
+          "parameter_enable": 0,
+          "bgcolor": [
+            0.25882352941176473,
+            0.29411764705882354,
+            0.27058823529411763,
+            1
+          ],
+          "textcolor": [
+            0.8627450980392157,
+            0.8901960784313725,
+            0.8666666666666667,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            14,
+            128,
+            332,
+            19
+          ],
+          "fontsize": 10,
+          "bordercolor": [
+            0.396078431372549,
+            0.44313725490196076,
+            0.40784313725490196,
+            1
+          ],
+          "items": [
+            "Identity conflict: keep identity on..."
+          ],
+          "hidden": 1
+        }
+      },
+      {
+        "box": {
+          "id": "conflictprep",
+          "maxclass": "newobj",
+          "text": "prepend conflictselect",
+          "patching_rect": [
+            400,
+            550,
+            150,
+            22
+          ],
+          "numinlets": 1,
+          "numoutlets": 1
         }
       }
     ],
@@ -961,7 +1098,8 @@
           "destination": [
             "api",
             0
-          ]
+          ],
+          "order": 1
         }
       },
       {
@@ -973,7 +1111,8 @@
           "destination": [
             "model",
             0
-          ]
+          ],
+          "order": 0
         }
       },
       {
@@ -1107,6 +1246,79 @@
             0
           ]
         }
+      },
+      {
+        "patchline": {
+          "source": [
+            "init",
+            0
+          ],
+          "destination": [
+            "sharing",
+            0
+          ],
+          "order": 2
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "model",
+            2
+          ],
+          "destination": [
+            "sharing",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "anchor",
+            0
+          ],
+          "destination": [
+            "anchorprep",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "anchorprep",
+            0
+          ],
+          "destination": [
+            "sharing",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "conflict",
+            0
+          ],
+          "destination": [
+            "conflictprep",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "conflictprep",
+            0
+          ],
+          "destination": [
+            "model",
+            0
+          ]
+        }
       }
     ],
     "dependency_cache": [
@@ -1133,6 +1345,13 @@
       },
       {
         "name": "whitekeys-keyboard.js",
+        "bootpath": ".",
+        "patcherrelativepath": ".",
+        "type": "TEXT",
+        "implicit": 1
+      },
+      {
+        "name": "whitekeys-sharing.js",
         "bootpath": ".",
         "patcherrelativepath": ".",
         "type": "TEXT",
@@ -1214,7 +1433,12 @@
           ]
         }
       },
-      "inherited_shortname": 1
+      "inherited_shortname": 1,
+      "enrollment": [
+        "WhiteKeys sharing enrollment",
+        "WK enrollment",
+        0
+      ]
     }
   }
 }

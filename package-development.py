@@ -10,10 +10,11 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parent
-JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js'}
+JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-keyboard.js', 'whitekeys-sharing.js'}
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
-                 'test-midi.cjs', 'test-state.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
-                 'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md'}
+                 'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
+                 'package-development.py', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
+                 'docs/production-sharing.md', 'docs/production-sharing-review.md'}
 
 
 def git(*args):
@@ -36,8 +37,8 @@ def integrity():
     if p['project']['amxdtype'] != 1835887981:
         raise ValueError('Not a MIDI effect')
     deps = p['dependency_cache']
-    if len(deps) != 4 or {d['name'] for d in deps} != JS or any(d.get('bootpath') != '.' or d.get('patcherrelativepath') != '.' or d.get('type') != 'TEXT' for d in deps):
-        raise ValueError('Four adjacent JS dependencies required')
+    if len(deps) != 5 or {d['name'] for d in deps} != JS or any(d.get('bootpath') != '.' or d.get('patcherrelativepath') != '.' or d.get('type') != 'TEXT' for d in deps):
+        raise ValueError('Five adjacent JS dependencies required')
     boxes = {b['box']['id']: b['box'] for b in p['boxes']}
     scripts = {b.get('text', '').removeprefix('js ') for b in boxes.values() if b.get('text', '').startswith('js ')}
     scripts |= {b['filename'] for b in boxes.values() if b.get('maxclass') == 'jsui'}
@@ -51,15 +52,22 @@ def integrity():
               (('keyboard', 0), ('model', 0)), (('model', 1), ('keyboard', 0)),
               (('midi', 1), ('keyboard', 0)), (('panic', 0), ('panicmsg', 0)),
               (('panicmsg', 0), ('midi', 0)), (('host', 0), ('hostprep', 0)),
-              (('hostprep', 0), ('model', 0))}
+              (('hostprep', 0), ('model', 0)), (('init', 0), ('sharing', 0)),
+              (('model', 2), ('sharing', 0)), (('anchor', 0), ('anchorprep', 0)),
+              (('anchorprep', 0), ('sharing', 0)), (('conflict', 0), ('conflictprep', 0)),
+              (('conflictprep', 0), ('model', 0))}
     for control in ('root', 'scale', 'black', 'source'):
         needed |= {((control, 0), (control + 'prep', 0)), ((control + 'prep', 0), ('model', 0))}
     if not needed <= routes:
         raise ValueError('Missing MIDI/API/editor/panic route')
     if boxes.get('source',{}).get('varname') != 'source_menu' or boxes.get('host',{}).get('varname') != 'host_toggle':
         raise ValueError('Scale Source and gated Host controls required')
-    if boxes['host'].get('active') != 0:
-        raise ValueError('Sharing identity gate pending: Host must remain disabled')
+    if boxes['host'].get('active') != 1:
+        raise ValueError('Host must be enabled')
+    if boxes.get('anchor', {}).get('saved_object_attributes', {}).get('_persistence') != 1:
+        raise ValueError('Persistent native Set anchor missing')
+    if p['parameters'].get('enrollment', [None])[0] != 'WhiteKeys sharing enrollment':
+        raise ValueError('Native census enrollment marker missing')
     if any(name in boxes for name in ('apply', 'applymsg', 'mode', 'modeprep', 'modestatus', 'modelabel')):
         raise ValueError('Removed Mode or Apply controls remain')
     if p.get('openrect') != [0, 0, 360, 169]:
@@ -76,20 +84,21 @@ def integrity():
     attrs = boxes['store']['saved_attribute_attributes']['valueof']
     if boxes['store'].get('saved_object_attributes', {}).get('parameter_enable') != 1 or attrs['parameter_type'] != 3 or attrs['parameter_invisible'] != 1 or 'store' not in p['parameters']:
         raise ValueError('Enabled Stored Only blob parameter missing')
-    print('Integrity OK: AMXD JSON equals maxpat; four local JS; routing; Stored Only per-device blob')
+    print('Integrity OK: AMXD JSON equals maxpat; five local JS; routing; Stored Only per-device blob')
 
 
 def package(output):
-    if git('status', '--porcelain', '--untracked-files=all'):
-        raise ValueError('Commit all source changes before packaging')
+    if git('status', '--porcelain', '--untracked-files=all', '--', *sorted(REQUIRED)):
+        raise ValueError('Commit production source changes before packaging')
     commit = git('rev-parse', 'HEAD')
     files = sorted(git('ls-files').splitlines())
     if not REQUIRED <= set(files):
         raise ValueError('Required source files must be tracked')
     if output.resolve().is_relative_to(ROOT):
         raise ValueError('ZIP must be outside the source checkout (use chat outputs)')
-    data = {name: (ROOT / name).read_bytes() for name in files}
-    manifest = {'status': 'PARTIAL DEVELOPMENT — Live acceptance pending issue #22; WhiteKeys sharing unavailable pending validation gate #19',
+    # Bundle committed production files; preserve unrelated in-progress diagnostics.
+    data = {name: subprocess.check_output(['git', '-C', str(ROOT), 'show', 'HEAD:' + name]) for name in sorted(REQUIRED)}
+    manifest = {'status': 'PARTIAL DEVELOPMENT — Live acceptance pending issue #22; production sharing implemented; production Live acceptance pending',
                 'source_commit': commit, 'package_version': 'development-' + commit[:12],
                 'files': {name: {'bytes': len(content), 'sha256': hashlib.sha256(content).hexdigest()} for name, content in data.items()}}
     data['MANIFEST.json'] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode()
