@@ -1,12 +1,12 @@
 # Üretim Host/Follower paylaşımı — #20 / #21
 
-Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve [ADR 0007](adr/0007-single-active-host-and-automatic-follow.md) ve onu kimlik çözümü bakımından güncelleyen [ADR 0008](adr/0008-automatic-identity-conflict-resolution.md). #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için gerçek Live kabulü ayrıca bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
+Yetkili sözleşme: [Spec #23](https://github.com/Cemvegas/whitekeys-live12/issues/23) ve [ADR 0007](adr/0007-single-active-host-and-automatic-follow.md) ve onu kimlik çözümü bakımından güncelleyen [ADR 0008](adr/0008-automatic-identity-conflict-resolution.md). #19 kullanıcı tarafından kabul edildi; bu üretim sürümü için beş ana Live adımı kullanıcı tarafından geçti bildirildi; kalan güvenlik koşulları bekliyor. #20–#21 kodu hazırlanmıştır; #22 kapanmış sayılmaz.
 
 ## Kullanım
 
 Host yazısının bütün yüzeyine basın; yalnız aktif Host sarı görünür. Local ve Follow Live paylaşabilir. Follow WhiteKeys seçen cihaz Set’in tek aktif Host’una otomatik bağlanır; ayrıca Host seçilmez. Follower’da Host açmak son gamı koruyarak Local’a geçer.
 
-Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Kimlik çakışması otomatik çözülür: canlı mevcut cihaz kimliği/Host tercihini korur, kopyalar yeni kimlik ve Host kapalı alır. Eski çakışmalı Set açılışında ilk native cihaz korunur; manuel aday menüsü yoktur. Ayrıntılar [otomatik kimlik sözleşmesinde](specs/automatic-identity-resolution.md). Gerçek kayıt/açılış kabulü bekler.
+Başka cihazda Host açmak rolü devreder: önceki Host’un kaynak türü ve gamı korunur, Host kapanır; Follower’lar yeni Host’a geçer. Host kapandığında son gam ve referans korunur, Waiting for Host görünür. Farklı kayıtlı Host tercihleri Host conflict gösterir; istediğiniz cihazda Host’a basın. Kimlik çakışması otomatik çözülür: canlı mevcut cihaz kimliği/Host tercihini korur, kopyalar yeni kimlik ve Host kapalı alır. Eski çakışmalı Set açılışında ilk native cihaz korunur; manuel aday menüsü yoktur. Ayrıntılar [otomatik kimlik sözleşmesinde](specs/automatic-identity-resolution.md). 2026-10-11: kullanıcı temel takip/devir/kapat-aç, kayıt/açılış ve aktif Host çoğaltmayı güncel f43ed90 paketiyle geçti bildirdi; kalan güvenlik koşulları [kabul formunda](../HOST-SONUC-FORMU.md) ayrı durur.
 
 ## Kayıt ve adapter
 
@@ -34,8 +34,8 @@ AMXD ve beş JS dosyasını aynı klasörde tutun. A, B ve C ayrı kimlikli ciha
 
 | Kriter | Sonuç |
 |---|---|
-| HC01 native düğme, sarı renk ve otomatik keşif | Not run |
-| HC02 gerçek Host devri ve basılı nota | Not run |
-| HC03 gerçek kapat/yeniden bağlan | Not run |
+| HC01 native düğme, sarı renk ve otomatik keşif | Passed — kullanıcı, 2026-10-11; f43ed90 |
+| HC02 gerçek Host devri ve basılı nota | Passed — kullanıcı, 2026-10-11; f43ed90 |
+| HC03 gerçek kapat/yeniden bağlan | Passed — kullanıcı, 2026-10-11; f43ed90 |
 
 Live/Max sürümü, fixture ve gözlenen sonuç gerçek denemede kaydedilir. Otomatik adapter testi native Live kanıtı değildir. HC04–HC05 kayıt/kimlik çözümü ve önceki güvenlik regresyonları Spec #23 / #21 / #22 kapsamında ayrıca bekler; bu demo bunları tamamlanmış saymaz.
