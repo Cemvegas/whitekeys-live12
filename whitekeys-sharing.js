@@ -78,7 +78,7 @@ function sharinghost(actionSession,sequence,enabled){
 }
 function applyRole(s){
     if(s.role){
-        for(var t in s.transactions)if(s.transactions[t].roleBefore&&s.transactions[t].roleBefore.generation===s.role.generation)return;
+        if(identityProtectsRole(s))return;
         if(record[12]===1||group(s.entries,record[1]).length>1)return;
         var target=s.entries[s.role.runtime];
         if(!target||target.session!==s.role.session||(s.role.runtime===runtime&&record[3]==='WhiteKeys'))s.role={runtime:'',session:''};
@@ -95,7 +95,7 @@ function automaticIdentity(s){
     for(var r in s.entries){
         var e=s.entries[r];if(e.excluded||visited[e.record[1]])continue;
         var id=e.record[1],g=group(s.entries,id);visited[id]=1;
-        var busy=false;for(var t in s.transactions)for(var k in s.transactions[t].assignments)for(var i=0;i<g.length;i++)if(g[i].runtime===k)busy=true;
+        var busy=false,k,i;for(i=0;i<g.length;i++)if(identityTransaction(s,g[i].runtime))busy=true;
         if(busy)continue;
         if(g.length===1&&g[0].valid&&g[0].record[12]!==1){s.owners[id]={runtime:g[0].runtime,session:g[0].session};continue;}
         var ready=g.length>0;for(i=0;i<g.length;i++)if(!g[i].valid||g[i].record[12]!==1)ready=false;
@@ -107,6 +107,51 @@ function automaticIdentity(s){
     }
     var table=read();table[scope]=s;write(table);
 }
+function resolveIdentity(sig,keeper){
+    // Re-read native topology and shared state at the moment of choice.
+    var table=read(),s=table[scope];if(!s||!nativeReady)return;
+    var entry=s.entries[String(keeper)];if(!entry)return;
+    var g=group(s.entries,entry.record[1]);if(!g.length||(g.length===1&&g[0].record[12]!==1)||String(sig)!==scope+'#'+signature(g))return;
+    var live=census(pathApi('live_set'));if(live.join('|')!==topology.join('|'))return;
+    var k,i;for(i=0;i<g.length;i++)if(identityTransaction(s,g[i].runtime))return;
+    var tx={assignments:{},sessions:{},original:{},topology:live.join('|')};var allocated={};for(k in s.entries)allocated[s.entries[k].record[1]]=1;
+    for(i=0;i<g.length;i++){if(g[i].record[12]!==1)return;var id=g[i].record[1];if(g[i].runtime!==String(keeper)){do{id=uid();}while(allocated[id]);allocated[id]=1;}tx.assignments[g[i].runtime]={id:id,host:g[i].runtime===String(keeper)?g[i].record[4]:0};tx.sessions[g[i].runtime]=g[i].session;tx.original[g[i].runtime]={id:g[i].record[1],host:g[i].record[4]};}
+    if(s.role&&g.some(function(e){return e.runtime===s.role.runtime&&e.session===s.role.session;})){tx.roleBefore=JSON.parse(JSON.stringify(s.role));s.role.runtime=String(keeper);s.role.session=entry.session;}
+    s.transactions[String(sig)]=tx;write(table);
+}
+// Identity transaction membership is shared by allocation, role protection and directory publication.
+function identityTransaction(s,member){
+    for(var key in s.transactions)if(s.transactions[key].assignments[member])return key;
+    return '';
+}
+function identityProtectsRole(s){
+    for(var key in s.transactions){var before=s.transactions[key].roleBefore;if(before&&s.role&&before.generation===s.role.generation)return true;}
+    return false;
+}
+// Advance only this device's assignment; model feedback updates record synchronously.
+// Return null while rolling back, so no directory or snapshot can escape that poll.
+function advanceIdentity(table,s){
+    // Mark ALL claimants blocked before exposing any source directory.
+    var own=group(s.entries,record[1]);if(own.length>1&&record[12]!==1){send('sharingblocked',1);s.entries[runtime].record=record;write(table);}
+    var t=identityTransaction(s,runtime),tx=t?s.transactions[t]:null,r;
+    if(tx){
+        var intact=true;for(r in tx.assignments){var e=s.entries[r];if(!e||!e.valid||e.session!==tx.sessions[r])intact=false;}
+        // A changed native membership aborts before any sharing can resume.
+        if(!intact||topology.join('|')!==tx.topology)tx.cancelled=1;
+        if(tx.cancelled){
+            var old=tx.original[runtime];send('sharingblocked',1);if(record[1]!==old.id||record[4]!==old.host){send('sharingidentity',old.id,old.host);s.entries[runtime].record=record;}
+            var rolledBack=true;for(r in tx.original)if(s.entries[r]&&(s.entries[r].record[1]!==tx.original[r].id||s.entries[r].record[4]!==tx.original[r].host))rolledBack=false;
+            if(rolledBack){if(tx.roleBefore&&s.role&&s.role.generation===tx.roleBefore.generation)s.role=tx.roleBefore;delete s.transactions[t];}write(table);send('sharingdirectory','[]');return null;
+        }
+        var a=tx.assignments[runtime];if(record[1]!==a.id||record[4]!==a.host){send('sharingidentity',a.id,a.host);s.entries[runtime].record=record;write(table);}
+        var applied=true;for(r in tx.assignments)if(s.entries[r].record[1]!==tx.assignments[r].id||s.entries[r].record[4]!==tx.assignments[r].host)applied=false;
+        if(applied){tx.committed=1;if(lastResolution!==t){lastResolution=t;transportEpoch=uid();revision=0;snapshotKey='';s.entries[runtime].epoch=transportEpoch;s.entries[runtime].revision=revision;}write(table);send('sharingblocked',0);s.entries[runtime].record=record;write(table);}
+        var cleared=applied;for(r in tx.assignments)if(s.entries[r].record[12]===1)cleared=false;
+        if(cleared){delete s.transactions[t];write(table);}
+    }
+    return own;
+}
+
 function tick(){
     try{
         nativeSeen={};
@@ -122,7 +167,8 @@ function tick(){
         }
         if(!nativeReady)return;
         send('sharingcontext',s.set,session,runtime);
-        // Registration barrier: ALL native enrolled devices must have valid records.
+        // Registration barrier: every native enrolled device must be registered.
+        // Identity allocation separately requires valid collision members.
         // A missing peer is pending, never proof that this device owns a copied UID.
         var key=record[8]+'|'+record[9]+'|'+record[10]+'|'+record[4]+'|'+record[3];if(key!==snapshotKey){snapshotKey=key;revision++;}
         s.entries[runtime]={runtime:runtime,session:session,record:record,valid:validRecord,label:label,revision:revision,epoch:transportEpoch};
@@ -132,29 +178,12 @@ function tick(){
         write(table);
         if(!ready){send('sharingdirectory','[]');return;}
         applyRole(s);write(table);
-        // Mark ALL claimants blocked before exposing any source directory.
-        var own=group(s.entries,record[1]);if(own.length>1&&record[12]!==1){send('sharingblocked',1);s.entries[runtime].record=record;write(table);}
-        var tx=null;for(var t in s.transactions)if(s.transactions[t].assignments[runtime]){tx=s.transactions[t];break;}
-        if(tx){
-            var members=[],intact=true;for(r in tx.assignments){var e=s.entries[r];if(!e||!e.valid||e.session!==tx.sessions[r])intact=false;else members.push(e);}
-            // A changed native membership aborts before any sharing can resume.
-            if(!intact||topology.join('|')!==tx.topology)tx.cancelled=1;
-            if(tx.cancelled){
-                var old=tx.original[runtime];send('sharingblocked',1);if(record[1]!==old.id||record[4]!==old.host){send('sharingidentity',old.id,old.host);s.entries[runtime].record=record;}
-                var rolledBack=true;for(r in tx.original)if(s.entries[r]&&(s.entries[r].record[1]!==tx.original[r].id||s.entries[r].record[4]!==tx.original[r].host))rolledBack=false;
-                if(rolledBack){if(tx.roleBefore&&s.role&&s.role.generation===tx.roleBefore.generation)s.role=tx.roleBefore;delete s.transactions[t];}write(table);send('sharingdirectory','[]');return;
-            }
-            var a=tx.assignments[runtime];if(record[1]!==a.id||record[4]!==a.host){send('sharingidentity',a.id,a.host);s.entries[runtime].record=record;write(table);}
-            var applied=true;for(r in tx.assignments)if(s.entries[r].record[1]!==tx.assignments[r].id||s.entries[r].record[4]!==tx.assignments[r].host)applied=false;
-            if(applied){tx.committed=1;if(lastResolution!==t){lastResolution=t;transportEpoch=uid();revision=0;snapshotKey='';s.entries[runtime].epoch=transportEpoch;s.entries[runtime].revision=revision;}write(table);send('sharingblocked',0);s.entries[runtime].record=record;write(table);}
-            var cleared=applied;for(r in tx.assignments)if(s.entries[r].record[12]===1)cleared=false;
-            if(cleared){delete s.transactions[t];write(table);}
-        }
+        var own=advanceIdentity(table,s);if(!own)return;
         var peers=[],selected=null,hosts=[];
         for(r in s.entries){var candidate=s.entries[r];if(!candidate.excluded&&candidate.valid&&candidate.record[4]===1&&candidate.record[3]!=='WhiteKeys'&&candidate.record[12]!==1&&group(s.entries,candidate.record[1]).length===1)hosts.push(candidate);}
         var roleConflict=hosts.length>1;
         for(r in s.entries){var entry=s.entries[r];if(entry.excluded)continue;var v=entry.record,g=group(s.entries,v[1]),blocked=v[12]===1||g.length>1||!entry.valid;
-            for(t in s.transactions)if(s.transactions[t].assignments[r])blocked=true;
+            if(identityTransaction(s,r))blocked=true;
             var activeHost=!roleConflict&&v[4]===1&&!blocked;
             var p={id:v[1],set:s.set,session:entry.epoch,host:activeHost?1:0,kind:v[3],blocked:blocked?1:0,label:entry.label,transfer:s.role&&s.role.generation?s.role.generation:''};peers.push(p);
             if(activeHost&&v[3]!=='WhiteKeys')selected=entry;
@@ -167,18 +196,6 @@ function tick(){
 
         automaticIdentity(s);
     }catch(e){send('sharingdirectory','[]');post('WhiteKeys sharing unavailable: '+e.message+'\n');}
-}
-function resolveIdentity(sig,keeper){
-    // Re-read native topology and shared state at the moment of choice.
-    var table=read(),s=table[scope];if(!s||!nativeReady)return;
-    var entry=s.entries[String(keeper)];if(!entry)return;
-    var g=group(s.entries,entry.record[1]);if(!g.length||(g.length===1&&g[0].record[12]!==1)||String(sig)!==scope+'#'+signature(g))return;
-    var live=census(pathApi('live_set'));if(live.join('|')!==topology.join('|'))return;
-    for(var existing in s.transactions)for(var k in s.transactions[existing].assignments)for(var i=0;i<g.length;i++)if(g[i].runtime===k)return;
-    var tx={assignments:{},sessions:{},original:{},topology:live.join('|')};var allocated={};for(k in s.entries)allocated[s.entries[k].record[1]]=1;
-    for(i=0;i<g.length;i++){if(g[i].record[12]!==1)return;var id=g[i].record[1];if(g[i].runtime!==String(keeper)){do{id=uid();}while(allocated[id]);allocated[id]=1;}tx.assignments[g[i].runtime]={id:id,host:g[i].runtime===String(keeper)?g[i].record[4]:0};tx.sessions[g[i].runtime]=g[i].session;tx.original[g[i].runtime]={id:g[i].record[1],host:g[i].record[4]};}
-    if(s.role&&g.some(function(e){return e.runtime===s.role.runtime&&e.session===s.role.session;})){tx.roleBefore=JSON.parse(JSON.stringify(s.role));s.role.runtime=String(keeper);s.role.session=entry.session;}
-    s.transactions[String(sig)]=tx;write(table);
 }
 function dispose(){for(var path in nativeApis){try{nativeApis[path].id=0;}catch(e){}}nativeApis={};nativeSeen={};parameterNames={};lastMessages={};if(poll){poll.cancel();poll=null;}if(scope&&runtime){var table=read();if(table[scope]){delete table[scope].entries[runtime];if(!Object.keys(table[scope].entries).length)delete table[scope];write(table);}}runtime='';nativeReady=false;}
 function notifydeleted(){dispose();}

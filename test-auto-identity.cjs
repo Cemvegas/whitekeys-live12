@@ -28,5 +28,30 @@ console.log('Invalid restore cannot cause partial automatic identity allocation 
 reset();const blockedHost=make(1100,record('blocked-reference',1,2)),blockedFollow=make(1101,[4,'blocked-auto-follow','set-A','WhiteKeys',0,'set-A','blocked-reference','Piano',0,2741,'Major',0]),separate=make(1102,record('separate-active',0,9));for(const d of devices)d.transport.init();run();const blockedCopy=make(1103,Array.from(blockedHost.state.getvalueof()));blockedCopy.transport.init();blockedHost.transport.tick();blockedFollow.transport.tick();separate.state.hostselect(1);run(15);assert.equal(last(separate.ui,'host_toggle'),1);assert.equal(blockedFollow.state.getvalueof()[6],'blocked-reference');assert.deepEqual(blockedFollow.note(),[144,62,90,128,62,23]);assert.equal(blockedCopy.state.getvalueof()[4],0);separate.state.hostselect(1);run();assert.equal(blockedFollow.state.getvalueof()[6],'separate-active');assert.deepEqual(blockedFollow.note(),[144,69,90,128,69,23]);
 console.log('Automatic resolution preserves blocked references until a later explicit handoff passed');
 // Restore validity is rechecked throughout allocation, not only before the transaction.
-reset();const inFlightA=make(1200,record('in-flight-invalid',1,2)),inFlightB=make(1201,record('in-flight-invalid',1,7));inFlightA.transport.init();inFlightB.transport.init();inFlightA.transport.tick();inFlightB.state.setvalueof(4,'broken');run(15);assert.equal(inFlightB.state.getvalueof()[1],'in-flight-invalid');assert.equal(inFlightB.state.getvalueof()[4],1);assert.equal(inFlightA.state.getvalueof()[12],1);inFlightB.state.setvalueof(...record('in-flight-invalid',1,7));run(15);assert.notEqual(inFlightB.state.getvalueof()[1],'in-flight-invalid');assert.equal(inFlightA.state.getvalueof()[12],undefined);
+reset();const inFlightA=make(1200,record('in-flight-invalid',1,2)),inFlightB=make(1201,record('in-flight-invalid',1,7));inFlightA.transport.init();inFlightB.transport.init();inFlightA.transport.tick();inFlightB.state.setvalueof(4,'broken');for(let poll=0;poll<15;poll++)for(const d of devices){d.transport.tick();assert.equal(inFlightB.state.getvalueof()[1],'in-flight-invalid');assert.equal(inFlightB.state.getvalueof()[4],1);}assert.equal(inFlightB.state.getvalueof()[1],'in-flight-invalid');assert.equal(inFlightB.state.getvalueof()[4],1);assert.equal(inFlightA.state.getvalueof()[12],1);inFlightB.state.setvalueof(...record('in-flight-invalid',1,7));run(15);assert.notEqual(inFlightB.state.getvalueof()[1],'in-flight-invalid');assert.equal(inFlightA.state.getvalueof()[12],undefined);
 console.log('Invalid in-flight restore rolls back allocation and retries only after valid restore passed');
+
+// Observe each scheduled device poll through saved state, UI and production MIDI.
+reset();const stepHost=make(1300,record('step-host',1,2)),stepFollow=make(1301,[4,'step-follow','set-A','WhiteKeys',0,'set-A','step-host','Piano',0,2741,'Major',1]);
+stepHost.transport.init();stepFollow.transport.init();run();
+stepFollow.bytes.length=0;stepFollow.midi.note(147,60,101);
+const stepCopy=make(1302,Array.from(stepHost.state.getvalueof()));stepCopy.transport.init();
+for(let round=0;round<15;round++)for(const d of devices){
+ d.transport.tick();
+ assert.equal(stepHost.state.getvalueof()[1],'step-host');
+ assert.equal(stepFollow.state.getvalueof()[6],'step-host');
+ assert.equal(stepFollow.state.getvalueof()[11],1);
+ // A blocked Follower keeps its last Sounding Scale, including mid-assignment.
+ assert.deepEqual(stepCopy.note(),[144,62,90,128,62,23]);
+ assert.deepEqual(stepFollow.note(),[144,62,90,128,62,23]);
+ assert.ok(last(stepCopy.ui,'host_toggle')!==1);
+ if(stepCopy.state.getvalueof()[1]!=='step-host')assert.equal(stepCopy.state.getvalueof()[4],0);
+}
+// note() clears the byte log; release still uses the original held channel/pitch.
+stepFollow.bytes.length=0;stepFollow.midi.note(131,60,39);
+assert.deepEqual(stepFollow.bytes,[131,62,39]);
+assert.notEqual(stepCopy.state.getvalueof()[1],'step-host');
+assert.equal(stepCopy.state.getvalueof()[4],0);
+assert.equal(stepHost.state.getvalueof()[12],undefined);
+assert.match(last(stepFollow.ui,'source_status'),/Following/);
+console.log('Every identity poll preserves Host/source/scale and held-note release passed');
