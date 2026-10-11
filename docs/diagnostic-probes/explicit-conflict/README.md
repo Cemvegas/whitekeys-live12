@@ -1,6 +1,6 @@
 # #19 — Explicit Conflict Probe
 
-Durum: otomatik mesaj senaryoları hazırlanıyor; gerçek Live **NOT RUN**. Spec #23 / ADR 0006 için ayrı tanılama cihazıdır, üretim paylaşım uygulaması değildir. #19 açık kalır, #20–#21 başlamaz. Computer Use kullanılmaz.
+Durum: otomatik mesaj senaryoları geçti, ayrı test paketi hazır; gerçek Live **NOT RUN**. Spec #23 / ADR 0006 için ayrı tanılama cihazıdır, üretim paylaşım uygulaması değildir. #19 açık kalır, #20–#21 başlamaz. Computer Use kullanılmaz.
 
 ## Paket ve test
 

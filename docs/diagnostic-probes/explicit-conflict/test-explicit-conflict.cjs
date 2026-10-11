@@ -6,7 +6,7 @@ function device(saved,id,anchorId=99){
  vm.createContext(midi);vm.runInContext(fs.readFileSync(__dirname+'/probe-midi.js','utf8'),midi);
  const c={Global:function(){return shared},Task:function(f){this.repeat=()=>tasks.push(f);this.cancel=()=>{}},LiveAPI:function(cb,path){this.id=path==='live_set'?90:path==='this_device'?id:path==='live_set master_track mixer_device volume'?99:Number(String(path).replace('id ',''));this.get=()=>['Device '+this.id]},arrayfromargs:a=>Array.from(a),notifyclients:()=>events.push('saved'),outlet:(i,cmd,...a)=>{if(i===1)midi[cmd](...a)},patcher:{getnamed:n=>({message:(...a)=>{ui[n]=a;if(n==='song_anchor'&&a[0]==='getid')c.anchor_set('id',anchorId)}})}};
  vm.createContext(c);vm.runInContext(fs.readFileSync(__dirname+'/explicit-conflict.js','utf8'),c);
- if(saved)c.setvalueof(...saved);c.init();return {c,ui,events,id,midiBytes,note:(n)=>{midiBytes.length=0;[144,n,100,128,n,20].forEach(x=>midi.msg_int(x));return midiBytes.slice()},saved:()=>JSON.parse(JSON.stringify(c.getvalueof()))};
+ if(saved)c.setvalueof(...saved);c.init();return {c,ui,events,id,midiBytes,send:bytes=>bytes.forEach(x=>midi.msg_int(x)),note:(n)=>{midiBytes.length=0;[144,n,100,128,n,20].forEach(x=>midi.msg_int(x));return midiBytes.slice()},saved:()=>JSON.parse(JSON.stringify(c.getvalueof()))};
 }
 const saved=[1,'original',1,'',0,2741];
 const copy=device(saved,12),original=device(saved,11);copy.c.tick();original.c.tick();
@@ -79,3 +79,23 @@ assert.deepEqual(waiting.note(60),[144,66,100,128,66,20]);
 const third=device(a.saved(),82);a.c.tick();const fourth=device(a.saved(),83);
 a.c.choose(1);assert.equal(a.saved()[1],'original');assert.match(a.c.notice,/expired/);
 console.log('Native-gate test doubles passed; real mapping and lifecycle still NOT RUN.');
+// Refresh must re-read the unresolved native anchor and restart the cancelled poller.
+let anchorReads=0,repeats=0;
+foreign.c.patcher.getnamed=n=>({message:(cmd)=>{if(n==='song_anchor'&&cmd==='getid'){anchorReads++;foreign.c.anchor_set('id',99);}}});
+foreign.c.Task=function(){this.cancel=()=>{};this.repeat=()=>{repeats++;}};
+foreign.c.refresh();assert.equal(anchorReads,1);assert.equal(repeats,1);
+// Polling an unchanged view must not clear open source/keeper dropdowns.
+let clears=0;
+a.c.patcher.getnamed=n=>({message:cmd=>{if((n==='source_menu'||n==='choice_menu')&&cmd==='clear')clears++;}});
+a.c.tick();clears=0;a.c.tick();assert.equal(clears,0);
+
+// Independent Host snapshots remain usable while another identity conflicts.
+const independent=device([1,'independent',1,'',8,2741],101);
+const otherFollower=device([1,'other-follower',0,'independent',0,2741],102);
+assert.deepEqual(otherFollower.note(60),[144,68,100,128,68,20]);
+// A held note closes at its original target through conflict and a scale change.
+otherFollower.midiBytes.length=0;otherFollower.send([147,60,100]);
+const independentCopy=device(independent.saved(),103);otherFollower.c.tick();
+independent.c.rootselect(2);otherFollower.c.tick();otherFollower.send([131,60,22]);
+assert.deepEqual(otherFollower.midiBytes,[147,68,100,131,68,22]);
+console.log('Independent Host and held-note MIDI assertions passed.');
