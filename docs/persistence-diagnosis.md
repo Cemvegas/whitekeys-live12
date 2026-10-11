@@ -35,7 +35,7 @@ Eski collision algoritması VM deneyinde kopya önce kaydolunca asıl cihazın k
 
 `live.object` persistent self-reference kopyada kopyanın kendisine eşlendi; tek başına asıl/kopya ayrımı sağlamadı. [Referans](https://docs.cycling74.com/reference/live.object).
 
-Ayrı v2 sahiplik deneyi kaydedilmiş sahip runtime ID ile copy-first VM testini geçti. Live’da kopya farklı kimlik aldı; 8 notalı gam ve kimlikler Live kapatılıp test Set’i açılınca bu örnekte korundu. Max sürecinin tamamen soğuk başlangıcı, başka Set/track/Rack, farklı yükleme sırası ve adayın Host ON döngüsü doğrulanmadı. Aday üretime aktarılmadı ve kalıcı kimlik çözümü olarak kabul edilmedi.
+Ayrı v2 sahiplik deneyi kaydedilmiş sahip runtime ID ile copy-first VM testini geçti. Daha sonraki soğuk açılış, track/Rack ve yükleme sırası deneylerinde bazı örnekler geçti; başka Set'te aynı runtime ID tekrar kullanıldığında kopyanın UID'sini koruduğu gerçek Live'da görüldü. Zorlanmış runtime değişimi testinde özgün UID/Host da kayboluyor. V2 reddedildi; üretime aktarılmadı. Güncel otomatik/Live ayrımı, kesin UID'ler ve kalan sınır [kimlik teşhisi](identity-diagnosis.md) içinde.
 
 ## Otomatik kanıt ve sınır
 
