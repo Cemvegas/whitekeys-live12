@@ -9,7 +9,7 @@ Play scale degrees from the white keys of your MIDI keyboard. WhiteKeys is a Max
 
 ## Download and install
 
-**Development version.** The device package is publicly available from the separate [WhiteKeys downloads repository](https://github.com/Cemvegas/whitekeys-downloads). This development repository remains private.
+**Development version.** The device package is publicly available from the separate [WhiteKeys downloads repository](https://github.com/Cemvegas/whitekeys-downloads). The source code and development history are available in this repository.
 
 1. [Download the device ZIP](https://github.com/Cemvegas/whitekeys-downloads/releases/download/development-20261012-e1c9a6e/WhiteKeysLive12-development-20261012-e1c9a6e.zip). Choose the named device ZIP, not GitHub's automatic source archive.
 2. Extract the ZIP into a permanent folder. Keep `WhiteKeys Live 12.amxd` and all five `whitekeys-*.js` files together in the extracted device folder. Do not move only the AMXD file.
