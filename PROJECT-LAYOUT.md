@@ -31,7 +31,7 @@ Keep production sources, regression tests and current technical references in th
 
 Archive completed experiments together with their issue, result and reproduction instructions. Keep rejected candidates as historical evidence when they explain a decision. Keep original prototype evidence and Live acceptance Sets. An experiment with unresolved work remains active until its owner or issue establishes completion.
 
-Use `work/<issue>/` for new experiments, rather than adding more executable probes to documentation. Existing source diagnostics contain uncommitted work and remain in place for review; they were not silently promoted into production tests or committed by this cleanup.
+Use `work/<issue>/` for new experiments, rather than adding more executable probes to documentation. Retired source diagnostics and UI prototypes were removed from the current source tree on 2026-10-12 after verifying a complete local archive. Their sources remain in Git history; see the navigation guide for the pinned commit and archive. Preserve any new unresolved or uncommitted work.
 
 Use `current/` for ordinary development delivery. Create separately named packages only for an explicit comparison or delivery requirement. At session completion, classify experiments as active, regression tests or archive, run `check.py`, and refresh the current package when production files changed.
 

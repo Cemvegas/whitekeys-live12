@@ -1,3 +1,5 @@
+**Historical diagnostic record.** The probe paths and commands below refer to the source snapshot at [commit 5c0d581](https://github.com/Cemvegas/whitekeys-live12/tree/5c0d581cbd4335223278e2e1cefe6a6229e6b904/docs/diagnostic-probes). Those experiments are archived locally and no longer included in the current source tree. They do not define the current automatic identity policy (ADR 0008).
+
 # #19 cihaz kimliği teşhisi — 2026-10-11
 
 **Sonuç: kabul edilmedi; sorun henüz bütünüyle çözülmedi.** Üretim paylaşımı kapalı; #19 ve #22 açık, #20–#21 başlatılmadı. Üretim MIDI/model koduna değişiklik yapılmadı. Kullanıcının son talebi üzerine Computer Use bırakıldı; aşağıdaki Live gözlemleri bu talepten önce toplandı.

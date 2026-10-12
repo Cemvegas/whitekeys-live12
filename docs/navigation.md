@@ -23,6 +23,6 @@ Start here to locate implementation and its regression checks. Run commands from
 
 ## Experiments and continuation
 
-Existing `docs/diagnostic-probes/` holds historical and in-progress diagnostics; read its README and the relevant issue before using a probe. A frozen failing candidate is evidence, not a production regression. Preserve uncommitted diagnostic work. New experiments follow the project layout's `work/<issue>/` convention. Keep durable results with their experiment or GitHub issue; temporary handoffs link to those records.
+Retired prototypes and diagnostic probes are preserved in Git history at [commit 5c0d581](https://github.com/Cemvegas/whitekeys-live12/tree/5c0d581cbd4335223278e2e1cefe6a6229e6b904/docs/diagnostic-probes), with a verified local snapshot in `archive/retired-experiments-2026-10-12.zip`. They are historical evidence, not production dependencies or regression checks. A fresh clone can retrieve them from that commit without a local archive. New experiments follow the project layout's `work/<issue>/` convention; preserve unresolved and uncommitted work.
 
 Run [check.py](../check.py) before completion. CI runs the same command. Packaging and simulated adapter tests do not establish native Live acceptance.
