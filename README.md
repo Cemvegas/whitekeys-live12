@@ -9,10 +9,10 @@ Play scale degrees from the white keys of your MIDI keyboard. WhiteKeys is a Max
 
 ## Download and install
 
-**Development version.** There is no published GitHub Release package yet. The repository contains the device and its required scripts. This repository is currently private: you must be signed in to GitHub with repository access to download it.
+**Development version.** The device package is publicly available from the separate [WhiteKeys downloads repository](https://github.com/Cemvegas/whitekeys-downloads). This development repository remains private.
 
-1. [Download the current source ZIP](https://github.com/Cemvegas/whitekeys-live12/archive/refs/heads/main.zip), or use GitHub's **Code → Download ZIP** button.
-2. Extract the ZIP into a permanent folder. Keep `WhiteKeys Live 12.amxd` and all five `whitekeys-*.js` files together in the extracted repository folder. Do not move only the AMXD file.
+1. [Download the device ZIP](https://github.com/Cemvegas/whitekeys-downloads/releases/download/development-20261012-e1c9a6e/WhiteKeysLive12-development-20261012-e1c9a6e.zip). Choose the named device ZIP, not GitHub's automatic source archive.
+2. Extract the ZIP into a permanent folder. Keep `WhiteKeys Live 12.amxd` and all five `whitekeys-*.js` files together in the extracted device folder. Do not move only the AMXD file.
 3. Open Ableton Live 12 with Max for Live available. Start with a new Set or a copy of an existing Set.
 4. Drag `WhiteKeys Live 12.amxd` onto a MIDI track **before an instrument**. Arm the track, or set monitoring to **In**, and select your MIDI input.
 
