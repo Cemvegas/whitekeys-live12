@@ -21,7 +21,9 @@ Start here to locate implementation and its regression checks. Run commands from
 - [Production sharing](production-sharing.md) and [automatic identity contract](specs/automatic-identity-resolution.md). The latter supersedes manual identity-selection requirements in older sharing specifications and reviews.
 - [Domain authority and document layout](agents/domain.md). ADR 0008 supersedes the manual identity clauses of ADR 0006 and ADR 0007.
 
-## Experiments and continuation
+## Historical reports and experiments
+
+Completed review and diagnosis reports are preserved at [commit 47c9da3](https://github.com/Cemvegas/whitekeys-live12/tree/47c9da34369166b919339b7c5516e2e8a0d0bb8d/docs), with a verified local snapshot in `archive/retired-reports-2026-10-12.zip`. Their old issue and acceptance statuses are historical; use the current contracts above and the acceptance form for current behavior and results.
 
 Retired prototypes and diagnostic probes are preserved in Git history at [commit 5c0d581](https://github.com/Cemvegas/whitekeys-live12/tree/5c0d581cbd4335223278e2e1cefe6a6229e6b904/docs/diagnostic-probes), with a verified local snapshot in `archive/retired-experiments-2026-10-12.zip`. They are historical evidence, not production dependencies or regression checks. A fresh clone can retrieve them from that commit without a local archive. New experiments follow the project layout's `work/<issue>/` convention; preserve unresolved and uncommitted work.
 

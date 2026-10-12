@@ -16,7 +16,7 @@ JS = {'whitekeys-api.js', 'whitekeys-midi.js', 'whitekeys-state.js', 'whitekeys-
 REQUIRED = JS | {'WhiteKeys Live 12.maxpat', 'WhiteKeys Live 12.amxd',
                  'test-midi.cjs', 'test-state.cjs', 'test-sharing.cjs', 'test-sharing-adapter.cjs', 'test-sharing-performance.cjs', 'test-auto-identity.cjs', 'sharing-test-fixture.cjs', 'test-ui.cjs', 'test-persistence.py', 'build-amxd.py',
                  'package-development.py', 'check.py', 'test-packaging.py', 'PROJECT-LAYOUT.md', 'AGENTS.md', 'KURULUM-VE-TEST.md', 'HOST-SONUC-FORMU.md',
-                 'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md', 'docs/automatic-identity-review.md', 'docs/production-sharing-review.md',
+                 'docs/production-sharing.md', 'docs/specs/automatic-identity-resolution.md',
                  'docs/performance-diagnosis/README.md'}
 
 REQUIRED |= {'docs/navigation.md', 'check-navigation.py', 'test-navigation.py',
